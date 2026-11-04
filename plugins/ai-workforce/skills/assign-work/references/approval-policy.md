@@ -8,13 +8,13 @@ The owner does these personally. The team prepares them as an approval item with
 4. **Publish or post publicly.**
 
 ## Done only after the owner's yes in the chat (handled by `review-approvals`)
-5. **Send an external message** - email, DM, SMS, comment, reply. The team writes Gmail drafts; the owner presses Send in Gmail.
+5. **Send an external message** - email, DM, SMS, comment, reply. The team writes drafts (Gmail drafts, or "Replies ready to copy" for Outlook and paste mode, per `connections.md`); the owner sends them.
 6. **Create or change calendar events involving other people.**
 7. **Quote a price, discount or term that is not in the Business Brain** (Pricing & Offers, Policies).
 
 ## Allowed without approval
 - Reading and searching connected apps.
-- Creating Gmail drafts (never sending).
+- Creating drafts: Gmail drafts, or reply text saved in a Briefings page (never sending).
 - **The orchestrator only** (the skill running in the main conversation): creating rows in the Business Brain's **Approvals**, **Assignments** and **Briefings** databases; updating an Approvals row's Status, Decided and Owner note fields as the skills describe; and adding new questions under "Waiting for an answer from you" on the FAQs page (skip questions already listed). Never delete rows or pages, and never rewrite page content other than replacing a "not set" field during setup.
 - **Specialists (subagents) are read-only in Notion.** They return items to the orchestrator.
 - Analysis, summaries, plans and drafts shown in the conversation.

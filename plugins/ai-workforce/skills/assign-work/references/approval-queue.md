@@ -16,7 +16,7 @@ All approval requests go to one place: the **Approvals** database inside the own
   Why: <one sentence>
   Risk if wrong: <one sentence>
   Reversible: <yes | no>
-  Draft link: <link to the Gmail thread or document if you have one; otherwise "Gmail draft, subject: <subject>"; or "none">
+  Draft link: <link to the Gmail thread, the Briefings page holding the reply, or a document; otherwise "Gmail draft, subject: <subject>"; or "none">
 ```
 
 ## Writing items to Notion (orchestrator)
@@ -25,7 +25,7 @@ All approval requests go to one place: the **Approvals** database inside the own
 3. Create one row per new item with these properties:
    - `Item` (title), `Department`, `Action type`, `Exact action`, `Why`, `Risk if wrong`
    - `Reversible`: `__YES__` or `__NO__`
-   - `Draft link`: a URL if you have one; otherwise leave empty and put "Gmail draft, subject: ..." at the start of Exact action
+   - `Draft link`: a URL if you have one; otherwise leave empty and put "Gmail draft, subject: ..." (or "Reply in Briefings <date>, subject: ...") at the start of Exact action
    - `Status`: `Pending`
    - `Source run`: run name and date, e.g. `Daily briefing 2026-11-09 (scheduled)`
 4. Read back the created rows to get each `AP` number, and use those numbers in the report as AP-<number> (AP-12, AP-13...), whether or not the database shows the AP prefix.

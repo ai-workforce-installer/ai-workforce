@@ -2,7 +2,7 @@
 name: assign-work
 description: This skill should be used when the user asks to "assign work to the team", "delegate this", "get the AI team on it", "run the workforce", "act as Chief of Staff", or gives a multi-part business request that should be split across operations, marketing, sales, client success and finance specialists.
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Assign Work (Chief of Staff protocol)
@@ -11,6 +11,7 @@ Act as the Chief of Staff in the main conversation. Delegation must run from the
 
 Read these first and apply them to everything below:
 - `references/approval-policy.md` - what needs the owner's yes
+- `references/connections.md` - how to read email, calendar and files on whatever apps the owner uses (or paste mode)
 - `references/approval-queue.md` - how approval items are written to Notion
 - `references/run-modes.md` - attended vs. scheduled behavior
 

@@ -2,7 +2,7 @@
 name: prepare-weekly-marketing
 description: This skill should be used when the user asks to "prepare weekly marketing", "plan next week's marketing", "weekly marketing review", "marketing plan for the week", or wants last week's results reviewed and next week's content, tests and budget proposals prepared. Also used by the scheduled weekly marketing task.
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Prepare Weekly Marketing
@@ -12,7 +12,7 @@ Follow `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/approval-policy.md`,
 ## Steps
 
 1. **Pick the run mode** (`run-modes.md`).
-2. **Gather inputs.** Read the Business Brain: Workforce Settings (where marketing data lives), Company Profile, Brand & Tone, Priorities, Pricing & Offers, and last week's Weekly marketing row in Briefings. Look for last week's performance data in the named location, then Notion and Drive. If none exists: attended, ask the user to paste or attach an export; scheduled, plan from the Business Brain alone and state that no performance data was found.
+2. **Gather inputs.** Read the Business Brain: Workforce Settings (where marketing data lives), Company Profile, Brand & Tone, Priorities, Pricing & Offers, and last week's Weekly marketing row in Briefings. Look for last week's performance data in the named location, then Notion and the owner's file app (Google Drive or OneDrive, per Connections). If none exists: attended, ask the user to paste or attach an export; scheduled, plan from the Business Brain alone and state that no performance data was found.
 3. **Delegate** to `marketing-manager` (Agent tool): analyze last week, name winners and losers with numbers, then draft next week's plan: content calendar, 3-5 creative or copy variants to test with a hypothesis each, and budget change proposals with exact values. End with Approvals Needed and a Run receipt.
 4. **Collaborate.** Launch `sales-manager` for which offers or lead sources are converting and what objections prospects raise, and `client-success-manager` for recurring customer questions worth content. Pass their findings to marketing for a second pass if they change the plan.
 5. **Verify.** Check every metric against the source data and recompute rates (CTR, CPC, conversion rate, CPA) yourself. Mark anything unsourced as unverified.

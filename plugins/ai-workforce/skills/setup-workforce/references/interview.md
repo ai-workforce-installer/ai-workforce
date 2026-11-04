@@ -5,7 +5,7 @@ Goal: every field in the Business Brain is either answered by the owner or delib
 ## How to run it
 
 - **One topic at a time**, at most 3 questions per message. Use multiple-choice options when a question tool is available; otherwise ask in plain text.
-- **Propose before you ask.** Use what you already know (website, earlier answers, the owner's connected Gmail and Calendar) to draft an answer and ask "Is this right?" Owners correct faster than they write. Say what you looked at.
+- **Propose before you ask.** Use what you already know (website, earlier answers, whatever email and calendar the owner connected) to draft an answer and ask "Is this right?" Owners correct faster than they write. Say what you looked at.
 - **Confirm, then save immediately.** After each topic, show the answers as 2-6 bullets, ask "Save this?", and on yes write them to Notion right away (see Saving). Then show one progress line, e.g. `Saved: Policies (topic 5 of 11)`.
 - **Skipping is fine.** "Skip" or "later" leaves that field as `not set` and moves on. Keep a list of skipped fields for the end.
 - **The owner's words, lightly tidied.** Never invent prices, policies, facts or quotes. If an answer is vague ("depends"), save it as said and add "ask me case by case" so the team escalates.
@@ -31,11 +31,12 @@ Goal: every field in the Business Brain is either answered by the owner or delib
 | 6 ★ | **Your voice** | Your voice in three words; how you sign off emails; words or phrases you like to use; words you never want used. Offer: "Want me to learn your style from a few emails you've sent?" If yes, read the 5-10 most recent sent emails, summarize the style (greeting, length, formality, sign-off, phrases), and save only what the owner confirms: the style, never those emails' contents, names or addresses. Finally ask them to paste or write one short example email that sounds like them (skippable). | Brand & Tone: `Our voice in three words`, `How I sign off`, `Words and phrases we use`, `Words and phrases we never use`, `Example of an email that sounds like me` |
 | 7 ★ | **Common questions** | What do customers ask you most? Aim for 5-10, each with the answer you want given. Offer to find candidates in their inbox (recent customer emails with repeated questions) and propose them. | FAQs → `Answered`: one `**Q:** …` / `A: …` pair per question |
 | 8 | **Your focus** | Top 3 goals this quarter; this month's focus; what the team should ignore for now | Priorities: numbered goals, `This month's focus`, `Things to ignore for now` |
-| 9 | **Where things live** | Which inbox or label holds customer emails? Where are invoices kept? Where are marketing results? The team can only read Gmail, Drive and Notion: if invoices or ad results live in another tool (Stripe, QuickBooks, Meta Ads Manager), suggest a weekly CSV export into one Drive folder and save that folder's name. | Workforce Settings → Where things live: `Customer email inbox`, `Invoices are kept in`, `Marketing performance data` |
+| 9 | **Where things live** | Which inbox, folder or label holds customer emails (on paste mode: write "Paste Box")? Where are invoices kept? Where are marketing results? The team can only read the apps connected in Stage 1 plus Notion: if invoices or ad results live in another tool (Stripe, QuickBooks, Meta Ads Manager), suggest a weekly CSV export into one Drive or OneDrive folder and save its name; with no file app, suggest pasting the export into a Notion page and save that page's name. | Workforce Settings → Where things live: `Customer email inbox`, `Invoices are kept in`, `Marketing performance data` |
 | 10 | **Key customers** (optional) | Your 5-10 most important current customers or open leads: name, company, email, stage, rough value, last contact, next step | Customers & Leads: one row each with `Name`, `Company`, `Email`, `Stage`, `Value`, `Last contact`, `Next step`, `Notes` |
 | 11 | **House rules** | "Anything your team should always or never do?" (e.g. "never offer more than 20% off", "always copy my assistant on VIP replies") | Workforce Settings → `Extra rules for my team` |
 
 Two fields are filled by later setup stages, not the interview:
+- **Connections** (Workforce Settings): Stage 1 and 2 of the setup skill fill them. Don't ask again.
 - **Active departments** (Workforce Settings): Stage 4 of the setup skill ticks them.
 - **Schedule** (Workforce Settings): the `schedule-workforce` skill fills it. If the owner doesn't schedule now, write `not scheduled yet` on each line.
 

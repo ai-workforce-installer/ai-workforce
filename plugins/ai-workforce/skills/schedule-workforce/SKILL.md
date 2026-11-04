@@ -2,7 +2,7 @@
 name: schedule-workforce
 description: This skill should be used when the user asks to "schedule the workforce", "make the team run automatically", "go autonomous", "set up the daily schedule", "schedule my briefing", "change the team's schedule", or wants the AI team's skills to run on their own at set times.
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Schedule the Workforce

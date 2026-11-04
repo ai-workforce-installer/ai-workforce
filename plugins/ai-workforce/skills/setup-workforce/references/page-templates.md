@@ -16,7 +16,7 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 
 ## Ground rules your team follows
 
-- Never sends an email or message without your yes. Replies are saved as Gmail drafts.
+- Never sends an email or message without your yes. Replies are saved as drafts for you to send: in Gmail if it is connected, otherwise in your briefing, ready to copy into your own email.
 - Never spends money or changes ad budgets.
 - Never creates, edits or deletes invoices or financial records.
 - Never books calendar events with other people without your yes.
@@ -33,6 +33,12 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 - Business email: _not set_
 - Time zone: _not set_
 - Working hours: _not set_
+
+## Connections
+
+- Email: _not set_
+- Calendar: _not set_
+- Files: _not set_
 
 ## Active departments
 
@@ -156,6 +162,26 @@ _not set_
 ## Example of an email that sounds like me
 
 _paste one here_
+````
+
+## Paste Box
+
+````markdown
+<callout icon="📥" color="gray_bg">
+Paste anything you want your team to handle: customer emails, forwarded messages, this week's meetings and deadlines. Your team checks this page on every run. You don't need any special format.
+</callout>
+
+## Emails to handle
+
+_Paste each email here: who it's from, the subject, and the message._
+
+## Upcoming schedule
+
+_Add key meetings, calls and deadlines: date, time, what it is._
+
+## Handled
+
+_Your team moves emails here after writing a reply._
 ````
 
 ## FAQs

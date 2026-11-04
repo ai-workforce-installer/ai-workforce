@@ -1,7 +1,7 @@
 # Business Brain structure (build exactly this)
 
 Root page: **Business Brain** (icon 🧠). Everything below is a direct child of it.
-Never delete or overwrite existing pages or databases. If a v0.1 Business Brain exists (plain pages named "Assignments log" and "Briefings"), keep their content and rename them to "Assignments log (v0.1 archive)" and "Briefings (v0.1 archive)" so the new databases can use the standard names. Then add the databases below alongside them.
+Never delete or overwrite existing pages or databases. When upgrading, add any missing page (for example Paste Box) and any missing section of Workforce Settings (for example Connections) without touching what is already there. If a v0.1 Business Brain exists (plain pages named "Assignments log" and "Briefings"), keep their content and rename them to "Assignments log (v0.1 archive)" and "Briefings (v0.1 archive)" so the new databases can use the standard names. Then add the databases below alongside them.
 
 ## Pages (create with notion-create-pages, parent = Business Brain page)
 
@@ -15,6 +15,7 @@ Use the template text in `page-templates.md` for each page's starting content.
 | Policies | 📜 |
 | Brand & Tone | 🗣️ |
 | FAQs | ❓ |
+| Paste Box | 📥 |
 
 ## Databases (create with notion-create-database, parent = Business Brain page)
 

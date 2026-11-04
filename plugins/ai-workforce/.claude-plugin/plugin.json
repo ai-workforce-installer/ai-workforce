@@ -1,6 +1,6 @@
 {
   "name": "ai-workforce",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "A multi-agent AI team: a Chief of Staff who delegates to Operations, Marketing, Sales, Client Success and Finance specialists, with Notion as the shared Business Brain, a daily approval queue, guided setup and scheduled runs.",
   "author": {
     "name": "Reed Floren"

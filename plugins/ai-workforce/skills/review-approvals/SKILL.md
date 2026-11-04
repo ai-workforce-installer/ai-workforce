@@ -2,7 +2,7 @@
 name: review-approvals
 description: This skill should be used when the user asks to "review my approvals", "what's waiting for me", "clear my approvals", "approve AP-12", "what does the team need from me", or wants to go through the AI team's pending approval queue and decide on each item.
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Review Approvals (the owner's daily 15 minutes)
@@ -15,8 +15,8 @@ This skill only runs with the owner present. It is the one place where queued ac
 2. **Present the queue** as a compact list grouped by Department. For each item show: AP number, Item, Exact action, Risk if wrong, Reversible, Draft link. Mark items whose Status is already "Approved" in Notion: those were ticked in Notion, but still need a yes here.
 3. **Ask for decisions** in one message: "Reply with the AP numbers to approve, reject or change, e.g. 'approve 12, 14; reject 13; change 15: make it $79'." If a multiple-choice question tool is available and there are 4 or fewer items, you may offer the choices that way; otherwise ask in plain text.
 4. **For each approved item, carry out exactly the Exact action**, nothing more, one item at a time:
-   - **Send message:** find the Gmail draft (by Draft link or subject), re-read it, and check the recipient and content match Exact action. If they match, tell the owner it's ready and where it is (Gmail Drafts, subject line) so they press Send themselves; this avoids duplicate sends. If the draft is missing or differs, stop and show the difference. If the owner asked for a change, update the draft and show it again.
-   - **Calendar with others:** create or change the event exactly as described, with the listed attendees.
+   - **Send message:** find the draft (by Draft link or subject): a Gmail draft, or the reply under Replies ready to copy in the linked Briefings page. Re-read it and check the recipient and content match Exact action. If they match, tell the owner it's ready and where it is (Gmail Drafts and subject line; or show the full reply text in the chat so they can copy it into their email) so they send it themselves; this avoids duplicate sends. If the draft is missing or differs, stop and show the difference. If the owner asked for a change, update the draft (Gmail draft, or the text in the Briefings page) and show it again.
+   - **Calendar with others:** on Google Calendar, create or change the event exactly as described, with the listed attendees. On Outlook or paste mode, give the owner the exact event details (title, date, time, attendees) to add themselves.
    - **Spend money, Financial record, Publish, Irreversible change (including deleting):** never perform these. Give the owner the exact steps to do it themselves.
    - **Other:** do it only if it is a reversible action Claude may take with the owner's yes and is not in the list above; otherwise give the owner the steps.
 5. **Update each row:** Status = Done (carried out, or handed to the owner with steps, which go in Owner note) or Rejected; set Decided to today; put the owner's words or any change in Owner note. Leave undecided items as Pending. For "change" decisions, edit the draft as asked, show it again, and wait for a yes before acting.

@@ -2,7 +2,7 @@
 
 A Chief of Staff and five department managers (Operations, Marketing, Sales, Client Success, Finance) that run your business admin from a Notion "Business Brain". The team reads, drafts and reports; you approve.
 
-Requires a paid Claude plan (Pro or above) and a Notion account.
+Requires a paid Claude plan (Pro or above) and a Notion account (free is fine). Email, calendar and files work with Gmail and Google, Outlook and Microsoft 365, or no connection at all (paste mode).
 
 ## Install
 
@@ -14,7 +14,7 @@ Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workforce
 
 ## Then
 
-1. Optional: connect Notion (required), Gmail, Google Calendar and Google Drive from the plugin's **Connectors** tab now. If you skip this, setup walks you through connecting each one and waits until it works.
+1. Optional: connect Notion and your email and calendar apps now. If you skip this, setup asks what you use and walks you through connecting each one, waiting until it works. Only Notion is required.
 2. Start a **new** chat and send: `Set up my AI team. My website is [your website].`
 
 Full details: [plugins/ai-workforce/README.md](plugins/ai-workforce/README.md)
