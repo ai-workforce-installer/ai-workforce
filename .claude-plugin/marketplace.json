@@ -1,0 +1,15 @@
+{
+  "name": "ai-workforce-marketplace",
+  "owner": {
+    "name": "Reed Floren"
+  },
+  "plugins": [
+    {
+      "name": "ai-workforce",
+      "source": "./",
+      "description": "A multi-agent AI team: a Chief of Staff who delegates to Operations, Marketing, Sales, Client Success and Finance specialists, with Notion as the shared Business Brain, a daily approval queue, guided setup and scheduled runs.",
+      "version": "0.2.2"
+    }
+  ],
+  "description": "AI Workforce: a Chief of Staff and five department managers that run your business admin from a Notion Business Brain."
+}
