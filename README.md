@@ -14,7 +14,7 @@ Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workforce
 
 ## Then
 
-1. Connect Notion (required), Gmail, Google Calendar and Google Drive from the plugin's **Connectors** tab.
+1. Optional: connect Notion (required), Gmail, Google Calendar and Google Drive from the plugin's **Connectors** tab now. If you skip this, setup walks you through connecting each one and waits until it works.
 2. Start a **new** chat and send: `Set up my AI team. My website is [your website].`
 
 Full details: [plugins/ai-workforce/README.md](plugins/ai-workforce/README.md)

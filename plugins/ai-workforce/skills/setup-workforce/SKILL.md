@@ -2,7 +2,7 @@
 name: setup-workforce
 description: This skill should be used when the user asks to "set up the workforce", "set up my AI team", "finish my setup", "continue the setup interview", "update my Business Brain answers", "setup-workforce", "build my Business Brain", "get started with the AI Workforce", "onboard me", or is using the AI Workforce plugin for the first time and has no Business Brain yet.
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
 # Set Up the AI Workforce
@@ -11,10 +11,19 @@ Take a business owner who has never used Claude from zero to a working AI team i
 
 Create a task list with these stages so the owner can see progress: Connect apps, Build the Business Brain, Interview, Choose departments, Self-test, Schedule.
 
-## Stage 1: Connect apps
-1. Load the Notion, Gmail, Google Calendar and Google Drive tools (use ToolSearch if they are deferred). For each, try one harmless read: Notion search "Business Brain"; Gmail search for 1 recent thread; Calendar list today's events; Drive list recent files.
-2. Show a 4-row table: app, connected yes/no, what the team uses it for.
-3. **Notion is required.** If it is missing, search the connector registry for Notion and suggest it, then wait. Gmail and Calendar are strongly recommended; Drive is optional. Missing optional apps: suggest them once and continue.
+## Stage 1: Connect apps (one at a time; do not move on until each is settled)
+Work through the apps **in this order, one per message**: Notion (required), Gmail (recommended), Google Calendar (recommended), Google Drive (optional). Do not start Stage 2 until every app is either connected and verified, or (for the three non-required apps) skipped by the owner on purpose.
+
+1. **Quick check first.** Load all four apps' tools (use ToolSearch if they are deferred) and try one harmless read for each: Notion search "Business Brain"; Gmail search for 1 recent thread; Calendar list today's events; Drive list recent files. Show a 4-row table: app, connected yes/no, what the team uses it for. If all four pass, say so and go to Stage 2.
+2. **For each app that is not connected, in order:**
+   a. Say in one or two plain sentences what the team uses it for and why it matters (Notion: "this is where your team's Business Brain lives; nothing works without it").
+   b. Search the connector registry for that one app and suggest it, so the owner sees a one-click Connect card. Tell them: "Click Connect, sign in, allow access, then come back here and reply **done**."
+   c. Stop and wait for the owner's reply. Ask nothing else in that message.
+   d. When they reply, reload that app's tools (ToolSearch again) and repeat its harmless read. Newly connected apps can take a moment to appear, so if the tools are still missing, ask them to wait a few seconds and reply **done** again before treating it as a failure.
+   e. **Verified:** confirm in one line ("Notion connected ✓"), then move to the next app.
+   f. **Still not working after a second try:** walk them through it plainly: check they finished signing in and clicked Allow; for Notion, check they gave access to the workspace (or pages) where the Business Brain should live; for Google, check they signed in with the account their business uses. Offer to wait again. If the app still won't appear in this chat, ask them to start a **new** chat and send "Set up my AI team" again; setup will resume where it left off.
+3. **Required vs optional.** Notion cannot be skipped: if the owner wants to stop, tell them setup will pick up from here whenever they connect it, and end. Gmail, Calendar and Drive can be skipped only when the owner clearly says so. Before accepting a skip, say in one sentence what they lose (Gmail: inbox triage and reply drafts; Calendar: schedule in the daily briefing; Drive: reading their documents). Note skipped apps; they are listed again in the Finish summary.
+4. End the stage with the updated 4-row table, then continue.
 
 ## Stage 2: Build the Business Brain
 1. Search Notion for a page titled "Business Brain".
@@ -43,4 +52,4 @@ Run the `workforce-self-test` skill. Show its table and explain any failure in o
 2. Offer to set up the schedule with the `schedule-workforce` skill.
 
 ## Finish
-Close with: the Business Brain link; which departments are active; what is still not set (top 3 gaps that matter most, from the completeness check); and the daily routine in one line ("each morning, read your briefing and say 'review my approvals'").
+Close with: the Business Brain link; which departments are active; any apps the owner skipped (and that they can connect them any time and say "finish my setup"); what is still not set (top 3 gaps that matter most, from the completeness check); and the daily routine in one line ("each morning, read your briefing and say 'review my approvals'").

@@ -60,7 +60,7 @@ In Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workfo
 **Option B (file):** download [ai-workforce.plugin](https://github.com/reedfloren/ai-workforce/raw/main/download/ai-workforce.plugin), then in Claude open **Customize → Plugins**, choose the upload option and select the file.
 
 Then:
-1. Connect Notion (required) and Gmail, Google Calendar, Google Drive (recommended) from the plugin's Connectors tab.
+1. Optional: connect Notion (required) and Gmail, Google Calendar, Google Drive (recommended) from the plugin's Connectors tab. If you skip this, setup walks you through each one, one at a time, and waits until it is connected.
 2. Start a **new** chat and say: "Set up my AI team."
 
 ## Important notes
