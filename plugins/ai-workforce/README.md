@@ -2,6 +2,9 @@
 
 A multi-agent team for Claude. A Chief of Staff delegates to five department managers, verifies their work, queues every decision for the owner, and can run on a schedule. Notion is the shared "Business Brain".
 
+## What's new in 0.3.1
+- **Approvals in the daily briefing.** "Waiting for you" now shows a short card for every pending approval (AP number, what it does, reversible or not, draft link), so the owner can reply "approve 3, 5; reject 4" straight from the briefing. `review-approvals` skips the walkthrough when decisions are already given.
+
 ## What's new in 0.3.0
 - **Works with any email and calendar.** Only Notion is required. Setup asks what the owner uses: Gmail and Google (full experience, replies saved as Gmail drafts), Outlook and Microsoft 365 (team reads Outlook; replies are ready to copy), or paste mode (owner pastes emails and dates into a **Paste Box** page in Notion). Every skill adapts; a missing app never fails a run.
 - **Setup connects apps one at a time** and waits until each works before moving on.

@@ -2,7 +2,7 @@
 name: review-approvals
 description: This skill should be used when the user asks to "review my approvals", "what's waiting for me", "clear my approvals", "approve AP-12", "what does the team need from me", or wants to go through the AI team's pending approval queue and decide on each item.
 metadata:
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # Review Approvals (the owner's daily 15 minutes)
@@ -11,6 +11,7 @@ This skill only runs with the owner present. It is the one place where queued ac
 
 ## Steps
 
+0. **Decisions already given?** If the owner's message already names AP numbers with decisions (for example replying to the daily briefing's Waiting for you cards), load just those rows and go straight to step 4. Don't re-list the queue.
 1. **Load the queue.** Find the Approvals database in the Business Brain and query rows with Status = Pending or Approved (Approved = the owner ticked it in Notion but hasn't confirmed here yet), oldest first. If the queue is empty, say so in one line and stop.
 2. **Present the queue** as a compact list grouped by Department. For each item show: AP number, Item, Exact action, Risk if wrong, Reversible, Draft link. Mark items whose Status is already "Approved" in Notion: those were ticked in Notion, but still need a yes here.
 3. **Ask for decisions** in one message: "Reply with the AP numbers to approve, reject or change, e.g. 'approve 12, 14; reject 13; change 15: make it $79'." If a multiple-choice question tool is available and there are 4 or fewer items, you may offer the choices that way; otherwise ask in plain text.
