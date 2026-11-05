@@ -9,6 +9,8 @@ metadata:
 
 _Files named `references/…` are in this skill's own folder._
 
+_When this skill runs from a recurring task, `references/scheduled-prompts.md` holds the current instructions for that task (used only to keep it up to date, per `references/run-modes.md`)._
+
 Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md` and `references/connections.md`. Financial records are strictly read-only: never mark paid, edit, void, refund, charge or send anything.
 
 **Running team members:** wherever this skill says to launch a member with the Agent tool, follow the run rule in `references/team-roles.md` (own agent in Cowork, otherwise a briefed assistant, otherwise do that member's work yourself in this conversation), include the member's Your Team notes in the brief, and report honestly which way it ran.

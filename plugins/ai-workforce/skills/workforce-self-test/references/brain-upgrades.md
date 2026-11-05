@@ -45,6 +45,7 @@ Adds saved views, which keep working on Notion's free plan after its query allow
    - Briefings → "Newest first": `SORT BY "Date" DESC` (only if missing).
    - Pricing & Offers → "Active offers": `FILTER "Active" = TRUE; SORT BY "Offer" ASC`.
    - Customers & Leads → "All contacts": `SORT BY "Last contact" DESC`.
-2. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.2`.
+2. **Schedule setting.** Under Workforce Settings → Schedule, add `- Recurring tasks update themselves: yes` if there's no such line. Without the line, the team treats it as yes.
+3. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.2`.
 
 Later versions add their own section here, below this one, and run in order.

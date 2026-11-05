@@ -231,3 +231,31 @@ def notification_line(tool_result):
 # ---- prepare-weekly-marketing: missing data ----
 def metric_label(value_from_source):
     return "Verified" if value_from_source is not None else "Unavailable"
+
+
+# ---- run-modes.md: recurring tasks keep themselves up to date ----
+STANDARD = {"daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"}
+
+
+def auto_update_plan(task_list, responsibility, current_version, setting="yes", template_available=True):
+    """Return ('update', task_id) | ('warn', reason) | ('none', None). Only the prompt ever changes."""
+    matches = [t for t in task_list if t["responsibility"] == responsibility]
+    if len(matches) == 1 and matches[0].get("version") == current_version:
+        return "none", None
+    if setting == "no":
+        return "warn", "owner turned automatic updates off"
+    if responsibility not in STANDARD:
+        return "warn", "custom responsibility"
+    if not template_available:
+        return "warn", "no current template"
+    outdated = [t for t in matches if t.get("version") != current_version]
+    if len(matches) != 1 or len(outdated) != 1:
+        return "warn", "task not found exactly once"
+    return "update", outdated[0]["id"]
+
+
+def apply_update(task, new_prompt):
+    """What an update may change: the prompt and nothing else."""
+    updated = dict(task)
+    updated["prompt"] = new_prompt
+    return updated

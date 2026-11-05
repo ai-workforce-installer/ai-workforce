@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from notion_logic import (MockNotion, read_database, describe, run_result, reconcile,
                           view_usable, handed_to_you_status, duplicate_schedule_warning,
-                          notification_line, metric_label,
+                          notification_line, metric_label, auto_update_plan, apply_update,
                           find_secrets, redact, security_flag, actions_from_content,
                           members_to_launch, should_prepare)
 
@@ -116,6 +116,33 @@ class StatusesAndSchedules(unittest.TestCase):
     def test_missing_marketing_data_is_unavailable_not_zero(self):
         self.assertEqual(metric_label(None), "Unavailable")
         self.assertEqual(metric_label(0), "Verified")
+
+
+class AutoUpdate(unittest.TestCase):
+    TASKS = [{"id": "t1", "responsibility": "inbox-triage", "version": "0.5.1", "cron": "45 11 * * 1-5",
+              "enabled": True, "notifications": "push", "prompt": "old"},
+             {"id": "t2", "responsibility": "daily-executive-briefing", "version": "0.5.2"}]
+
+    def test_outdated_standard_task_updates_itself(self):
+        self.assertEqual(auto_update_plan(self.TASKS, "inbox-triage", "0.5.2"), ("update", "t1"))
+
+    def test_current_task_is_left_alone(self):
+        self.assertEqual(auto_update_plan(self.TASKS, "daily-executive-briefing", "0.5.2")[0], "none")
+
+    def test_owner_can_turn_it_off(self):
+        self.assertEqual(auto_update_plan(self.TASKS, "inbox-triage", "0.5.2", setting="no")[0], "warn")
+
+    def test_custom_and_ambiguous_tasks_only_warn(self):
+        tasks = self.TASKS + [{"id": "t3", "responsibility": "inbox-triage", "version": "0.4.4"}]
+        self.assertEqual(auto_update_plan(tasks, "inbox-triage", "0.5.2")[0], "warn")
+        self.assertEqual(auto_update_plan([{"id": "c", "responsibility": "podcast", "version": "0.5.1"}],
+                                          "podcast", "0.5.2")[0], "warn")
+        self.assertEqual(auto_update_plan(self.TASKS, "inbox-triage", "0.5.2", template_available=False)[0], "warn")
+
+    def test_update_changes_only_the_prompt(self):
+        before = self.TASKS[0]
+        after = apply_update(before, "new")
+        self.assertEqual({k for k in before if before[k] != after[k]}, {"prompt"})
 
 
 class Counts(unittest.TestCase):

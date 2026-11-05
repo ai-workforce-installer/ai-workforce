@@ -34,6 +34,7 @@ Give team members recurring responsibilities that run on their own. With the own
 9. **Offer a test run** of the responsibility just created (not a different one), so the owner sees it land in Briefings. A listed schedule only proves it exists; only a Briefings row proves a run happened. If approval prompts are on, warn that the run may wait for them.
 
 ## Check and update recurring responsibilities
+Recurring tasks for the four standard responsibilities normally update their own instructions on their next run after a plugin update (`references/run-modes.md`, "Keep the task up to date automatically"). The owner can turn that off with "don't update my recurring tasks automatically" (set `Recurring tasks update themselves: no` under Schedule in Workforce Settings, after confirming) or back on. This section is for checking by hand, custom responsibilities, and when the owner has it off.
 Use when the owner says "check my scheduled tasks" or "update my recurring tasks", when a run reported a configuration warning, after a plugin update, and whenever `setup-workforce` upgrades the Business Brain. Ask before changing anything.
 
 1. **List** the owner's scheduled tasks (include paused ones) and read Workforce Settings → Schedule.

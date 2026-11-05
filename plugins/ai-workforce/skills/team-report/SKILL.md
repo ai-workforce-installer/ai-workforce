@@ -27,6 +27,7 @@ A truthful account of what the team actually did. Every line rests on a record i
    - Saved as "proposed, not scheduled" → **not set up yet**.
    - A record still running with no Progress for over 45 minutes → **stuck**: the next run will finish it. Not run records are normal (two runs overlapped) and aren't problems. Abandoned records are problems: say what was left undone.
    - **Never call runs duplicates because of their timing.** Several runs in one day, or a weekly task running on another day, usually mean the owner pressed Run now. Mention a duplicate schedule only if the scheduled-task list shows two tasks for the same responsibility.
+   - A run that updated its recurring task's instructions: mention it once ("Your inbox triage task now uses the 0.5.2 instructions").
    - A row or task with a configuration warning, or a task whose prompt lacks the current `prompt version` line (`references/run-modes.md`, "Is the recurring task current?") → **uses older instructions**: say what it does differently and offer "update my recurring tasks".
    - Runs whose row says the plugin or an app wasn't available → say so plainly, with the fix (reconnect the app, or keep AI Workforce turned on under Customize → Plugins).
 4. **Report in this order**, short and plain:

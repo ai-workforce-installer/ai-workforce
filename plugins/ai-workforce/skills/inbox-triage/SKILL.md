@@ -9,6 +9,8 @@ metadata:
 
 _Files named `references/…` are in this skill's own folder._
 
+_When this skill runs from a recurring task, `references/scheduled-prompts.md` holds the current instructions for that task (used only to keep it up to date, per `references/run-modes.md`)._
+
 General inbox triage reviews everything that arrived, catches what matters (deadlines, people waiting, opportunities, money and account notices, meeting context, customer questions), does the follow-up work, and proves how much was reviewed. Customer support is one part of it, handled with the `process-customer-inquiries` steps.
 
 Follow `references/inbox-coverage.md` (how to search, sort and count), `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md`, `references/connections.md`, `references/team-roles.md` and `references/talking-to-the-owner.md`. Nothing is sent, deleted, paid or changed: replies are drafts, decisions are approval items.

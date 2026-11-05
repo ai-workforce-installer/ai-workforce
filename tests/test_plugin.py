@@ -291,6 +291,20 @@ class FreePlanAndEfficiency(unittest.TestCase):
                      "Worth knowing", "**proposals**", "registration or sales link"]:
             self.assertIn(must, tr)
 
+    def test_recurring_tasks_update_themselves_safely(self):
+        rm = read(REFS / "run-modes.md")
+        for must in ["Keep the task up to date automatically", "Recurring tasks update themselves: no",
+                     "Update **only the prompt**", "never create, pause or delete a task",
+                     "If more than one task matches, or none does, change nothing",
+                     "Custom responsibilities aren't updated automatically"]:
+            self.assertIn(must, rm)
+        self.assertNotIn("A run never changes its own scheduled task", rm)
+        self.assertIn("prompt only", read(REFS / "approval-policy.md"))
+        for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
+            self.assertTrue((SKILLS / sk / "references" / "scheduled-prompts.md").exists(), sk)
+        self.assertIn("- Recurring tasks update themselves: yes",
+                      read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
+
     def test_root_readme_consistent(self):
         root = read(ROOT / "README.md")
         self.assertNotIn("15 minutes", root)

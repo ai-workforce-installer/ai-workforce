@@ -13,6 +13,7 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 - **Marketing without data:** past results are labelled Unavailable, never guessed; you still get next week's plan, plus exactly which export to provide (date range and columns). Sales and Client Success are only asked when Marketing truly needs them.
 - **Fewer, clearer asks:** everything is sorted as Urgent, Approval needed, Handed to you, Prepared for later, or Worth knowing; existing approvals are reused; dated promotions are checked (date, link, terms) before they're recommended; unlisted prices and commissions are marked as proposals.
 - **Leaner runs:** stable pages are reused from a run in the last 3 hours; fewer mid-run Notion writes.
+- **Recurring tasks keep themselves up to date.** After a plugin update, each standard recurring task (briefing, inbox triage, marketing plan, invoice review) updates its own instructions on its next run: only the instructions, never its time or settings, and it tells you it did. Say "don't update my recurring tasks automatically" to turn this off.
 
 ## What's new in 0.5.1 (dependable on free Notion, lighter on usage)
 - **Works on Notion's free plan.** The team reads your Business Brain with saved views and filtered lists instead of the rationed query method, reads each thing once per run, and never mistakes "couldn't read" for "empty": it says "Pricing & Offers could not be verified" and marks the run Partial instead of reporting no offers.

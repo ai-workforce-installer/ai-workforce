@@ -54,6 +54,7 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 - Inbox triage: _not set_
 - Weekly marketing plan: _not set_
 - Invoice review: _not set_
+- Recurring tasks update themselves: yes
 
 ## Where things live
 
