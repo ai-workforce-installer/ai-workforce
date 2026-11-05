@@ -277,6 +277,8 @@ class FreePlanAndEfficiency(unittest.TestCase):
         self.assertIn("accepted by the tool", rt)
         self.assertIn("never call it \"delivered\"", rt)
         for p in PLUGIN.rglob("*.md"):
+            if p.name == "prompt-history.md":
+                continue                      # released prompts are kept exactly as released
             self.assertNotIn("Notified: yes", read(p), p)
 
     def test_marketing_missing_data(self):
@@ -294,16 +296,49 @@ class FreePlanAndEfficiency(unittest.TestCase):
     def test_recurring_tasks_update_themselves_safely(self):
         rm = read(REFS / "run-modes.md")
         for must in ["Keep the task up to date automatically", "Recurring tasks update themselves: no",
-                     "Update **only the prompt**", "never create, pause or delete a task",
-                     "If more than one task matches, or none does, change nothing",
-                     "Custom responsibilities aren't updated automatically"]:
+                     "update **only the prompt**", "never create, pause or delete a task",
+                     "None, or more than one: stop and ask the owner",
+                     "Custom responsibilities are never replaced", "exactly** one released version",
+                     "never judge by the version line alone", "Previous recurring-task instructions (backup)",
+                     "put the backed-up instructions back", "Never report success that wasn't verified",
+                     "Nothing new to accept"]:
             self.assertIn(must, rm)
         self.assertNotIn("A run never changes its own scheduled task", rm)
         self.assertIn("prompt only", read(REFS / "approval-policy.md"))
         for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
             self.assertTrue((SKILLS / sk / "references" / "scheduled-prompts.md").exists(), sk)
+            self.assertTrue((SKILLS / sk / "references" / "prompt-history.md").exists(), sk)
+
+    def test_prompt_history_records_current_templates(self):
+        r = subprocess.run([sys.executable, str(ROOT / "tools" / "prompt_history.py"), "--check"],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        h = read(SKILLS / "schedule-workforce" / "references" / "prompt-history.md")
+        for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
+            for v in ["0.5.0", "0.5.1", "0.5.2"]:
+                self.assertIn(f"## {sk} {v}", h)
+
+    def test_setup_explains_auto_updates_in_one_sentence(self):
+        self.assertIn("These keep themselves up to date when AI Workforce improves",
+                      read(SKILLS / "schedule-workforce" / "SKILL.md"))
+        setup = read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.assertNotIn("minutes)", setup)
+        self.assertIn("No website", setup)
+
+    def test_view_upgrade_verifies_before_version_bump(self):
+        up = read(REFS / "brain-upgrades.md")
+        self.assertIn("Only when every view above exists", up)
+        self.assertIn("check each new view is there with that filter and sort", up)
         self.assertIn("- Recurring tasks update themselves: yes",
                       read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
+
+    def test_readme_separates_enforced_tested_and_unproven(self):
+        r = read(PLUGIN / "README.md")
+        for must in ["## What you can rely on", "Enforced by your apps and settings", "Written rules the team follows",
+                     "Seen working in live runs", "Checked by automated tests", "Not yet proven live"]:
+            self.assertIn(must, r)
+        for absolute in ["No duplicate drafts, approvals", "Unfinished work never disappears", "no skipped emails"]:
+            self.assertNotIn(absolute, r)
 
     def test_root_readme_consistent(self):
         root = read(ROOT / "README.md")
@@ -314,7 +349,8 @@ class FreePlanAndEfficiency(unittest.TestCase):
 
     def test_ci_workflow_runs_the_checks(self):
         wf = read(ROOT / ".github" / "workflows" / "ci.yml")
-        for must in ["push", "pull_request", "unittest discover tests", "sync_references.py --check"]:
+        for must in ["push", "pull_request", "unittest discover tests", "sync_references.py --check",
+                     "prompt_history.py --check"]:
             self.assertIn(must, wf)
 
     def test_customer_claims_are_measured(self):

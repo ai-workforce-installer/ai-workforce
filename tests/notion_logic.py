@@ -235,27 +235,101 @@ def metric_label(value_from_source):
 
 # ---- run-modes.md: recurring tasks keep themselves up to date ----
 STANDARD = {"daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"}
+SETTINGS = ("cron", "timezone", "enabled", "notifications", "model", "approval")
 
 
-def auto_update_plan(task_list, responsibility, current_version, setting="yes", template_available=True):
-    """Return ('update', task_id) | ('warn', reason) | ('none', None). Only the prompt ever changes."""
-    matches = [t for t in task_list if t["responsibility"] == responsibility]
-    if len(matches) == 1 and matches[0].get("version") == current_version:
-        return "none", None
+def vkey(v):
+    return [int(x) for x in v.split(".")]
+
+
+def auto_update_plan(tasks, responsibility, history, current_version, brain_version,
+                     setting="yes", can_compare=True, brain_title="Business Brain"):
+    """Decide what an outdated standard task may do. Returns (action, detail).
+
+    history: {(responsibility, version): (template_text, needs_brain_version)}
+    action: none | update | warn | ask
+    """
     if setting == "no":
-        return "warn", "owner turned automatic updates off"
+        return "warn", "automatic updates turned off"
     if responsibility not in STANDARD:
         return "warn", "custom responsibility"
-    if not template_available:
-        return "warn", "no current template"
-    outdated = [t for t in matches if t.get("version") != current_version]
-    if len(matches) != 1 or len(outdated) != 1:
-        return "warn", "task not found exactly once"
-    return "update", outdated[0]["id"]
+    matches = [t for t in tasks if t["responsibility"] == responsibility]
+    if len(matches) != 1:
+        return "ask", f"{len(matches)} matching tasks"
+    task = matches[0]
+    current_text, needs = history[(responsibility, current_version)]
+    current_text = current_text.replace("<BRAIN>", brain_title)
+    if task["prompt"] == current_text:
+        return "none", None
+    if not can_compare:
+        return "warn", "can't compare reliably"
+    released = {v: t.replace("<BRAIN>", brain_title) for (r, v), (t, _) in history.items() if r == responsibility}
+    found = [v for v, text in released.items() if text == task["prompt"]]
+    if not found:
+        return "warn", "custom instructions"          # includes unknown old versions
+    if vkey(brain_version) < vkey(needs):
+        return "warn", f"needs Business Brain {needs}"
+    return "update", {"task": task["id"], "from": found[0], "to": current_version, "backup": task["prompt"],
+                      "new": current_text}
 
 
-def apply_update(task, new_prompt):
-    """What an update may change: the prompt and nothing else."""
-    updated = dict(task)
-    updated["prompt"] = new_prompt
-    return updated
+class FakeScheduler:
+    """A scheduled-task list whose update can be made to fail or misbehave."""
+    def __init__(self, tasks, fail_update=False, corrupt_setting=None, fail_restore=False):
+        self.tasks = {t["id"]: dict(t) for t in tasks}
+        self.fail_update, self.corrupt, self.fail_restore = fail_update, corrupt_setting, fail_restore
+        self.calls = 0
+
+    def update_prompt(self, task_id, prompt):
+        self.calls += 1
+        restoring = self.calls > 1
+        if (self.fail_update and not restoring) or (self.fail_restore and restoring):
+            return False
+        self.tasks[task_id]["prompt"] = prompt
+        if self.corrupt and not restoring:
+            self.tasks[task_id][self.corrupt] = "changed"
+        return True
+
+    def get(self, task_id):
+        return dict(self.tasks[task_id])
+
+
+def apply_update(scheduler, plan):
+    """Back up, update the prompt only, verify, restore on failure. Returns the report line."""
+    tid, backup, new = plan["task"], plan["backup"], plan["new"]
+    before = scheduler.get(tid)
+    scheduler.update_prompt(tid, new)
+    after = scheduler.get(tid)
+    ok = after["prompt"] == new and all(after.get(k) == before.get(k) for k in SETTINGS)
+    if ok:
+        return "updated", after
+    scheduler.update_prompt(tid, backup)
+    restored = scheduler.get(tid)
+    if restored["prompt"] == backup:
+        return "restored", restored
+    return "restore unconfirmed", restored
+
+
+# ---- brain-upgrades.md 0.5.2: saved views ----
+STANDARD_VIEWS = {
+    "Approvals": ("Active approvals", 'FILTER "Status" IN ("Pending", "Approved", "Handed to you"); SORT BY "AP" ASC'),
+    "Assignments": ("Open work", 'FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC'),
+    "Briefings": ("Newest first", 'SORT BY "Date" DESC'),
+    "Pricing & Offers": ("Active offers", 'FILTER "Active" = TRUE; SORT BY "Offer" ASC'),
+    "Customers & Leads": ("All contacts", 'SORT BY "Last contact" DESC'),
+}
+
+
+def upgrade_views(workspace, fail_on=()):
+    """Add missing views by name; never touch existing ones; bump version only if all present."""
+    for db, (name, config) in STANDARD_VIEWS.items():
+        views = workspace["views"].setdefault(db, {})
+        if name in views:
+            continue                                  # leave the owner's view as it is
+        if db in fail_on:
+            continue
+        views[name] = config
+    complete = all(STANDARD_VIEWS[db][0] in workspace["views"].get(db, {}) for db in STANDARD_VIEWS)
+    if complete:
+        workspace["version"] = "0.5.2"
+    return complete

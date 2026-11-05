@@ -2,7 +2,7 @@
 name: setup-workforce
 description: This skill should be used when the user asks to "set up my AI team", "set up the workforce", "get started with the AI Workforce", "onboard me", "build my Business Brain", "setup-workforce", "finish my setup", "continue the setup interview", "update my Business Brain answers", "update my team workspace", or is using the AI Workforce plugin for the first time and has no Business Brain yet.
 metadata:
-  version: "0.5.2"
+  version: "0.5.3"
 ---
 
 # Set Up the AI Workforce
@@ -54,13 +54,13 @@ f. **Still not working after a second try:** walk them through it plainly: finis
 ## Stage 2: Set up your workspace
 1. Search Notion for a page titled "Business Brain" (see `references/run-modes.md` for picking the right one).
    - **Found:** use it. If its version is older, offer the upgrade in one line as `references/brain-upgrades.md` says (it only adds what's missing and never changes what's there) and run it on yes; add the Paste Box page and the Connections section of Workforce Settings if either is missing. An older layout with "Assignments log" pages is upgraded per `references/notion-schema.md`. Never delete or overwrite.
-   - **Not found:** ask: "Have you already copied a Business Brain template into your Notion, for example from a link you were given?" If yes, ask for the page's name or link and use it (offer to rename it to exactly "Business Brain" if needed), then offer the upgrade steps. If no, create the full structure from `references/notion-schema.md` and `references/page-templates.md`, in as few calls as possible: the root page as a private page (draft mode); then all eight pages in **one** create call; then the five databases, sent together; then the two views. Views are conveniences: if one fails, note it and carry on. Tell the owner in one line while this happens ("Setting up your workspace, about a minute"). The new Workforce Settings already carries the current Business Brain version line. Before moving on, fetch the root page once to confirm the eight pages and five databases are there; retry anything missing once, then tell the owner plainly if it's still missing.
+   - **Not found:** ask: "Have you already copied a Business Brain template into your Notion, for example from a link you were given?" If yes, ask for the page's name or link and use it (offer to rename it to exactly "Business Brain" if needed), then offer the upgrade steps. If no, create the full structure from `references/notion-schema.md` and `references/page-templates.md`, in as few calls as possible: the root page as a private page (draft mode); then all eight pages in **one** create call; then the five databases, sent together; then the views listed in `references/notion-schema.md`. The team relies on the saved views on Notion's free plan: if one fails, retry it once, then note it and tell the owner they can say "update my team workspace" later to add it. Tell the owner in one line while this happens ("Setting up your workspace, about a minute"). The new Workforce Settings already carries the current Business Brain version line. Before moving on, fetch the root page once to confirm the eight pages and five databases are there; retry anything missing once, then tell the owner plainly if it's still missing.
 2. Fill in the Connections section of Workforce Settings with the Stage 1 choices.
 3. Tell the owner in one line where the Business Brain lives, with its link.
 
-## Stage 3: Learn your business (about 5 minutes)
+## Stage 3: Learn your business
 Gather first, ask second. Only what the first assignment needs.
-1. **Read their website** (from their message, or ask for it). Draft: What we do, Who we serve, What makes us different, Website and key links, and Main products and services. Note any prices the site publishes, labeled "from your website". Propose the owner's name (from their connected accounts), time zone (from the session) and working hours (suggest 9-5 in that time zone).
+1. **Read their website** (from their message, or ask for it). No website, or it says little: ask for two or three sentences about what they sell and who buys it, and work from that. Draft: What we do, Who we serve, What makes us different, Website and key links, and Main products and services. Note any prices the site publishes, labeled "from your website". Propose the owner's name (from their connected accounts), time zone (from the session) and working hours (suggest 9-5 in that time zone).
 2. **Show one compact summary** (6-8 bullets) and ask: "Here's what I picked up. Is this right? Fix anything that's off." Save only what they confirm, to the fields listed in `references/interview.md`. Create Pricing & Offers rows only for prices the owner confirms. If the site has no prices, don't ask now; Sales asks when it first needs them.
 3. **One question about their time**, unless they already answered it (in this chat, or under "Work I'd like to hand off" on Priorities): "What's one thing you spend too much time on every week that you'd love to hand off?" If their email or calendar is connected you may suggest likely answers from what you see, for example "I see a lot of customer questions in your inbox", stating only what you actually saw. Save the answer under "Work I'd like to hand off" on Priorities.
 4. Tell them: "That's enough to get started. I'll ask for anything else when the team actually needs it." Never invent prices, policies, customers or other facts to fill gaps.
@@ -69,7 +69,7 @@ Gather first, ask second. Only what the first assignment needs.
 Run the `first-team-meeting` skill now. Setup is finished when the team has completed its first real assignment, not when the workspace exists.
 
 ## If something goes wrong
-If a member's run or a connection fails during the first assignment, run the `workforce-self-test` skill, explain the problem in one plain sentence, and fix it before moving on.
+If a member's run or a connection fails during the first assignment, explain the problem in one plain sentence and what you'll do about it, and retry once. If it still fails, offer to run the `workforce-self-test` skill to find the cause, and finish the assignment another way if you can (for example, the Chief of Staff doing that part directly).
 
 ## Finish
 Close in a few lines: what the team just did, with the link; the Business Brain link; how to talk to the team from now on (for example: "Have Marketing work on…", "What's waiting for my approval?", "What's my team been working on?", "Can someone handle this every Friday?", "From now on, keep replies shorter"); and that they can say "finish my setup" any time to tell the team more about the business up front.

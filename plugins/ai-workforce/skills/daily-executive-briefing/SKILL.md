@@ -2,14 +2,14 @@
 name: daily-executive-briefing
 description: This skill should be used when the user asks for a "daily executive briefing", "morning briefing", "daily brief", "what do I need to know today", "run the daily briefing", or wants the AI team's consolidated status of the business. Also used by the scheduled daily briefing task.
 metadata:
-  version: "0.5.2"
+  version: "0.5.3"
 ---
 
 # Daily Executive Briefing
 
 _Files named `references/…` are in this skill's own folder._
 
-_When this skill runs from a recurring task, `references/scheduled-prompts.md` holds the current instructions for that task (used only to keep it up to date, per `references/run-modes.md`)._
+_When this skill runs from a recurring task, `references/scheduled-prompts.md` holds the current instructions for that task and `references/prompt-history.md` every released version (used only to keep the task up to date safely, per `references/run-modes.md`)._
 
 Act as Chief of Staff in the main conversation. Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md` and `references/connections.md`. Email, calendar and files come from whatever the owner uses (Connections in Workforce Settings), or the Paste Box on paste mode.
 

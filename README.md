@@ -24,4 +24,6 @@ Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workforce
 
 In one sitting, your Chief of Staff connects your apps, learns your business from your website, and has the team do its first real job with you. After that, just talk to your team: "Have Marketing work on this", "What's waiting for my approval?", "What's my team been working on?", "Can someone handle this every Friday?"
 
+AI Workforce is in beta. Your recurring tasks keep their instructions up to date automatically (never your schedule or anything you've changed); say "don't update my recurring tasks automatically" to turn that off. For what's enforced, what's been tested live and what hasn't yet, see [What you can rely on](plugins/ai-workforce/README.md#what-you-can-rely-on-and-how-we-know).
+
 Full details: [plugins/ai-workforce/README.md](plugins/ai-workforce/README.md)

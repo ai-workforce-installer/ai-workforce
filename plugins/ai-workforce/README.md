@@ -4,6 +4,19 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 **You run the business. Your team handles the work.**
 
+## What you can rely on (and how we know)
+AI Workforce is in beta. Here's the honest picture:
+- **Enforced by your apps and settings:** the team can only use the apps you connect, with the access you granted, and each recurring task follows the approval setting you chose for it.
+- **Written rules the team follows:** never sending, spending, publishing, deleting or changing financial records without you; treating emails and web pages as information, not instructions; not repeating passwords or keys; not redoing work already done; reporting "couldn't check" instead of "nothing there". These are instructions to Claude, which it follows closely, but they aren't a technical lock. Your email connection, for example, can technically send.
+- **Seen working in live runs:** inbox triage reviewing every page of mail (including archived and tabbed mail) and moving its bookmark; daily briefings and the weekly marketing plan finishing and saving reports; team members started only when they had work; saved views still reading Notion after the free plan's query allowance ran out.
+- **Checked by automated tests of the design:** run records and retries, the inbox bookmark across failures and long gaps, duplicate checks, count reconciliation, safe automatic task updates, the Notion upgrade. These test the rules, not Claude following them.
+- **Not yet proven live:** recurring tasks updating themselves, an interrupted run being finished by the next one, two inbox runs on one day, how much usage a typical day needs, and setup time on a brand-new account.
+
+## What's new in 0.5.3 (beta readiness)
+- **Automatic updates that respect your changes.** Standard recurring tasks still keep themselves current by default, but now only when their instructions are exactly a version AI Workforce released. If you've edited a task, it's left alone and you're told; "update my recurring tasks" updates it while keeping your changes. Before any update the old instructions are backed up in that run's report and restored if the update can't be verified. Schedule and settings never change, and updates that would need a workspace upgrade or a new connection wait for you.
+- **Safer workspace upgrade:** saved views are checked after they're created, and the workspace version only moves forward when every step worked.
+- **Clearer setup:** no website needed (a short description works), no time promises, and gentler recovery if something fails during the first assignment.
+
 ## What's new in 0.5.2 (lessons from the first live runs)
 - **Saved views first.** On Notion's free plan, saved views kept working after the query allowance ran out; filtered lists and SQL didn't. The team now reads through saved views (checking each view's filter first), and an optional add-only workspace upgrade adds the views it needs.
 - **Unfinished work is never closed because it's old.** Old open tasks are listed for you to check instead; nothing you created is changed without your say-so.
@@ -13,22 +26,22 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 - **Marketing without data:** past results are labelled Unavailable, never guessed; you still get next week's plan, plus exactly which export to provide (date range and columns). Sales and Client Success are only asked when Marketing truly needs them.
 - **Fewer, clearer asks:** everything is sorted as Urgent, Approval needed, Handed to you, Prepared for later, or Worth knowing; existing approvals are reused; dated promotions are checked (date, link, terms) before they're recommended; unlisted prices and commissions are marked as proposals.
 - **Leaner runs:** stable pages are reused from a run in the last 3 hours; fewer mid-run Notion writes.
-- **Recurring tasks keep themselves up to date.** After a plugin update, each standard recurring task (briefing, inbox triage, marketing plan, invoice review) updates its own instructions on its next run: only the instructions, never its time or settings, and it tells you it did. Say "don't update my recurring tasks automatically" to turn this off.
+- **Recurring tasks keep themselves up to date.** After a plugin update, each standard recurring task (briefing, inbox triage, marketing plan, invoice review) updates its own instructions on its next run: only the instructions, never its time or settings, and it tells you it did. (0.5.3 adds protection for tasks you've edited.) Say "don't update my recurring tasks automatically" to turn this off.
 
 ## What's new in 0.5.1 (dependable on free Notion, lighter on usage)
-- **Works on Notion's free plan.** The team reads your Business Brain with saved views and filtered lists instead of the rationed query method, reads each thing once per run, and never mistakes "couldn't read" for "empty": it says "Pricing & Offers could not be verified" and marks the run Partial instead of reporting no offers.
+- **Designed for Notion's free plan.** The team reads your Business Brain with saved views and filtered lists instead of the rationed query method, reads each thing once per run, and never mistakes "couldn't read" for "empty": it says "Pricing & Offers could not be verified" and marks the run Partial instead of reporting no offers.
 - **Lighter on your Claude usage.** Shared context is read once and handed out; team members with nothing to do aren't started; one team member does a job alone when that's enough; large inboxes are sorted from previews before anything is opened; fewer Notion writes. Each run records what it actually used (tool calls, team members, emails processed, time), never a guessed cost.
-- **Unfinished work never disappears.** Anything found but not finished stays in your Assignments list (Planned, Prepared, Handed to you, Blocked, Done) until it's done, however long between runs. The inbox report separates "every email was searched" from "follow-up still queued".
+- **Unfinished work stays on the list.** Anything found but not finished stays in your Assignments list (Planned, Prepared, Handed to you, Blocked, Done) until it's done, however long between runs. The inbox report separates "every email was searched" from "follow-up still queued".
 - **Better judgment.** No draft for someone you're meeting shortly anyway, no near-duplicate drafts or approvals, short recommendations instead of approvals for small calls, and things only you can do are clearly marked Handed to you.
 - **Numbers add up.** Inbox categories don't overlap, totals are recomputed before a run finishes, and every run checks its sources, window, who ran, what was saved and what's still open.
 - **Secrets stay secret.** If a password or API key turns up in a document or email, the team never repeats it; it tells you where it is and recommends changing it.
 - **No sales pitches in reports**, just a plain line when a service limit got in the way.
 - **Workspace upgrade 0.5.1** (optional, add-only, safe to repeat): adds open-work statuses and two fields to Assignments.
 
-## What's new in 0.5.0 (reliability: no skipped emails, no duplicate work)
+## What's new in 0.5.0 (reliability: fewer skipped emails and duplicates)
 - **Every run has its own record** in your Briefings list, with a run number, start and finish time, where it came from (manual, scheduled, or "started from your recurring task" when that can't be told apart), and its result. A second run on the same day gets its own record; an interrupted run is finished, not repeated; two runs at once don't both do the work.
 - **Inbox triage keeps a bookmark** ("completed through") that only moves forward when every email in the window was found and sorted. A run that stops partway leaves the bookmark where it was, so the next run covers the same window again. Windows overlap by 15 minutes, and emails already handled are recognised by their ID, so nothing is skipped and nothing is done twice. Anything past the per-run limit is carried over to the next run.
-- **No duplicate drafts, approvals, tasks or notifications** on retries: every action records the email or run it came from, and every run checks for it first.
+- **Built to avoid duplicate drafts, approvals, tasks and notifications** on retries: every action records the email or run it came from, and every run checks for it first.
 - **Honest about how a run started.** "Run now" and a scheduled start look the same to the team, so it no longer guesses from the clock.
 - **A deeper self-test**: duplicate approvals, run records and retries (with test records only), mail outside the inbox, many pages of results, the inbox bookmark, Gmail draft links (with your OK), recurring tasks and notification links. Each check says whether it was tested live or only checked by reading.
 - **Clear about what is enforced** by your apps and settings versus by the team's written rules (see Safety rules).
@@ -55,14 +68,14 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 - **The full approval queue every time**, with one-line instructions to approve, reject or change several at once. Duplicates and stale items leave the queue but keep their history.
 - **Honest about what's visible:** "none visible in Gmail" instead of "no leads" when a source isn't connected.
 - **No spreadsheet suggestions:** Notion is the workspace.
-- **No duplicate briefings, drafts or approvals** from retried runs.
+- **Retried runs check before creating** briefings, drafts or approvals again.
 
 ## What's new in 0.4.1 (reliability fixes, no new features)
 - **Self-test tells the truth about who ran.** Each team member is reported as a separate agent, a briefed assistant, or (in regular chat) handled by the Chief of Staff alone, and the verdict says "no separate agents ran" when that's the case. Failures are failures.
 - **Every skill can find its files.** Each skill now carries the reference files it uses, with simple `references/…` paths. Plugin-root paths weren't substituted on every surface, and chat only sees the running skill's folder.
 - **The approval policy lists every Notion write the team makes**, including adding to its own briefings and moving handled Paste Box emails. Anything not listed is not allowed.
 - **Faster, checked workspace setup:** pages in one call, databases together, views last, then a check that everything was created.
-- **Scheduled runs always leave an honest record:** how the work was done, and Complete / Partial / Failed with clear meanings.
+- **Scheduled runs are built to leave an honest record:** how the work was done, and Complete / Partial / Failed with clear meanings.
 - **Updates:** an older plugin keeps working with a newer workspace; update limits are documented.
 
 ## What's new in 0.4.0

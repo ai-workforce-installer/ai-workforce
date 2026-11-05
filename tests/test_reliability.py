@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from notion_logic import (MockNotion, read_database, describe, run_result, reconcile,
                           view_usable, handed_to_you_status, duplicate_schedule_warning,
                           notification_line, metric_label, auto_update_plan, apply_update,
+                          FakeScheduler, upgrade_views,
                           find_secrets, redact, security_flag, actions_from_content,
                           members_to_launch, should_prepare)
 
@@ -119,30 +120,111 @@ class StatusesAndSchedules(unittest.TestCase):
 
 
 class AutoUpdate(unittest.TestCase):
-    TASKS = [{"id": "t1", "responsibility": "inbox-triage", "version": "0.5.1", "cron": "45 11 * * 1-5",
-              "enabled": True, "notifications": "push", "prompt": "old"},
-             {"id": "t2", "responsibility": "daily-executive-briefing", "version": "0.5.2"}]
+    H = {("inbox-triage", "0.5.1"): ("[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold <BRAIN>", "0.5.0"),
+         ("inbox-triage", "0.5.2"): ("[AI Workforce task: inbox-triage | prompt version 0.5.2]\nnew <BRAIN>", "0.5.0"),
+         ("inbox-triage", "0.6.0"): ("[AI Workforce task: inbox-triage | prompt version 0.6.0]\nnewer <BRAIN>", "0.6.0")}
 
-    def test_outdated_standard_task_updates_itself(self):
-        self.assertEqual(auto_update_plan(self.TASKS, "inbox-triage", "0.5.2"), ("update", "t1"))
+    def task(self, prompt, **kw):
+        t = {"id": "t1", "responsibility": "inbox-triage", "prompt": prompt, "cron": "45 11 * * 1-5",
+             "timezone": "America/Chicago", "enabled": True, "notifications": "push", "model": "m",
+             "approval": "auto"}
+        t.update(kw)
+        return t
 
-    def test_current_task_is_left_alone(self):
-        self.assertEqual(auto_update_plan(self.TASKS, "daily-executive-briefing", "0.5.2")[0], "none")
+    OLD = "[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold Business Brain"
+    NEW = "[AI Workforce task: inbox-triage | prompt version 0.5.2]\nnew Business Brain"
 
-    def test_owner_can_turn_it_off(self):
-        self.assertEqual(auto_update_plan(self.TASKS, "inbox-triage", "0.5.2", setting="no")[0], "warn")
+    def test_standard_outdated_prompt_updates(self):
+        action, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
+        self.assertEqual(action, "update")
+        status, after = apply_update(FakeScheduler([self.task(self.OLD)]), plan)
+        self.assertEqual((status, after["prompt"]), ("updated", self.NEW))
 
-    def test_custom_and_ambiguous_tasks_only_warn(self):
-        tasks = self.TASKS + [{"id": "t3", "responsibility": "inbox-triage", "version": "0.4.4"}]
-        self.assertEqual(auto_update_plan(tasks, "inbox-triage", "0.5.2")[0], "warn")
-        self.assertEqual(auto_update_plan([{"id": "c", "responsibility": "podcast", "version": "0.5.1"}],
-                                          "podcast", "0.5.2")[0], "warn")
-        self.assertEqual(auto_update_plan(self.TASKS, "inbox-triage", "0.5.2", template_available=False)[0], "warn")
+    def test_current_prompt_untouched(self):
+        self.assertEqual(auto_update_plan([self.task(self.NEW)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "none")
 
-    def test_update_changes_only_the_prompt(self):
-        before = self.TASKS[0]
-        after = apply_update(before, "new")
+    def test_customized_prompt_preserved(self):
+        custom = self.OLD + "\nAlso always cc my assistant."
+        self.assertEqual(auto_update_plan([self.task(custom)], "inbox-triage", self.H, "0.5.2", "0.5.2"),
+                         ("warn", "custom instructions"))
+
+    def test_old_version_line_alone_is_not_enough(self):
+        edited = "[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold Business Brain, but shorter"
+        self.assertEqual(auto_update_plan([self.task(edited)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "warn")
+
+    def test_unknown_previous_version_not_overwritten(self):
+        legacy = "Scheduled run of AI Workforce inbox triage... (no version line)"
+        self.assertEqual(auto_update_plan([self.task(legacy)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "warn")
+
+    def test_multiple_matching_tasks_stop(self):
+        tasks = [self.task(self.OLD), self.task(self.OLD, id="t2")]
+        self.assertEqual(auto_update_plan(tasks, "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "ask")
+
+    def test_disabled_and_custom_responsibilities_respected(self):
+        self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2",
+                                          setting="no")[0], "warn")
+        self.assertEqual(auto_update_plan([self.task(self.OLD, responsibility="podcast")], "podcast",
+                                          self.H, "0.5.2", "0.5.2")[0], "warn")
+
+    def test_no_reliable_comparison_means_no_update(self):
+        self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2",
+                                          can_compare=False)[0], "warn")
+
+    def test_settings_unchanged_after_update(self):
+        sched = FakeScheduler([self.task(self.OLD)])
+        before = sched.get("t1")
+        _, plan = auto_update_plan([before], "inbox-triage", self.H, "0.5.2", "0.5.2")
+        status, after = apply_update(sched, plan)
+        self.assertEqual(status, "updated")
         self.assertEqual({k for k in before if before[k] != after[k]}, {"prompt"})
+
+    def test_failed_update_is_rolled_back(self):
+        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
+        status, after = apply_update(FakeScheduler([self.task(self.OLD)], corrupt_setting="cron"), plan)
+        self.assertEqual((status, after["prompt"]), ("restored", self.OLD))
+        status, after = apply_update(FakeScheduler([self.task(self.OLD)], fail_update=True), plan)
+        self.assertEqual(status, "restored")
+
+    def test_failed_rollback_reported_honestly(self):
+        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
+        status, _ = apply_update(FakeScheduler([self.task(self.OLD)], corrupt_setting="cron", fail_restore=True), plan)
+        self.assertEqual(status, "restore unconfirmed")
+
+    def test_incompatible_upgrade_not_accepted(self):
+        self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.6.0", "0.5.2"),
+                         ("warn", "needs Business Brain 0.6.0"))
+
+    def test_skips_several_versions_when_unmodified(self):
+        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.6.0", "0.6.0")
+        self.assertEqual((plan["from"], plan["to"]), ("0.5.1", "0.6.0"))
+
+
+class ViewUpgrade(unittest.TestCase):
+    def ws(self):
+        return {"version": "0.5.1", "views": {"Approvals": {"Decision board": "GROUP BY \"Status\"",
+                                                             "Active approvals": "owner's own filter"},
+                                               "Briefings": {"Newest first": 'SORT BY "Date" DESC'}}}
+
+    def test_existing_views_unchanged_and_missing_added(self):
+        w = self.ws()
+        self.assertTrue(upgrade_views(w))
+        self.assertEqual(w["views"]["Approvals"]["Active approvals"], "owner's own filter")
+        self.assertEqual(w["views"]["Approvals"]["Decision board"], "GROUP BY \"Status\"")
+        self.assertIn("Active offers", w["views"]["Pricing & Offers"])
+        self.assertEqual(w["version"], "0.5.2")
+
+    def test_repeated_upgrade_adds_nothing(self):
+        w = self.ws(); upgrade_views(w)
+        snapshot = {k: dict(v) for k, v in w["views"].items()}
+        upgrade_views(w)
+        self.assertEqual(w["views"], snapshot)
+
+    def test_failed_view_keeps_old_version(self):
+        w = self.ws()
+        self.assertFalse(upgrade_views(w, fail_on={"Customers & Leads"}))
+        self.assertEqual(w["version"], "0.5.1")
+        self.assertTrue(upgrade_views(w))              # safe to run again
+        self.assertEqual(w["version"], "0.5.2")
 
 
 class Counts(unittest.TestCase):

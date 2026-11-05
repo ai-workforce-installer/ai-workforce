@@ -2,7 +2,7 @@
 name: first-team-meeting
 description: This skill should be used at the end of setup, and when the owner asks "what can my team take off my plate?", "what should my team work on?", "let's have a team meeting", "what else can you handle?", or wants the Chief of Staff to recommend responsibilities and get the team doing real work.
 metadata:
-  version: "0.5.2"
+  version: "0.5.3"
 ---
 
 # Team Meeting

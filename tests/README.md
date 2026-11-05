@@ -37,3 +37,25 @@ Each of these has to be watched on a real account; nothing in this folder can do
 13. **What the notification tool actually returns** (whether it ever confirms delivery), so the Notified line matches it.
 15. **A recurring task updating itself**: after a plugin update, the next run of an outdated standard task changes only its prompt (time, on/off, notifications and approval setting unchanged), says so in its report, and the run after it shows no configuration warning. This depends on the scheduling tools being available inside a scheduled session, which hasn't been confirmed yet.
 14. **Weekly marketing with no ad export available**: Partial, past metrics Unavailable, a usable plan, and the exact export request.
+
+## Live check: the 0.5.2 saved-view upgrade on an existing Free workspace
+
+About 10 minutes; changes nothing except adding views and two lines in Workforce Settings.
+1. In Notion, note the views each Business Brain database has today (Approvals, Assignments, Briefings, Pricing & Offers, Customers & Leads).
+2. In a new Claude chat, say **"update my team workspace"** and approve the upgrade.
+3. Check in Notion: each database now has its standard view (Active approvals, Open work, Newest first, Active offers, All contacts), every view you had before is still there and unchanged, no records changed, and Workforce Settings shows `Business Brain version: 0.5.2` and `Recurring tasks update themselves: yes`.
+4. Open each new view and confirm it shows what its name says (for example Active offers shows only offers with Active ticked).
+5. Run **"update my team workspace"** again: it should report nothing to add and create no second copies.
+6. After the free plan's query allowance has run out (any busy day), say **"what's waiting for my approval?"**: the list should come back through the Active approvals view, or say it "could not be verified", never "nothing waiting" when items exist.
+
+## Live check: clean-account beginner install
+
+Use a Claude account and Notion workspace that have never seen AI Workforce. Time it and note every question you had to think about.
+1. Install from the marketplace link in the README.
+2. New chat: "Set up my AI team. My website is …" (try once with no website too).
+3. Connect Notion when asked; try skipping email to confirm paste mode works.
+4. Confirm the Business Brain appears in Notion with its pages, databases and views.
+5. Answer the website summary check and the one "what takes too much time" question.
+6. Watch the first assignment finish, with a link to its result.
+7. Say yes to one recurring task; confirm the one-sentence note about automatic updates appears and the task shows up in your scheduled tasks.
+8. Record: total time, Claude usage shown by the app, any step that was confusing or failed.

@@ -2,14 +2,14 @@
 name: review-overdue-invoices
 description: This skill should be used when the user asks to "review overdue invoices", "check receivables", "who owes us money", "accounts receivable aging", "draft payment reminders", or wants an overdue invoice report. Also used by the scheduled invoice review task.
 metadata:
-  version: "0.5.2"
+  version: "0.5.3"
 ---
 
 # Review Overdue Invoices (read-only)
 
 _Files named `references/…` are in this skill's own folder._
 
-_When this skill runs from a recurring task, `references/scheduled-prompts.md` holds the current instructions for that task (used only to keep it up to date, per `references/run-modes.md`)._
+_When this skill runs from a recurring task, `references/scheduled-prompts.md` holds the current instructions for that task and `references/prompt-history.md` every released version (used only to keep the task up to date safely, per `references/run-modes.md`)._
 
 Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md` and `references/connections.md`. Financial records are strictly read-only: never mark paid, edit, void, refund, charge or send anything.
 

@@ -39,13 +39,13 @@ Lets the Assignments database hold the team's open work so nothing found is forg
 
 ## Upgrade to 0.5.2
 Adds saved views, which keep working on Notion's free plan after its query allowance runs out. Nothing existing changes: no records are edited and no existing view is changed. Safe to repeat.
-1. Fetch each database to see its views. For each view below that **doesn't exist yet by that name**, create it as a table view with the notion-create-view tool. If one with that name exists, leave it as it is, even if its filter differs (runs check a view's filter before using it).
+1. Fetch each database to see its views. For each view below that **doesn't exist yet by that name**, create it as a table view with the notion-create-view tool (`database_id` = the database, `data_source_id` = its collection, `configure` = the line below). If one with that name exists, leave it as it is, even if its filter differs (runs check a view's filter before using it). After creating, fetch the database again and check each new view is there with that filter and sort.
    - Approvals → "Active approvals": `FILTER "Status" IN ("Pending", "Approved", "Handed to you"); SORT BY "AP" ASC`. On a workspace without the "Handed to you" option, leave that value out.
    - Assignments → "Open work": `FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC`, leaving out options the database doesn't have.
    - Briefings → "Newest first": `SORT BY "Date" DESC` (only if missing).
    - Pricing & Offers → "Active offers": `FILTER "Active" = TRUE; SORT BY "Offer" ASC`.
    - Customers & Leads → "All contacts": `SORT BY "Last contact" DESC`.
 2. **Schedule setting.** Under Workforce Settings → Schedule, add `- Recurring tasks update themselves: yes` if there's no such line. Without the line, the team treats it as yes.
-3. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.2`.
+3. **Version line.** Only when every view above exists (created now or already there) and the setting line is present, replace the `Business Brain version` line with `- Business Brain version: 0.5.2`. If any step failed (a view couldn't be created, the database couldn't be read), leave the version line as it was, say which step failed, and the upgrade can simply be run again.
 
 Later versions add their own section here, below this one, and run in order.
