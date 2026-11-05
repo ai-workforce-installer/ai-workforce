@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent / "plugins" / "ai-workforce" / "skills"
 CANONICAL_HOME = {  # file -> skill folder that owns the original
     **{f: "assign-work" for f in ["approval-policy.md", "approval-queue.md", "brain-upgrades.md",
-       "connections.md", "just-in-time.md", "run-modes.md", "talking-to-the-owner.md", "team-roles.md"]},
+       "connections.md", "just-in-time.md", "run-modes.md", "run-tracking.md", "talking-to-the-owner.md", "team-roles.md"]},
     **{f: "setup-workforce" for f in ["interview.md", "notion-schema.md", "page-templates.md"]},
     "scheduled-prompts.md": "schedule-workforce",
     "inbox-coverage.md": "inbox-triage",

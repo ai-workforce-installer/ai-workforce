@@ -4,6 +4,15 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 **You run the business. Your team handles the work.**
 
+## What's new in 0.5.0 (reliability: no skipped emails, no duplicate work)
+- **Every run has its own record** in your Briefings list, with a run number, start and finish time, where it came from (manual, scheduled, or "started from your recurring task" when that can't be told apart), and its result. A second run on the same day gets its own record; an interrupted run is finished, not repeated; two runs at once don't both do the work.
+- **Inbox triage keeps a bookmark** ("completed through") that only moves forward when every email in the window was found and handled. A run that stops partway leaves the bookmark where it was, so the next run covers the same window again. Windows overlap by 15 minutes, and emails already handled are recognised by their ID, so nothing is skipped and nothing is done twice. Anything past the per-run limit is carried over to the next run.
+- **No duplicate drafts, approvals, tasks or notifications** on retries: every action records the email or run it came from, and every run checks for it first.
+- **Honest about how a run started.** "Run now" and a scheduled start look the same to the team, so it no longer guesses from the clock.
+- **A deeper self-test**: duplicate approvals, run records and retries (with test records only), mail outside the inbox, many pages of results, the inbox bookmark, Gmail draft links (with your OK), recurring tasks and notification links. Each check says whether it was tested live or only checked by reading.
+- **Clear about what is enforced** by your apps and settings versus by the team's written rules (see Safety rules).
+- **Workspace upgrade 0.5.0** (optional, add-only): adds run fields to Briefings. Runs work without it.
+
 ## What's new in 0.4.4 (recurring tasks stay in step with the plugin)
 - **Outdated recurring tasks can't quietly do the wrong job.** Each run checks its saved instructions against the current version. If an older task names the wrong skill (for example customer-only email for "inbox triage"), the run does the job the task is for and warns you, or marks itself Partial if it can't.
 - **"Update my recurring tasks"** lists any task using older instructions and, with your yes, updates it in place: no duplicates, same time and settings.
@@ -105,6 +114,8 @@ Databases: Approvals, Assignments, Briefings, Pricing & Offers, Customers & Lead
 - Scheduled runs only read, draft and queue. Nothing in the queue is carried out until the owner reviews it.
 - Department managers are read-only in Notion; only the orchestrating skill writes rows.
 
+**What actually enforces these rules.** Your apps only allow what you granted when you connected them, and each recurring task follows the approval setting you chose for it ("ask first" stops before any action that needs approval; automatic approval lets runs finish on their own). Everything else above (no sending, spending, deleting, publishing, financial changes, or acting on approvals in unattended runs; treating emails and pages as information) is enforced by the team's written instructions. Your email connection technically can send and delete, so these are strong rules, not a technical lock. If you want a hard stop, keep "ask first" on for your recurring tasks, and where your task settings let you limit an app's tools, limit email to reading and drafting.
+
 ## Install
 
 Requires a paid Claude plan (Pro, Max, Team or Enterprise).
@@ -128,7 +139,8 @@ Then:
 - Never rename a skill: customers' scheduled tasks call skills by name.
 - Business Brain changes go in `skills/assign-work/references/brain-upgrades.md` as a new add-only version section.
 - Keep `skills/assign-work/references/team-roles.md` in step with `agents/`.
-- Each skill carries its own copy of the reference files it uses (Claude reliably sees only the running skill's folder). Edit a reference only at its original location (`assign-work`, `setup-workforce` or `schedule-workforce`), then run `python3 tools/sync_references.py`. Run it with `--check` before every release.
+- Each skill carries its own copy of the reference files it uses (Claude reliably sees only the running skill's folder). Edit a reference only at its original location (`assign-work`, `setup-workforce`, `schedule-workforce` or `inbox-triage`), then run `python3 tools/sync_references.py`. Run it with `--check` before every release.
+- Run `python3 -m unittest discover tests` before every release (see `tests/README.md`). When a scheduled prompt changes, raise its version line and the table in `run-modes.md`.
 
 ## Important notes
 - Subagents cannot launch other subagents. Delegation runs from the main conversation, where the skill acts as Chief of Staff.

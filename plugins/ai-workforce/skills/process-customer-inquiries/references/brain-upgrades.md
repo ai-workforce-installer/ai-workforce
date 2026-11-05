@@ -22,6 +22,13 @@ Workforce Settings ends with an **About this workspace** section holding `- Busi
 1. **Your Team page.** If the Business Brain has no child page titled "Your Team", create it (icon 👥) from the Your Team template.
 2. **Work to hand off.** If Priorities has no "Work I'd like to hand off" heading, append that section from the Priorities template at the end of the page.
 3. **Handed to you.** If the Approvals Status property has no "Handed to you" option, add it (blue), keeping every existing option.
-4. **Version line.** If Workforce Settings has no "About this workspace" heading, append it from the Workforce Settings template. Otherwise replace the existing `Business Brain version` line. Either way it ends as `- Business Brain version: 0.4.0`.
+4. **Version line.** If Workforce Settings has no "About this workspace" heading, append it from the Workforce Settings template. Otherwise replace the existing `Business Brain version` line. Either way it ends as `- Business Brain version: 0.4.0` (then continue with 0.5.0).
+
+## Upgrade to 0.5.0
+Adds run tracking fields so the team can tell retries from new runs and keep its inbox bookmark. Nothing existing changes; runs work without these fields too (they keep the same information in each record's text).
+1. **Briefings properties.** Fetch the Briefings data source. Add any that are missing: `Run ID` (text), `Started` (date), `Finished` (date), `Completed through` (date).
+2. **Briefings options.** Add `Unknown` (gray) to Run type and `Running` (blue) to Result if missing, sending every existing option with them.
+3. **Assignments option.** Add `Unknown` (gray) to its Run type if missing, sending every existing option with it.
+4. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.0`.
 
 Later versions add their own section here, below this one, and run in order.

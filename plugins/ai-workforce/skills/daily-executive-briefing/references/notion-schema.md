@@ -31,13 +31,13 @@ Then add a board view named "Decision board": `GROUP BY "Status" SHOW EMPTY; SHO
 ### Assignments
 Description: Every task the Chief of Staff hands to a manager, with its result and whether it was verified.
 ```
-CREATE TABLE ("Assignment" TITLE, "Task ID" RICH_TEXT, "Owner" SELECT('Chief of Staff':blue, 'Operations':default, 'Marketing':pink, 'Sales':green, 'Client Success':yellow, 'Finance':red), "Status" SELECT('Planned':gray, 'In progress':blue, 'Done':green, 'Failed':red), "Verification" SELECT('Verified':green, 'Unverified':yellow, 'Failed':red), "Run type" SELECT('Manual':blue, 'Scheduled':purple), "Result" RICH_TEXT, "Date" DATE)
+CREATE TABLE ("Assignment" TITLE, "Task ID" RICH_TEXT, "Owner" SELECT('Chief of Staff':blue, 'Operations':default, 'Marketing':pink, 'Sales':green, 'Client Success':yellow, 'Finance':red), "Status" SELECT('Planned':gray, 'In progress':blue, 'Done':green, 'Failed':red), "Verification" SELECT('Verified':green, 'Unverified':yellow, 'Failed':red), "Run type" SELECT('Manual':blue, 'Scheduled':purple, 'Unknown':gray), "Result" RICH_TEXT, "Date" DATE)
 ```
 
 ### Briefings
 Description: Every report your AI team produces, newest first.
 ```
-CREATE TABLE ("Briefing" TITLE, "Date" DATE, "Type" SELECT('Daily briefing':blue, 'Inbox triage':yellow, 'Invoice review':red, 'Weekly marketing':pink, 'Assignment':green, 'Self-test':gray), "Run type" SELECT('Manual':blue, 'Scheduled':purple), "Result" SELECT('Complete':green, 'Partial':yellow, 'Failed':red), "Approvals raised" NUMBER, "Drafts created" NUMBER)
+CREATE TABLE ("Briefing" TITLE, "Date" DATE, "Type" SELECT('Daily briefing':blue, 'Inbox triage':yellow, 'Invoice review':red, 'Weekly marketing':pink, 'Assignment':green, 'Self-test':gray), "Run type" SELECT('Manual':blue, 'Scheduled':purple, 'Unknown':gray), "Result" SELECT('Complete':green, 'Partial':yellow, 'Failed':red, 'Running':blue), "Approvals raised" NUMBER, "Drafts created" NUMBER, "Run ID" RICH_TEXT, "Started" DATE, "Finished" DATE, "Completed through" DATE)
 ```
 Then add a table view named "Newest first": `SORT BY "Date" DESC`
 

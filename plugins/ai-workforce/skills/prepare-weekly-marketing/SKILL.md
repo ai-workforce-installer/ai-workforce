@@ -2,7 +2,7 @@
 name: prepare-weekly-marketing
 description: This skill should be used when the user asks to "prepare weekly marketing", "plan next week's marketing", "weekly marketing review", "marketing plan for the week", or wants last week's results reviewed and next week's content, tests and budget proposals prepared. Also used by the scheduled weekly marketing task.
 metadata:
-  version: "0.4.4"
+  version: "0.5.0"
 ---
 
 # Prepare Weekly Marketing
@@ -21,5 +21,5 @@ Follow `references/approval-policy.md`, `references/approval-queue.md` and `refe
 4. **Collaborate.** Launch `sales-manager` for which offers or lead sources are converting and what objections prospects raise, and `client-success-manager` for recurring customer questions worth content. Pass their findings to marketing for a second pass if they change the plan.
 5. **Verify.** Check every metric against the source data and recompute rates (CTR, CPC, conversion rate, CPA) yourself. Mark anything unsourced as unverified.
 6. **Queue approvals.** Every publish, send or budget change becomes an Approvals row with exact values (Action type = Publish, Send message or Spend money).
-7. **Save** a Briefings row (Type = Weekly marketing) holding the full plan, plus Assignments rows. Never overwrite earlier plans.
+7. **Save** the full plan in this run's record (`references/run-tracking.md`) (Type = Weekly marketing), plus Assignments rows. Never overwrite earlier plans.
 8. **Report:** last week in 5 lines, next week's plan (content, tests, drafts), budget proposals, Approvals Needed by AP number, Run receipt. Notify in scheduled runs.

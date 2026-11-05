@@ -2,7 +2,7 @@
 name: inbox-triage
 description: This skill should be used when the owner asks to "triage my inbox", "go through my email", "check my email", "what's in my inbox", "anything important in my email?", "what did I miss?", or wants all their email reviewed, sorted and followed up, not only customer messages. Also used by the scheduled inbox triage task.
 metadata:
-  version: "0.4.4"
+  version: "0.5.0"
 ---
 
 # Inbox Triage (all email, not just customers)
@@ -15,7 +15,7 @@ Follow `references/inbox-coverage.md` (how to search, sort and count), `referenc
 
 ## Steps
 
-1. **Pick the run mode and Run type** (`references/run-modes.md`, including "Manual or Scheduled?").
+1. **Pick the run mode and start the run record** (`references/run-modes.md`, `references/run-tracking.md`): Run ID, Source, and whether this is a new run, an interrupted one to finish, or an overlap to skip. Set the window from the checkpoint (`references/inbox-coverage.md` section 1) and collect earlier runs' Carried over items.
 2. **Load context.** Workforce Settings (Connections, Where things live, Schedule, Extra rules, Active departments), Priorities, Company Profile, Brand & Tone, Pricing & Offers, Customers & Leads, open Approvals and Assignments, the Your Team page, and the next 7 days of calendar events. This is what tells important mail from noise.
 3. **Find everything in the window** exactly as `references/inbox-coverage.md` sections 1-2 say: All Mail, every page, exact searches recorded. List what can't be reached under Not checked.
 4. **Sort and read** (section 3): a quick pass on every thread, then open every message that might matter. Skip threads already reported in an earlier Inbox triage row unless a new message arrived since.
@@ -28,7 +28,7 @@ Follow `references/inbox-coverage.md` (how to search, sort and count), `referenc
    Each brief carries the messages (sender, date, subject, link, key text), the Business Brain context, the safe-links rule and limits from section 4, and the deliverables format. Nobody gets an empty brief: skip members with nothing to do and say so.
 6. **Verify** as Chief of Staff: every claim traces to a message; drafts exist (get_draft) and say nothing outside the Business Brain; money figures match the email; nothing was sent, clicked through a sign-in or payment link, or changed.
 7. **Queue approvals** for every decision or consequential next step (`references/approval-queue.md`), each with a recommendation, Reversible, and the email or draft link.
-8. **Log** one Assignments row per member task and one Briefings row (Type = Inbox triage, Run type per step 1) with the report below. Result: Complete when every page was fetched, the coverage counts add up, every likely-important message was read and every member's work was checked; Partial otherwise. A mailbox the team has never been connected to doesn't make the run Partial, but it is always named under Not checked (`references/inbox-coverage.md` section 5).
+8. **Log** one Assignments row per member task (with its source key) and finish the run record with the report below, the Handled and Carried over lists, and Completed through (moved forward only if the whole window was processed). Result: Complete when every page was fetched, the coverage counts add up, every likely-important message was read and every member's work was checked; Partial otherwise. A mailbox the team has never been connected to doesn't make the run Partial, but it is always named under Not checked (`references/inbox-coverage.md` section 5).
 9. **Report** in this order, short, every item with its link (email `viewUrl`, checked Gmail draft link, AP number, Notion page):
    1. **One line on coverage:** "Reviewed 247 threads from Wed 8:49 AM to Thu 8:49 AM (all of Gmail). 9 need you, 6 prepared, 228 routine."
    2. **Needs you:** decisions and replies, each with what the team recommends.

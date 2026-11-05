@@ -21,13 +21,14 @@ All approval requests go to one place: the **Approvals** database inside the own
 
 ## Writing items to Notion (orchestrator)
 1. Find the Approvals database: search Notion for "Approvals" and pick the one whose parent is the Business Brain. Fetch it to get its `collection://` data source ID.
-2. **Deduplicate.** Query rows with Status Pending, Approved or Handed to you, plus Done and Rejected rows from the last 14 days. If a row already describes the same action for the same person or record, do not add a new row; mention the existing AP number instead (and for a Rejected one, don't raise it again unless something new happened).
+2. **Deduplicate.** Query rows with Status Pending, Approved or Handed to you, plus Done and Rejected rows from the last 14 days. If a row already has the same source key (`references/run-tracking.md` section 4) or describes the same action for the same person or record, do not add a new row; mention the existing AP number instead (and for a Rejected one, don't raise it again unless something new happened).
 3. Create one row per new item with these properties:
    - `Item` (title), `Department`, `Action type`, `Exact action`, `Why`, `Risk if wrong`
    - `Reversible`: `__YES__` or `__NO__`
    - `Draft link`: a URL if you have one; otherwise leave empty and put "Gmail draft, subject: ..." (or "Reply in Briefings <date>, subject: ...") at the start of Exact action
    - `Status`: `Pending`
-   - `Source run`: run name and date, e.g. `Daily briefing 2026-11-09 (scheduled)`
+   - `Source run`: the Run ID and title, e.g. `IT-20261109-1146 Inbox triage 2026-11-09 11:46`
+   - End `Exact action` with the source key, e.g. `(source: gmail:<message id>)`
 4. Read back the created rows to get each `AP` number, and use those numbers in the report as AP-<number> (AP-12, AP-13...), whether or not the database shows the AP prefix.
 5. If Notion is not reachable, list the items in the report with temporary IDs (TEMP-1, TEMP-2) and say clearly that they were not queued.
 

@@ -2,7 +2,7 @@
 name: assign-work
 description: This skill should be used when the owner hands the team work, such as "have Marketing work on that", "ask Sales what happened with those leads", "get the team on this", "delegate this", "can someone handle this", "assign work to the team", "act as Chief of Staff", or gives a business request that should go to one or more of Operations, Marketing, Sales, Client Success, Finance or a custom team member.
 metadata:
-  version: "0.4.4"
+  version: "0.5.0"
 ---
 
 # Assign Work (Chief of Staff protocol)
@@ -32,7 +32,7 @@ Act as the Chief of Staff in the main conversation. Read these and apply them th
 7. **Verify** each result: deliverable present, every figure sourced, arithmetic recomputed, nothing sent, spent or changed, no price or term outside the Business Brain, drafts actually exist where the result says they are (check the Gmail draft or the saved text). If it fails, redo it once with specific feedback; then mark it Unverified.
 8. **Decide.** Where members disagree, make one recommendation and say why. For high-stakes calls in Cowork, the `chief-of-staff` agent can give an independent, tool-free review of the reports.
 9. **Queue approvals** (`references/approval-queue.md`) and use their AP numbers.
-10. **Log.** One Assignments row per task (Result says which way it ran: own agent, briefed assistant, or handled directly) and one Briefings row (Type = Assignment) holding the full report: results, verification, approvals, questions, run receipt.
+10. **Log.** One Assignments row per task (Result says which way it ran: own agent, briefed assistant, or handled directly) and the run's record in Briefings (Type = Assignment, `references/run-tracking.md`) holding the full report: results, verification, approvals, questions, run receipt.
 11. **Report to the owner** per `references/talking-to-the-owner.md`: what got done and the link, what needs them, what couldn't be done. Offer the details on request.
 12. **Repeat work?** If this kind of request has come up before (check recent Assignments) or the owner says "every week", offer once: "Want <member> to handle this every <cadence>?" On yes, use `schedule-workforce` for just that responsibility.
 

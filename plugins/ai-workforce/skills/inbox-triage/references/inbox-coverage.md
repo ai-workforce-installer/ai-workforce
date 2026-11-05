@@ -2,11 +2,25 @@
 
 General inbox triage reviews **all** the owner's email for a window, not just customer messages. This file says how to search so nothing is missed, how to sort what was found, and how to prove coverage in the report. It works for an owner who has never set up a filter or label.
 
-## 1. The window
+## 1. The window and the checkpoint
 
-- **Scheduled run:** from the end of the last comprehensive window (the "Window" line of the newest Inbox triage row whose Coverage says comprehensive) to the scheduled time, at most 7 days back. No such row (for example only customer-only runs so far): the last 24 hours (on Monday, since Friday 00:00). If the gap was longer than 7 days, say so under Not checked.
-- **Attended run:** what the owner asked for ("this week", "since yesterday"); otherwise the same rule as scheduled, at most 7 days.
-- Write the window in the report in the owner's time zone, e.g. "Window: Wed 8:49 AM – Thu 8:49 AM (owner's time zone)".
+The team keeps one bookmark: **Completed through**, the time up to which every message has been found, sorted and its follow-up done or carried over. It lives in the run record (`references/run-tracking.md`): the `Completed through` property if the Briefings database has it, otherwise the "Completed through:" line at the end of the body.
+
+- **Start:** the newest **Completed through** among finished Inbox triage records, minus a 15-minute overlap (messages already handled are skipped by their ID, below). No record has one yet (first run, or only older runs): the last 24 hours (on Monday, since Friday 00:00). Attended runs may use the period the owner asks for instead.
+- **End:** when this run started.
+- **Long gaps:** if the start is more than 7 days back, scan the most recent 7 days, and report the earlier days plainly as a gap ("Not scanned: Oct 20 – Oct 29. Say 'triage my inbox from Oct 20' to cover it."). Never hide a gap.
+- Write the window in the run header in the owner's time zone.
+
+**Advancing the bookmark.** When the run finishes:
+- **Everything done** (every page fetched, every thread sorted, every prioritized item read and handed out or listed as carried over): Completed through = the window's end.
+- **Stopped partway** (a page failed after one retry, a connection dropped, the run timed out, a team member failed): Completed through **stays where it was** (copy the previous value), so the next run scans this window again. List what was done and what wasn't. Result: Partial (Failed if nothing was found).
+- Retrying a page once after a short pause is fine; never skip a page that failed.
+
+**Not processing the same email twice.** Each message has an ID (Gmail message id; Outlook message id). In the run record, under **Handled**, list the source key of every message that got follow-up work (`gmail:<id>` with a 3-word note). Before doing follow-up work on a message, check the Handled lists of Inbox triage records from the last 7 days, plus existing drafts, Approvals and Assignments (`references/run-tracking.md` section 4). Already handled → count it as "already handled" and move on. Routine and personal messages are only counted, so seeing them again costs nothing.
+
+**Carried over.** Prioritized messages found but not finished (past the read or draft limit) are listed under **Carried over** with their source keys and links. They are not marked Handled. Every run starts by collecting the Carried over lists of Inbox triage records from the last 7 days and working first on any message not yet Handled, so carried-over mail is never lost when the bookmark moves.
+
+**Custom periods.** A run over a period the owner chose moves the bookmark only if that period starts at or before the current Completed through; otherwise it leaves the bookmark alone.
 
 ## 2. Search everything, then page to the end
 
@@ -69,14 +83,16 @@ Coverage: comprehensive (all mail in the window) | narrow (say what was left out
 - Window: <start> – <end> (<time zone>)
 - Searched: <app>, All Mail incl. archived and every tab; excluded sent, drafts, spam, trash
 - Searches: <exact query> (<n> pages)
-- Found: <n> threads in the window
-- Read in full: <n>
+- Discovered: <n> threads in the window (<n> already handled by an earlier run)
+- Reviewed: <n> sorted, <n> read in full
+- Processed: <n> with follow-up done; <n> carried over to the next run
 - Prioritized: <n> (urgent <n>, needs reply <n>, opportunities <n>, money and accounts <n>, meetings and projects <n>, customer <n>)
 - Filtered out as routine: <n> (promotions <n>, newsletters <n>, webinar or event pitches <n>, notifications <n>, receipts <n>); personal or family: <n>
 - Not checked: <every mailbox under Where things live the team can't reach>, or "nothing"
+- Completed through: <time> (moved forward | not moved: <why>)
 ```
 
-Found must equal Prioritized + Filtered out + personal (each thread counted once, in its most important bucket). Coverage is **comprehensive** only when the search followed section 2 exactly (All Mail, no inbox, category or keyword filters, every page). Anything narrower is **narrow**, says what was left out, and makes the Result Partial. If the numbers don't add up, or a page of results couldn't be fetched, say so and set Result to Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
+Discovered must equal Prioritized + Filtered out + personal + already handled (each thread counted once, in its most important bucket). In the owner's summary, show only one line ("Reviewed 247 emails; 9 need you; nothing skipped"), and say so plainly if anything was carried over or the bookmark didn't move. Coverage is **comprehensive** only when the search followed section 2 exactly (All Mail, no inbox, category or keyword filters, every page). Anything narrower is **narrow**, says what was left out, and makes the Result Partial. If the numbers don't add up, or a page of results couldn't be fetched, say so and set Result to Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
 
 ## 6. Saying it precisely
 

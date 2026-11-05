@@ -2,7 +2,7 @@
 name: review-overdue-invoices
 description: This skill should be used when the user asks to "review overdue invoices", "check receivables", "who owes us money", "accounts receivable aging", "draft payment reminders", or wants an overdue invoice report. Also used by the scheduled invoice review task.
 metadata:
-  version: "0.4.4"
+  version: "0.5.0"
 ---
 
 # Review Overdue Invoices (read-only)
@@ -22,5 +22,5 @@ Follow `references/approval-policy.md`, `references/approval-queue.md`, `referen
 5. **Verify.** Recompute totals from the source rows yourself (run the arithmetic) and confirm they match. Flag mismatches and missing due dates.
 6. **Drafts.** Reminder drafts follow `references/connections.md`: Gmail drafts if the owner uses Gmail, otherwise Replies ready to copy in this run's Briefings page. Never send. Skip customers with disputes.
 7. **Queue approvals.** Each reminder send, late fee or write-off is an Approvals row (Action type = Send message or Financial record) with exact details and the Draft link.
-8. **Save** a Briefings row (Type = Invoice review) and Assignments rows.
+8. **Save** the report in this run's record (`references/run-tracking.md`) (Type = Invoice review) and Assignments rows.
 9. **Report:** totals by aging bucket, top overdue with invoice number, amount, due date and days late, anomalies, drafts created, Approvals Needed by AP number, Run receipt. Notify in scheduled runs.

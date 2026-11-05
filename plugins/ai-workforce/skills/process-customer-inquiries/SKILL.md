@@ -2,7 +2,7 @@
 name: process-customer-inquiries
 description: This skill should be used when the user asks to "process customer inquiries", "handle customer emails", "answer my support emails", "draft replies to customers", "check support requests", or wants only customer messages sorted, answered in draft, and escalated. For reviewing all email ("triage my inbox"), use inbox-triage, which runs these steps for its customer items.
 metadata:
-  version: "0.4.4"
+  version: "0.5.0"
 ---
 
 # Process Customer Inquiries
@@ -27,5 +27,5 @@ Follow `references/approval-policy.md`, `references/approval-queue.md`, `referen
 7. **Save the drafts.** Gmail: create each verified reply as a Gmail draft in the same thread, so later runs can see a draft already exists. Check each with get_draft and use its `viewUrl` as the link (`references/connections.md`); list each reply as **Saved in Gmail** (link) or **Suggested text, not saved**. Outlook or paste mode: put every verified reply under **Replies ready to copy** in this run's Briefings page (recipient, subject, full text). Never send. Record each draft's subject. On paste mode, move handled emails under Handled on the Paste Box.
 8. **Queue approvals.** Every reply that needs the owner's yes before sending (escalations, anything sensitive) becomes an Approvals row with Action type = Send message and the Draft link filled in. Routine, fully grounded replies do not need a row; they wait in Gmail drafts, or in Replies ready to copy, for the owner to send.
 9. **Grow the FAQ.** Add new unanswered questions under "Waiting for an answer from you" on the FAQs page (append only; skip questions already on the page).
-10. **Save** a Briefings row (Type = Inbox triage) with the report, plus Assignments rows.
+10. **Save** the report in this run's record (`references/run-tracking.md`) (Type = Inbox triage), plus Assignments rows with source keys.
 11. **Report:** start with the scope, "Customer support triage: customer messages only, not a full inbox review", then what was handled first, then decisions; the full triage table (sender, topic, urgency, status) goes in the Briefings page. Include drafts created (each with its link: the checked Gmail draft link, or the Briefings page for suggested text), the Briefings page link, escalations, FAQ questions added, Approvals Needed by AP number, Run receipt. In scheduled runs, notify per `references/run-modes.md`.

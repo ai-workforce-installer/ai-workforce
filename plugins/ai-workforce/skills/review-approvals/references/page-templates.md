@@ -67,7 +67,7 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 
 ## About this workspace
 
-- Business Brain version: 0.4.0
+- Business Brain version: 0.5.0
 ````
 
 ## Company Profile

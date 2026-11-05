@@ -2,7 +2,7 @@
 name: daily-executive-briefing
 description: This skill should be used when the user asks for a "daily executive briefing", "morning briefing", "daily brief", "what do I need to know today", "run the daily briefing", or wants the AI team's consolidated status of the business. Also used by the scheduled daily briefing task.
 metadata:
-  version: "0.4.4"
+  version: "0.5.0"
 ---
 
 # Daily Executive Briefing
@@ -18,7 +18,7 @@ The goal of every briefing: **"Here's what your team already handled, and here a
 ## Steps
 
 1. **Pick the run mode** (`references/run-modes.md`). Scheduled runs ask no questions.
-2. **Load context.** Find the Business Brain. Read Workforce Settings (active departments, time zone, Connections, Where things live), the Paste Box, Priorities, the Your Team page, and the most recent Daily briefing. Query Approvals for every row with Status Pending, Approved or Handed to you, with every property. Name this run's row per `references/run-modes.md` ("One row per run"); add to an existing row only when it is this same run, interrupted.
+2. **Load context.** Find the Business Brain. Read Workforce Settings (active departments, time zone, Connections, Where things live), the Paste Box, Priorities, the Your Team page, and the most recent Daily briefing. Query Approvals for every row with Status Pending, Approved or Handed to you, with every property. Start this run's record now (`references/run-tracking.md`); it tells you whether this is a new run, an interrupted one to finish, or an overlap to skip.
 3. **Launch the active members in parallel** (one call each, same message). Each reports in its standard format, under 300 words, and **does the work, not just a report**:
    - **Operations:** today's and tomorrow's calendar, conflicts, deadlines, blocked items. For each meeting with another person in the next 24 hours (up to 2), prepare a **meeting prep**: who it's with, the context from recent emails and shared files (read any linked documents the connected apps can open and summarize the key points), how it relates to Priorities and the Business Brain, a short agenda, and the decisions the owner should make there, with a recommendation.
    - **Client Success:** customer emails from the last 24 hours in the connected apps and the Paste Box, and which are urgent. If inbox triage isn't scheduled, draft replies for urgent ones.
@@ -41,7 +41,7 @@ The goal of every briefing: **"Here's what your team already handled, and here a
    5. **Spotted:** important opportunities or problems found (up to 3), and **Questions for you** (at most 3, per `references/just-in-time.md`). Add the weekly suggestion here when one is due: only when based on something the team actually saw (the same customer question three or more times; the owner changing drafts the same way repeatedly; one member often doing work outside its job), not if one was made in the last 7 days or was declined before (check "Suggestions from your Chief of Staff" on the Your Team page, and add it there with today's date and "open").
    6. **Details** (in Notion only): today's full calendar, each member's findings, how each part ran, and **Verification**, with each item marked checked against the source or taken from the member's report.
    **Say what is visible, not what exists.** Never write "no leads" or "no customer emails" when a source isn't connected. Write "None visible in <connected apps>", then name what the team can't see.
-8. **Save.** Create the Briefings row (title "Daily briefing <date>", Type, Date, Run type, Result, Approvals raised, Drafts created), with the briefing as the page body, or add to today's existing row (step 2). Fetch it back to get its URL. Move handled Paste Box emails under Handled. One Assignments row per member task.
+8. **Save** the briefing as the body of this run's record (`references/run-tracking.md`), then finish the record (Result, Approvals raised, Drafts created). Fetch it back to get its URL. Move handled Paste Box emails under Handled. One Assignments row per member task.
 9. **Report and notify.** The chat reply (attended) or the notification (scheduled) holds: the top priorities in one line each, how many things the team handled, how many decisions are waiting (oldest AP number), and the briefing's Notion URL. In a notification, put the full URL as plain text on its own line (notifications can't show formatted links). Only say a link is included when it actually is.
 10. **Decisions in reply** (attended mode, or when the owner later replies to the briefing): if the owner answers with AP numbers, carry them out with the `review-approvals` skill, starting at its step 4 for the named items, without re-presenting the queue.
 
