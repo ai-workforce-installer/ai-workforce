@@ -4,7 +4,7 @@ General inbox triage reviews **all** the owner's email for a window, not just cu
 
 ## 1. The window
 
-- **Scheduled run:** from the end of the last window (the "Window" line in the newest Inbox triage row in Briefings that has one) to now, at most 7 days back. No such row: the last 24 hours (on Monday, since Friday 00:00). If the gap was longer than 7 days, say so under Not checked.
+- **Scheduled run:** from the end of the last comprehensive window (the "Window" line of the newest Inbox triage row whose Coverage says comprehensive) to the scheduled time, at most 7 days back. No such row (for example only customer-only runs so far): the last 24 hours (on Monday, since Friday 00:00). If the gap was longer than 7 days, say so under Not checked.
 - **Attended run:** what the owner asked for ("this week", "since yesterday"); otherwise the same rule as scheduled, at most 7 days.
 - Write the window in the report in the owner's time zone, e.g. "Window: Wed 8:49 AM – Thu 8:49 AM (owner's time zone)".
 
@@ -65,7 +65,7 @@ For each item in the first five buckets, the assigned member does the next usefu
 ## 5. Coverage section (every report)
 
 ```
-Coverage
+Coverage: comprehensive (all mail in the window) | narrow (say what was left out)
 - Window: <start> – <end> (<time zone>)
 - Searched: <app>, All Mail incl. archived and every tab; excluded sent, drafts, spam, trash
 - Searches: <exact query> (<n> pages)
@@ -76,7 +76,7 @@ Coverage
 - Not checked: <every mailbox under Where things live the team can't reach>, or "nothing"
 ```
 
-Found must equal Prioritized + Filtered out + personal (each thread counted once, in its most important bucket). If the numbers don't add up, or a page of results couldn't be fetched, say so and set Result to Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
+Found must equal Prioritized + Filtered out + personal (each thread counted once, in its most important bucket). Coverage is **comprehensive** only when the search followed section 2 exactly (All Mail, no inbox, category or keyword filters, every page). Anything narrower is **narrow**, says what was left out, and makes the Result Partial. If the numbers don't add up, or a page of results couldn't be fetched, say so and set Result to Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
 
 ## 6. Saying it precisely
 

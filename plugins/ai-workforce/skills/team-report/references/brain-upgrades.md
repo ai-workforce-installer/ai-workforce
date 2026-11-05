@@ -8,6 +8,7 @@ Workforce Settings ends with an **About this workspace** section holding `- Busi
 - **Newer than this file knows** (the workspace was upgraded by a newer copy of the plugin, for example on another device): change nothing and carry on. In attended mode, mention once that their AI Workforce may be out of date and they can update it from Customize → Plugins.
 - **Scheduled:** never upgrade. Add one line to the briefing: "Workspace improvements are ready. Say 'update my team workspace' when you have a minute."
 - `setup-workforce` offers it the same way when it finds an existing Business Brain.
+- **After an attended upgrade** (or whenever the owner mentions updating the plugin), also offer to check their recurring tasks: "Your recurring tasks may still use older instructions. Want me to check them?" (`schedule-workforce`, "Check and update recurring responsibilities"). Change nothing without a yes.
 
 ## Rules
 - **Check, then add.** Every step first checks whether its change is already there and skips it if so. Running the steps twice changes nothing.

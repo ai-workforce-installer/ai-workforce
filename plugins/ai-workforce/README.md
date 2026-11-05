@@ -4,6 +4,13 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 **You run the business. Your team handles the work.**
 
+## What's new in 0.4.4 (recurring tasks stay in step with the plugin)
+- **Outdated recurring tasks can't quietly do the wrong job.** Each run checks its saved instructions against the current version. If an older task names the wrong skill (for example customer-only email for "inbox triage"), the run does the job the task is for and warns you, or marks itself Partial if it can't.
+- **"Update my recurring tasks"** lists any task using older instructions and, with your yes, updates it in place: no duplicates, same time and settings.
+- **One Briefings row per run.** A second run on the same day gets its own row; only a run that was interrupted is resumed.
+- **Honest results:** a run is judged against the job it was for. Customer-only checking for an inbox triage is Partial, and the notification says so.
+- **Coverage label:** inbox reports say whether the search was comprehensive or narrow.
+
 ## What's new in 0.4.3 (inbox triage covers all email)
 - **"Triage my inbox" now means all email**, not just customer messages. A new `inbox-triage` skill catches deadlines, people waiting on you, opportunities, payment and account notices, and meeting context, then has the right team member do the follow-up: drafts, reconciliations, research, approval items. Customer support stays its own job (`process-customer-inquiries`) and is one part of inbox triage.
 - **It searches everywhere mail lands:** archived, labeled and every Gmail tab, every page of results. Your Gmail filters don't need changing.

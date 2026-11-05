@@ -2,7 +2,7 @@
 name: team-report
 description: This skill should be used when the owner asks "what's my team been working on?", "what did the team do this week?", "did the morning briefing run?", "what's scheduled?", "is the team working?", "any problems?", or wants a truthful summary of the team's actual activity, results, failures and pending decisions.
 metadata:
-  version: "0.4.3"
+  version: "0.4.4"
 ---
 
 # Team Report
@@ -25,6 +25,7 @@ A truthful account of what the team actually did. Every line rests on a record i
    - Expected run with no row → **no record**: it didn't run, or it didn't finish. Give the last-run status from the schedule list if you have it. Don't guess which.
    - Listed in Workforce Settings but missing from the schedule list, or disabled → **not actually scheduled**.
    - Saved as "proposed, not scheduled" → **not set up yet**.
+   - A row or task with a configuration warning, or a task whose prompt lacks the current `prompt version` line (`references/run-modes.md`, "Is the recurring task current?") → **uses older instructions**: say what it does differently and offer "update my recurring tasks".
    - Runs whose row says the plugin or an app wasn't available → say so plainly, with the fix (reconnect the app, or keep AI Workforce turned on under Customize → Plugins).
 4. **Report in this order**, short and plain:
    1. **Done:** what the team finished, grouped by team member, each with a count and link ("Client Success: 12 reply drafts across 3 runs").

@@ -2,7 +2,7 @@
 name: review-approvals
 description: This skill should be used when the user asks to "review my approvals", "what's waiting for me", "clear my approvals", "approve AP-12", "what does the team need from me", or wants to go through the AI team's pending approval queue and decide on each item.
 metadata:
-  version: "0.4.3"
+  version: "0.4.4"
 ---
 
 # Review Approvals (the owner's daily 15 minutes)

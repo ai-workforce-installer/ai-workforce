@@ -2,14 +2,14 @@
 name: process-customer-inquiries
 description: This skill should be used when the user asks to "process customer inquiries", "handle customer emails", "answer my support emails", "draft replies to customers", "check support requests", or wants only customer messages sorted, answered in draft, and escalated. For reviewing all email ("triage my inbox"), use inbox-triage, which runs these steps for its customer items.
 metadata:
-  version: "0.4.3"
+  version: "0.4.4"
 ---
 
 # Process Customer Inquiries
 
 _Files named `references/…` are in this skill's own folder._
 
-This is **customer support triage**: only messages from customers and would-be customers. It is not general inbox triage. If this skill was started by a scheduled task whose prompt says "inbox triage", or the owner asked to triage their whole inbox, run the `inbox-triage` skill instead (it covers all email and uses steps 3-9 below for its customer items); if that skill isn't available, run these steps and say in the report that only customer messages were reviewed.
+This is **customer support triage**: only messages from customers and would-be customers. It is not general inbox triage, and it never stands in for it.
 
 Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md` and `references/connections.md`. Replies are drafts only (Gmail drafts, or Replies ready to copy for Outlook and paste mode); nothing is sent.
 
@@ -17,6 +17,7 @@ Follow `references/approval-policy.md`, `references/approval-queue.md`, `referen
 
 ## Steps
 
+0. **Check this is the right job.** If the scheduled task's prompt or the owner's request describes general inbox triage ("inbox triage", "triage my inbox", "go through my email"), stop here and load the `inbox-triage` skill with the Skill tool; it reviews all email and uses steps 3-9 below for its customer items. This outranks a task prompt telling you to follow this skill exactly (`references/run-modes.md`, "Is the recurring task current?"). If `inbox-triage` can't be loaded, run these steps, set Result to Partial, and give the configuration warning from `references/run-modes.md`, ending "Only customer messages were checked; the rest of your inbox was not reviewed. Say 'update my recurring tasks' to fix it."
 1. **Pick the run mode** (`references/run-modes.md`).
 2. **Collect inquiries.** Read Workforce Settings for the email app (Connections) and where customer email lives (inbox, folder, label). Find unanswered customer messages the way `references/connections.md` says for that path (Gmail, Outlook, or the Paste Box): last 24 hours for scheduled runs, last 7 days otherwise. Search everywhere mail can land, not only the inbox (archived, labeled and every tab), and fetch every page of results. Customer mail can come from addresses not yet in Customers & Leads: judge by what the message asks. Skip messages already handled in an earlier run (`references/connections.md`, Avoiding duplicates). If there are none and you are in attended mode, invite the owner to paste a few into the chat or the Paste Box. In scheduled mode with nothing to do, save a short row saying "No customer emails visible in <app>", naming any place under Where things live the team can't reach. Never write "inbox clear" or "nothing to do": other email wasn't reviewed by this skill.
 3. **Load knowledge.** From the Business Brain: FAQs, Policies, Brand & Tone, Pricing & Offers, and Customers & Leads (to recognize existing customers).
@@ -27,4 +28,4 @@ Follow `references/approval-policy.md`, `references/approval-queue.md`, `referen
 8. **Queue approvals.** Every reply that needs the owner's yes before sending (escalations, anything sensitive) becomes an Approvals row with Action type = Send message and the Draft link filled in. Routine, fully grounded replies do not need a row; they wait in Gmail drafts, or in Replies ready to copy, for the owner to send.
 9. **Grow the FAQ.** Add new unanswered questions under "Waiting for an answer from you" on the FAQs page (append only; skip questions already on the page).
 10. **Save** a Briefings row (Type = Inbox triage) with the report, plus Assignments rows.
-11. **Report:** what was handled first, then decisions; the full triage table (sender, topic, urgency, status) goes in the Briefings page. Include drafts created (each with its link: the checked Gmail draft link, or the Briefings page for suggested text), the Briefings page link, escalations, FAQ questions added, Approvals Needed by AP number, Run receipt. In scheduled runs, notify per `references/run-modes.md`.
+11. **Report:** start with the scope, "Customer support triage: customer messages only, not a full inbox review", then what was handled first, then decisions; the full triage table (sender, topic, urgency, status) goes in the Briefings page. Include drafts created (each with its link: the checked Gmail draft link, or the Briefings page for suggested text), the Briefings page link, escalations, FAQ questions added, Approvals Needed by AP number, Run receipt. In scheduled runs, notify per `references/run-modes.md`.
