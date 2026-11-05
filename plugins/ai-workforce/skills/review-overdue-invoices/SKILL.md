@@ -2,12 +2,14 @@
 name: review-overdue-invoices
 description: This skill should be used when the user asks to "review overdue invoices", "check receivables", "who owes us money", "accounts receivable aging", "draft payment reminders", or wants an overdue invoice report. Also used by the scheduled invoice review task.
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # Review Overdue Invoices (read-only)
 
 Follow `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/approval-policy.md`, `approval-queue.md`, `run-modes.md` and `connections.md` (same folder). Financial records are strictly read-only: never mark paid, edit, void, refund, charge or send anything.
+
+**Running team members:** wherever this skill says to launch a member with the Agent tool, follow the run rule in `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/team-roles.md` (own agent in Cowork, otherwise a briefed assistant, otherwise do that member's work yourself in this conversation), include the member's Your Team notes in the brief, and report honestly which way it ran.
 
 ## Steps
 

@@ -1,38 +1,37 @@
 ---
 name: assign-work
-description: This skill should be used when the user asks to "assign work to the team", "delegate this", "get the AI team on it", "run the workforce", "act as Chief of Staff", or gives a multi-part business request that should be split across operations, marketing, sales, client success and finance specialists.
+description: This skill should be used when the owner hands the team work, such as "have Marketing work on that", "ask Sales what happened with those leads", "get the team on this", "delegate this", "can someone handle this", "assign work to the team", "act as Chief of Staff", or gives a business request that should go to one or more of Operations, Marketing, Sales, Client Success, Finance or a custom team member.
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # Assign Work (Chief of Staff protocol)
 
-Act as the Chief of Staff in the main conversation. Delegation must run from the main thread, because specialist subagents are launched with the Agent tool.
-
-Read these first and apply them to everything below:
-- `references/approval-policy.md` - what needs the owner's yes
-- `references/connections.md` - how to read email, calendar and files on whatever apps the owner uses (or paste mode)
-- `references/approval-queue.md` - how approval items are written to Notion
-- `references/run-modes.md` - attended vs. scheduled behavior
+Act as the Chief of Staff in the main conversation. Read these and apply them throughout:
+- `references/team-roles.md`: who does what, and **how each member runs** (own agent, briefed assistant, or you directly)
+- `references/approval-policy.md`: what needs the owner's yes
+- `references/connections.md`: email, calendar and files on whatever apps the owner uses, or the Paste Box
+- `references/just-in-time.md`: facts each kind of work needs, and what to do when one is missing
+- `references/approval-queue.md` and `references/run-modes.md`
+- `references/talking-to-the-owner.md`: how to report back
 
 ## Steps
 
 1. **Pick the run mode** (`run-modes.md`).
-2. **Load context.** Search Notion for the "Business Brain" page. Read Workforce Settings first (active departments, extra rules), then Priorities, Policies, Brand & Tone and Pricing & Offers. If Notion is not connected, say so and continue with what the user provided. If the Business Brain has no Workforce Settings page, suggest running `setup-workforce` and continue.
-3. **Plan.** Split the request into tasks. For each: ID (A-001...), owner, goal, inputs, expected deliverable, definition of done. Assign only to active departments. Show the plan in a short table. Start immediately unless the request is ambiguous or expensive to redo.
-4. **Delegate.** Call the Agent tool once per task with `subagent_type` set to the owner (`operations-manager`, `marketing-manager`, `sales-manager`, `client-success-manager`, `finance-manager`). Launch independent tasks together in one message so they run in parallel. Give each the full brief, the Business Brain context, and the approval policy. Tell each to end with Approvals Needed (queue format) and a Run receipt.
-5. **Route collaboration.** If a report has a "Needs from other manager" item, launch a follow-up task to that manager with the relevant findings. Specialists never contact each other directly.
-6. **Verify.** For each report: deliverable present, figures sourced, arithmetic recomputed, nothing sent/spent/modified, no price or term outside the Business Brain. If it fails, re-delegate once with specific feedback; if it still fails, mark it Unverified.
-7. **Decide.** Where managers disagree, make one recommendation and give the reasoning. A separate `chief-of-staff` subagent may be used for an independent review of the reports when the stakes are high; give it the reports in full and tell it not to call tools.
-8. **Queue approvals** in the Approvals database (`approval-queue.md`). Use the AP numbers in the report.
-9. **Log.** Create one Assignments row per task and one Briefings row (Type = Assignment) holding the report.
-10. **Report** in this format:
-    - **Headline** (2 sentences)
-    - **Results by manager** (what was done, key findings, source)
-    - **Verification** (per task: Verified / Unverified, and why)
-    - **Recommendation**
-    - **Approvals Needed** (AP numbers, exact action each)
-    - **Open items / next steps**
-    - **Run receipt** (which specialists ran, tools each called)
+2. **Load context.** Find the Business Brain (`run-modes.md`). Read Workforce Settings (Connections, active departments, Extra rules), Brand & Tone, the Your Team page (each member's notes and any custom members), and whatever else the work touches. If Notion isn't connected, say so and work from what the owner gave you. No Workforce Settings page: suggest `setup-workforce` and carry on.
+3. **Route.**
+   - The owner named a member ("have Marketing…"), or the job clearly belongs to one: give it to that member. No plan table; say in one line who's on it.
+   - It spans several members: split it into tasks (ID A-001…, owner, goal, deliverable, definition of done) and show a short plan, then start unless it is ambiguous or expensive to redo.
+   - It matches a custom member's responsibilities better than a core one: use the custom member.
+   - Nobody fits well: say so, do it with the closest member, and mention once that the owner can say "do we need another person for this?" (`manage-team`).
+4. **Check what the work needs** (`just-in-time.md`). Attended: ask for missing facts (at most 3), save them, continue. Scheduled: continue without guessing and collect the questions.
+5. **Delegate** using the run rule in `team-roles.md`. Launch independent tasks together so they run in parallel. Every brief carries the Business Brain context, Connections, Extra rules, Brand & Tone, that member's Your Team notes, the approval policy, and the deliverables format.
+6. **Route collaboration.** A "Needs from another team member" item gets one follow-up task to that member (one round at most). Members never contact each other directly.
+7. **Verify** each result: deliverable present, every figure sourced, arithmetic recomputed, nothing sent, spent or changed, no price or term outside the Business Brain, drafts actually exist where the result says they are (check the Gmail draft or the saved text). If it fails, redo it once with specific feedback; then mark it Unverified.
+8. **Decide.** Where members disagree, make one recommendation and say why. For high-stakes calls in Cowork, the `chief-of-staff` agent can give an independent, tool-free review of the reports.
+9. **Queue approvals** (`approval-queue.md`) and use their AP numbers.
+10. **Log.** One Assignments row per task (Result says which way it ran: own agent, briefed assistant, or handled directly) and one Briefings row (Type = Assignment) holding the full report: results, verification, approvals, questions, run receipt.
+11. **Report to the owner** per `talking-to-the-owner.md`: what got done and the link, what needs them, what couldn't be done. Offer the details on request.
+12. **Repeat work?** If this kind of request has come up before (check recent Assignments) or the owner says "every week", offer once: "Want <member> to handle this every <cadence>?" On yes, use `schedule-workforce` for just that responsibility.
 
-If a connector or subagent call failed, say so plainly. Never present work as done that was not done.
+If a connection or a member's run failed, say so plainly. Never present work as done that wasn't done.

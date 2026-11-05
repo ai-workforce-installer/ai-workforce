@@ -5,7 +5,7 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 
 ````markdown
 <callout icon="👋" color="blue_bg">
-**This is your AI team's shared memory.** Every manager on your AI Workforce reads these pages before doing any work, and writes its results back here. The more accurate this page is, the better your team performs.
+**This is your AI team's shared memory.** Every member of your AI team reads these pages before doing any work, and your Chief of Staff saves the team's results here. The more accurate this page is, the better your team performs.
 </callout>
 
 ## Your 15-minute daily routine
@@ -64,6 +64,10 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 ## Extra rules for my team
 
 - _none yet_
+
+## About this workspace
+
+- Business Brain version: 0.4.0
 ````
 
 ## Company Profile
@@ -108,6 +112,10 @@ _not set_
 - _not set_
 
 ## Things to ignore for now
+
+- _not set_
+
+## Work I'd like to hand off
 
 - _not set_
 ````
@@ -182,6 +190,44 @@ _Add key meetings, calls and deadlines: date, time, what it is._
 ## Handled
 
 _Your team moves emails here after writing a reply._
+````
+
+## Your Team
+
+````markdown
+<callout icon="👥" color="gray_bg">
+Your team members and how you want each of them to work. Tell your Chief of Staff things like "from now on, keep customer replies short and friendly" and it's saved here. You can also edit this page yourself.
+</callout>
+
+## How each team member should work
+
+### Operations
+
+- _none yet_
+
+### Marketing
+
+- _none yet_
+
+### Sales
+
+- _none yet_
+
+### Client Success
+
+- _none yet_
+
+### Finance
+
+- _none yet_
+
+## Custom team members
+
+_None yet. Ask your Chief of Staff "do we need another person for this?"_
+
+## Suggestions from your Chief of Staff
+
+_Ideas for work the team could take off your plate. Your Chief of Staff adds one at most once a week and never repeats one you declined._
 ````
 
 ## FAQs

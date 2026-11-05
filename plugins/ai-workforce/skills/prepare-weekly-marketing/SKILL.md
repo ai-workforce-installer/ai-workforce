@@ -2,12 +2,14 @@
 name: prepare-weekly-marketing
 description: This skill should be used when the user asks to "prepare weekly marketing", "plan next week's marketing", "weekly marketing review", "marketing plan for the week", or wants last week's results reviewed and next week's content, tests and budget proposals prepared. Also used by the scheduled weekly marketing task.
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # Prepare Weekly Marketing
 
 Follow `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/approval-policy.md`, `approval-queue.md` and `run-modes.md` (same folder). Nothing is published, sent or spent; budget changes are proposals.
+
+**Running team members:** wherever this skill says to launch a member with the Agent tool, follow the run rule in `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/team-roles.md` (own agent in Cowork, otherwise a briefed assistant, otherwise do that member's work yourself in this conversation), include the member's Your Team notes in the brief, and report honestly which way it ran.
 
 ## Steps
 

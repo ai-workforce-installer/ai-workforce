@@ -1,6 +1,19 @@
 # AI Workforce
 
-A multi-agent team for Claude. A Chief of Staff delegates to five department managers, verifies their work, queues every decision for the owner, and can run on a schedule. Notion is the shared "Business Brain".
+A ready-made AI team for business owners: a Chief of Staff and five team members (Operations, Marketing, Sales, Client Success, Finance) that learn your business, take work off your plate, and ask before anything leaves your hands. Everything your team knows lives in your own Notion, in a workspace called the Business Brain.
+
+**You run the business. Your team handles the work.**
+
+## What's new in 0.4.0
+- **Setup ends with real work, in about 15 minutes.** The Chief of Staff introduces the team, connects your apps, learns your business from your website, asks one question ("what do you spend too much time on?"), then holds a **team meeting**: it recommends up to three jobs grounded in what it saw, does one with you right away, shows the result and offers to make it recurring. The long interview is now optional ("finish my setup").
+- **Questions when they're needed.** The team asks for a missing fact (a price, a refund rule) the first time a job needs it, instead of all up front. Scheduled runs never guess; they list the question in the briefing.
+- **Works in regular chat, not just Cowork.** Claude runs plugin agents only in Cowork and Claude Code. In chat the Chief of Staff now does each team member's work itself, following that member's brief, and says so honestly when asked.
+- **"From now on…"** Tell the Chief of Staff how you want a job done and it saves it in the right place (a new **Your Team** page, Brand & Tone, Policies…). Changes you keep making to drafts are offered as a standing rule.
+- **Add a team member by asking**, reuse first: the Chief of Staff checks whether an existing member can do it before proposing a new one, and you approve the role and its limits. Custom members are saved roles in your Business Brain, not installed agents.
+- **"What's my team been working on?"** A truthful report that checks the schedule against what actually ran, and lists failures, missing runs and what's waiting for you.
+- **Recurring responsibilities are confirmed, not assumed.** Proposed, scheduled, ran, succeeded and failed are kept separate; a schedule is only called set up after it's checked.
+- **"Handed to you"** marks things only you can do (press Send, pay, publish), separate from work the team finished.
+- **Safe workspace upgrades.** Existing Business Brains get the new pieces with one yes. Upgrades only add; nothing you wrote changes.
 
 ## What's new in 0.3.1
 - **Approvals in the daily briefing.** "Waiting for you" now shows a short card for every pending approval (AP number, what it does, reversible or not, draft link), so the owner can reply "approve 3, 5; reject 4" straight from the briefing. `review-approvals` skips the walkthrough when decisions are already given.
@@ -31,19 +44,22 @@ A multi-agent team for Claude. A Chief of Staff delegates to five department man
 
 | Say this | Skill | What happens |
 |---|---|---|
-| "Set up my AI team" | `setup-workforce` | Guided setup, 30-45 minutes |
+| "Set up my AI team" | `setup-workforce` | About 15 minutes to the team's first real assignment |
+| "What can my team take off my plate?" | `first-team-meeting` | Recommends jobs, does one now, offers to make it recurring |
+| "What's my team been working on?" | `team-report` | What ran, what failed, what's waiting for you |
+| "From now on…" / "Add a team member" | `manage-team` | Saves how you want work done; adds roles, reuse first |
 | "Run the daily briefing" | `daily-executive-briefing` | Every active department reports; one-screen briefing |
 | "Triage my inbox" | `process-customer-inquiries` | Sorts customer emails, drafts replies, grows the FAQ |
 | "Review overdue invoices" | `review-overdue-invoices` | Aging report and reminder drafts (read-only) |
 | "Prepare weekly marketing" | `prepare-weekly-marketing` | Last week's results and next week's plan |
 | "Get the team on this: ..." | `assign-work` | Chief of Staff splits any request across departments |
 | "Review my approvals" | `review-approvals` | Approve, reject or change queued items by AP number |
-| "Schedule the team" | `schedule-workforce` | Creates the scheduled tasks |
+| "Can someone handle this every Friday?" | `schedule-workforce` | Creates a recurring responsibility and confirms it exists |
 | "Run the self-test" | `workforce-self-test` | Proves each manager runs and the Brain is complete |
 
 ## The Business Brain (Notion)
 
-Pages: Workforce Settings, Company Profile, Priorities, Policies, Brand & Tone, FAQs, Paste Box.
+Pages: Workforce Settings, Company Profile, Priorities, Policies, Brand & Tone, FAQs, Paste Box, Your Team.
 Databases: Approvals, Assignments, Briefings, Pricing & Offers, Customers & Leads.
 
 `setup-workforce` builds this automatically. If you hand students a Notion template link instead, it must be published with "Duplicate as template" allowed, and the copied page should be named exactly "Business Brain".
@@ -70,6 +86,19 @@ Then:
 1. Optional: connect Notion (required) and your email, calendar and file apps. If you skip this, setup asks what you use (Google, Microsoft 365, or neither) and walks you through each one, waiting until it is connected.
 2. Start a **new** chat and say: "Set up my AI team."
 
+## What lives where (why updates are safe)
+- **The plugin** holds how the team works: skills, team member briefs, rules. Updating it never touches your data.
+- **Your Business Brain in Notion** holds everything about your business, how you want each member to work, and your custom team members. Only you and your team change it; plugin updates add new pieces only with your yes.
+- **Your recurring responsibilities** are scheduled tasks on your Claude account.
+
+## Notes for the maintainer
+- Bump `version` in both `plugins/ai-workforce/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, and rebuild `download/ai-workforce.plugin`, for every release.
+- Never rename a skill: customers' scheduled tasks call skills by name.
+- Business Brain changes go in `skills/assign-work/references/brain-upgrades.md` as a new add-only version section.
+- Keep `skills/assign-work/references/team-roles.md` in step with `agents/`.
+
 ## Important notes
 - Subagents cannot launch other subagents. Delegation runs from the main conversation, where the skill acts as Chief of Staff.
+- Plugin agents run only in Cowork and Claude Code. In regular chat the Chief of Staff does each member's work itself.
+- Customers who installed from the marketplace get updates when they select **Check for updates** or turn on **Sync automatically**. Customers who uploaded the file must upload the new one.
 - Scheduled tasks need a plan that supports them. Each run uses part of your usage allowance; start with the daily briefing and add more once it's useful.

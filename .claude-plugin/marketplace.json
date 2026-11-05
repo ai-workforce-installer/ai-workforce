@@ -8,8 +8,8 @@
     {
       "name": "ai-workforce",
       "source": "./plugins/ai-workforce",
-      "description": "A multi-agent AI team: a Chief of Staff who delegates to Operations, Marketing, Sales, Client Success and Finance specialists, with Notion as the shared Business Brain, a daily approval queue, guided setup and scheduled runs.",
-      "version": "0.3.1"
+      "description": "A ready-made AI team for business owners: a Chief of Staff and five team members who learn your business from a Notion Business Brain, take work off your plate, and ask before anything leaves your hands.",
+      "version": "0.4.0"
     }
   ]
 }

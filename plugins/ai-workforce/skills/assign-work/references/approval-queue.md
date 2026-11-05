@@ -10,7 +10,7 @@ All approval requests go to one place: the **Approvals** database inside the own
 
 ```
 - Item: <short title, e.g. "Send reply to Dana Lee about refund">
-  Department: <Operations | Marketing | Sales | Client Success | Finance | Chief of Staff>
+  Department: <Operations | Marketing | Sales | Client Success | Finance | Chief of Staff> (custom team members: Chief of Staff, with "[Member name]" at the start of Item)
   Action type: <Send message | Spend money | Financial record | Calendar with others | Publish | Irreversible change | Other>
   Exact action: <exactly what would be done: recipient, subject, amount, record, new value>
   Why: <one sentence>
@@ -21,7 +21,7 @@ All approval requests go to one place: the **Approvals** database inside the own
 
 ## Writing items to Notion (orchestrator)
 1. Find the Approvals database: search Notion for "Approvals" and pick the one whose parent is the Business Brain. Fetch it to get its `collection://` data source ID.
-2. **Deduplicate.** Query rows with Status Pending or Approved, plus Done and Rejected rows from the last 14 days. If a row already describes the same action for the same person or record, do not add a new row; mention the existing AP number instead (and for a Rejected one, don't raise it again unless something new happened).
+2. **Deduplicate.** Query rows with Status Pending, Approved or Handed to you, plus Done and Rejected rows from the last 14 days. If a row already describes the same action for the same person or record, do not add a new row; mention the existing AP number instead (and for a Rejected one, don't raise it again unless something new happened).
 3. Create one row per new item with these properties:
    - `Item` (title), `Department`, `Action type`, `Exact action`, `Why`, `Risk if wrong`
    - `Reversible`: `__YES__` or `__NO__`

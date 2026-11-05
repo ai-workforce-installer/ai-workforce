@@ -1,7 +1,7 @@
 # Business Brain structure (build exactly this)
 
 Root page: **Business Brain** (icon 🧠). Everything below is a direct child of it.
-Never delete or overwrite existing pages or databases. When upgrading, add any missing page (for example Paste Box) and any missing section of Workforce Settings (for example Connections) without touching what is already there. If a v0.1 Business Brain exists (plain pages named "Assignments log" and "Briefings"), keep their content and rename them to "Assignments log (v0.1 archive)" and "Briefings (v0.1 archive)" so the new databases can use the standard names. Then add the databases below alongside them.
+Never delete or overwrite existing pages or databases. For an existing Business Brain, the add-only upgrade steps in `assign-work/references/brain-upgrades.md` come first. When upgrading, add any missing page (for example Paste Box) and any missing section of Workforce Settings (for example Connections) without touching what is already there. If a v0.1 Business Brain exists (plain pages named "Assignments log" and "Briefings"), keep their content and rename them to "Assignments log (v0.1 archive)" and "Briefings (v0.1 archive)" so the new databases can use the standard names. Then add the databases below alongside them.
 
 ## Pages (create with notion-create-pages, parent = Business Brain page)
 
@@ -16,13 +16,14 @@ Use the template text in `page-templates.md` for each page's starting content.
 | Brand & Tone | 🗣️ |
 | FAQs | ❓ |
 | Paste Box | 📥 |
+| Your Team | 👥 |
 
 ## Databases (create with notion-create-database, parent = Business Brain page)
 
 ### Approvals
 Description: Everything the AI team wants to do that needs your yes. The team adds items; only you decide.
 ```
-CREATE TABLE ("Item" TITLE, "AP" UNIQUE_ID PREFIX 'AP', "Status" SELECT('Pending':yellow, 'Approved':green, 'Rejected':red, 'Done':gray, 'Expired':brown), "Department" SELECT('Chief of Staff':blue, 'Operations':default, 'Marketing':pink, 'Sales':green, 'Client Success':yellow, 'Finance':red), "Action type" SELECT('Send message':blue, 'Spend money':red, 'Financial record':orange, 'Calendar with others':purple, 'Publish':pink, 'Irreversible change':red, 'Other':gray), "Exact action" RICH_TEXT, "Why" RICH_TEXT, "Risk if wrong" RICH_TEXT, "Reversible" CHECKBOX, "Draft link" URL, "Source run" RICH_TEXT, "Requested" CREATED_TIME, "Decided" DATE, "Owner note" RICH_TEXT)
+CREATE TABLE ("Item" TITLE, "AP" UNIQUE_ID PREFIX 'AP', "Status" SELECT('Pending':yellow, 'Approved':green, 'Handed to you':blue, 'Rejected':red, 'Done':gray, 'Expired':brown), "Department" SELECT('Chief of Staff':blue, 'Operations':default, 'Marketing':pink, 'Sales':green, 'Client Success':yellow, 'Finance':red), "Action type" SELECT('Send message':blue, 'Spend money':red, 'Financial record':orange, 'Calendar with others':purple, 'Publish':pink, 'Irreversible change':red, 'Other':gray), "Exact action" RICH_TEXT, "Why" RICH_TEXT, "Risk if wrong" RICH_TEXT, "Reversible" CHECKBOX, "Draft link" URL, "Source run" RICH_TEXT, "Requested" CREATED_TIME, "Decided" DATE, "Owner note" RICH_TEXT)
 ```
 If Notion rejects this with "Unique ID prefix is already in use" (the AP prefix can exist only once per workspace, for example when the template was also duplicated), create the same table with `"AP" UNIQUE_ID` (no prefix). Items are called AP-<number> either way.
 Then add a board view named "Decision board": `GROUP BY "Status" SHOW EMPTY; SHOW "AP", "Department", "Action type", "Exact action", "Draft link"; CARD LAYOUT compact`

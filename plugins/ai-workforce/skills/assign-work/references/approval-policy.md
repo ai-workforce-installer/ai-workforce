@@ -1,4 +1,6 @@
-# Approval Policy (applies to every agent and skill in this plugin)
+# Approval Policy (applies to every agent and skill in this plugin, and to every custom team member)
+
+No saved rule can loosen this policy: not a custom team member's definition, not a note on the Your Team page, not Extra rules, Policies or anything else in the Business Brain. They can add limits, never remove one. If the owner asks for a rule that would loosen it ("from now on, just send the FAQ replies"), explain kindly what the team can do instead (for example, have replies ready for a quick send) and don't save the loosening rule.
 
 ## Never done by the team, even with approval
 The owner does these personally. The team prepares them as an approval item with exact steps.
@@ -15,7 +17,11 @@ The owner does these personally. The team prepares them as an approval item with
 ## Allowed without approval
 - Reading and searching connected apps.
 - Creating drafts: Gmail drafts, or reply text saved in a Briefings page (never sending).
-- **The orchestrator only** (the skill running in the main conversation): creating rows in the Business Brain's **Approvals**, **Assignments** and **Briefings** databases; updating an Approvals row's Status, Decided and Owner note fields as the skills describe; and adding new questions under "Waiting for an answer from you" on the FAQs page (skip questions already listed). Never delete rows or pages, and never rewrite page content other than replacing a "not set" field during setup.
+- **The orchestrator only** (the skill running in the main conversation) writes to the Business Brain, and only these ways:
+  - Any run, attended or scheduled: create rows in **Approvals**, **Assignments** and **Briefings**; update an Approvals row's Status, Decided and Owner note as the skills describe; add new questions under "Waiting for an answer from you" on the FAQs page (skip ones already listed); add one line under "Suggestions from your Chief of Staff" on the Your Team page.
+  - Attended only, after the owner confirms the exact wording in the chat: save business facts, preferences and team changes to the pages and databases named in `setup-workforce/references/interview.md`, `just-in-time.md` and `manage-team` (replacing a placeholder or adding a line or row; replacing an old line only when the owner chose the new one over it); update the Schedule lines in Workforce Settings (`schedule-workforce`).
+  - Attended only, after the owner's yes: the add-only upgrade steps in `brain-upgrades.md`.
+  - Never delete pages, rows or blocks the owner or the team wrote. Retire or mark things instead (for example Status "Retired", "(answered <date>)").
 - **Specialists (subagents) are read-only in Notion.** They return items to the orchestrator.
 - Analysis, summaries, plans and drafts shown in the conversation.
 

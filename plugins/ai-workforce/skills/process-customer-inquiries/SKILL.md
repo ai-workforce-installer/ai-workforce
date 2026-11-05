@@ -2,12 +2,14 @@
 name: process-customer-inquiries
 description: This skill should be used when the user asks to "process customer inquiries", "triage my inbox", "handle customer emails", "draft replies to customers", "check support requests", or wants customer messages sorted, answered in draft, and escalated. Also used by the scheduled inbox triage task.
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # Process Customer Inquiries
 
 Follow `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/approval-policy.md`, `approval-queue.md`, `run-modes.md` and `connections.md` (same folder). Replies are drafts only (Gmail drafts, or Replies ready to copy for Outlook and paste mode); nothing is sent.
+
+**Running team members:** wherever this skill says to launch a member with the Agent tool, follow the run rule in `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/team-roles.md` (own agent in Cowork, otherwise a briefed assistant, otherwise do that member's work yourself in this conversation), include the member's Your Team notes in the brief, and report honestly which way it ran.
 
 ## Steps
 
