@@ -20,7 +20,7 @@ Window: <start> – <end>            (inbox triage only)
 
 If the Briefings database has the newer properties (`Run ID`, `Started`, `Finished`, `Completed through`; added by the 0.5.0 upgrade in `references/brain-upgrades.md`), fill them too. If it doesn't, the header alone is enough; never fail a run over a missing property.
 
-**Show progress.** After each main stage (at most three: for example search done, team members back, approvals queued), add a line `Progress <time>: <stage>` to the record. Other sessions use the newest Progress line to tell a working run from a stuck one.
+**Show progress.** After each main stage (for example search done, team members back, approvals queued), and at least every 30 minutes during a long stage, add a line `Progress <time>: <stage>` to the record. Keep it to that: no other mid-run writes. Other sessions use the newest Progress line to tell a working run from a stuck one.
 
 **Check before finishing.** Verify, and fix or report anything that fails:
 - **Sources:** each source the run needed and its outcome (`references/notion-access.md` section 3: read, verified empty, incomplete, unavailable).
@@ -42,13 +42,11 @@ Usage: <n> tool calls, <n> team members launched, <n> emails or records processe
 Notified: no
 ```
 
-Count tool calls and launches yourself; add model or token usage only if the platform shows it. Never estimate credits or cost.
+and set the Result, Approvals raised, Drafts created (and Finished, if present) properties. Then send the notification (section 5) and add `Notified: yes <time>`.
 
-**Result means the same everywhere:** Complete = the whole job was done, every source it needed was read, and the checks above passed. Partial = useful work was done but something was skipped, unreadable, incomplete or unchecked (name it). Failed = nothing useful was produced. Never claim nothing was missed when a source, a page of results or a check could not be verified.
+Count tool calls and launches yourself; add model or token usage only if the platform shows it. Never estimate credits or cost. A run that can't finish properly still writes these lines with Result Partial or Failed and says what was left undone.
 
-then send the notification (section 5) and add `Notified: yes <time>`.
-
-and setting the Result, Approvals raised, Drafts created (and Finished, if present) properties. A run that can't finish properly still writes these lines with Result Partial or Failed and says what was left undone.
+**Result means the same everywhere:** Complete = the whole job was done, every source it needed was read, and the checks above passed. Work saved in the open-work queue because it was past a per-run limit counts as done for this purpose (it's tracked, not dropped); work that couldn't be saved anywhere does not. Partial = useful work was done but something was skipped, unreadable, incomplete or unchecked (name it). Failed = nothing useful was produced. Never claim nothing was missed when a source, a page of results or a check could not be verified.
 
 ## 2. Where the run came from (Source)
 
@@ -90,7 +88,7 @@ Before each action, check:
 - **Assignment:** an Assignments row with the same source key (Source, Task ID or Result) and the same intended action → update it instead of adding one.
 - **Paste Box:** already moved under Handled → skip.
 
-Write the source key at the end of Exact action (approvals) and in Task ID (assignments), for example "… (source: gmail:1a1ab13c5aeeedbb)".
+Write the source key at the end of Exact action (approvals) and in Task ID (assignments), for example "… (source: gmail:18f3a2b4c5d6e7f8)".
 
 ## 5. Notifications
 Send one notification per run, after the record is finished and fetched back for its link, then add `Notified: yes <time>`. A resumed run sends one only if the record has no `Notified: yes` line. A Not run or Abandoned record sends none. Partial or Failed runs, and configuration warnings, are said plainly in the first line.
@@ -100,7 +98,9 @@ Send one notification per run, after the record is finished and fetched back for
 Work the team found but hasn't finished lives in the **Assignments** database, not in run reports, so it survives any gap between runs.
 - **When to add a row:** something worth doing was found (an email needing a reply, a deadline, a document to review) and this run won't finish it, or it was prepared and now waits on the owner. Routine items don't get rows.
 - **Fields:** Assignment (short title), Owner (team member), Status, Source (`gmail:<id>`, `notion:<page>`, `<Run ID>:<task>`), Next action (one line: who does what next), Date. If the database doesn't have Source and Next action yet (0.5.1 upgrade), put the source key in Task ID and start Result with the next action.
-- **Status:** Planned (to do), In progress, Prepared (a draft or recommendation is ready and waiting on the owner), Handed to you (only the owner can do it, e.g. update payout details in their account), Blocked (missing access or information; say what's missing), Done, Failed. Without the 0.5.1 options, use Planned, In progress, Done or Failed and begin Result with "[Prepared]", "[Handed to you]" or "[Blocked]".
-- **Every run starts with the queue:** read Assignments whose Status isn't Done or Failed (rows mode, filtered, `references/notion-access.md`), whatever their age. Finish what the team can finish now; leave the rest with an up-to-date Next action. If the queue can't be read, say so and don't create rows that might duplicate it.
+- **Status:** Planned (to do), In progress, Prepared (a draft or recommendation is ready and waiting on the owner), Handed to you (only the owner can do it, e.g. update payout details in their account), Blocked (missing access or information; say what's missing), Done, Failed. Without the 0.5.1 options, use Planned, In progress, Done or Failed and begin Result with "[Prepared]", "[Handed to you]" or "[Blocked]". Use Assignments for things only the owner can do (Handed to you); use Approvals only for decisions.
+- **Every run starts with the queue:** read Assignments whose Status isn't Done or Failed (filtered rows, `limit: 100`, `references/notion-access.md`), whatever their age. Each run works only the rows for its own job (inbox triage: rows whose Source is an email; a recurring member task: that member's rows); the daily briefing lists the rest under what's waiting, without redoing them. Finish what can be finished now; leave the rest with an up-to-date Next action.
+- **If the queue can't be read or written**, don't create rows that might duplicate it. List the unfinished items under **Carried over** in the run record instead (source key, owner, next action); the next run reads the last run's Carried over list and moves those items into the queue once it's readable.
+- **Older rows:** Assignments rows from before 0.5.1 with no Source that are more than 14 days old and still Planned or In progress are history, not open work. The first run that finds them closes them (Status Done, Result "closed as history by the 0.5.1 update") so they don't crowd the queue.
 - **Deduplicate** by source and intended action: one row per source and action. Update the existing row (Status, Next action, Result) instead of adding another.
 - **Close rows** when the work is done, the owner handled it, or it no longer matters (Status Done, with a one-line reason).

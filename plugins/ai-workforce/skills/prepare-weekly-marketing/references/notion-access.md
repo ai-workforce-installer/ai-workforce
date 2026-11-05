@@ -5,7 +5,7 @@ The Business Brain must work on Notion's Free plan. Notion's connection offers s
 ## 1. How to read a database (in this order)
 
 1. **Saved view** (`mode: "view"` with the view's link): use it when a view already shows what you need (for example the Approvals "Decision board", or Briefings "Newest first"). Views page through results: when the answer says there are more, ask for the next page with its cursor until there are none.
-2. **Rows with filters** (`mode: "rows"` with a structured `filter` and `sort`): the default for everything else, e.g. Approvals where Status is Pending or Approved; Pricing & Offers where Active is checked; Assignments where Status is not Done. Rows mode returns at most 100 rows and no next page: if exactly 100 come back, the answer may be cut off, so narrow the filter (by date or status) or use a view, and never treat it as the full list.
+2. **Rows with filters** (`mode: "rows"` with a structured `filter` and `sort`): the default for everything else, e.g. Approvals where Status is Pending or Approved; Pricing & Offers where Active is checked; Assignments where Status is not Done. Always ask rows mode for `limit: 100` (its default is 50). It returns at most 100 rows and no next page: if exactly 100 come back, the answer may be cut off, so narrow the filter (by date or status) or use a view, and never treat it as the full list.
 3. **SQL** (`mode: "sql"`): only when the question truly needs it (joining two databases, counting across thousands of rows) and nothing else can answer it. It may be unavailable on the owner's plan. If it fails, fall back to 1 or 2; never stop at the failure.
 
 Fetching a database page returns its schema, not its rows. A page (Workforce Settings, Priorities, Brand & Tone) is read with fetch.
@@ -41,4 +41,4 @@ Retry a failed read once, using the next method in section 1. Then record the ou
 In the run record, list each source read and its outcome in one line ("Notion: Settings read, Pricing read (8), Approvals read (5), Assignments unavailable").
 
 ## 4. Write sparingly
-Create the run record once at the start and finish it once at the end; add Progress lines only at the main stages (at most three). Batch new rows into one call when the tool allows. After a write, trust the tool's answer; fetch a page back only when you need its link or the tool reported a problem.
+Create the run record once at the start and finish it once at the end; add Progress lines only at the main stages, plus one at least every 30 minutes during a long stage, so another session never mistakes a working run for a stuck one. Batch new rows into one call when the tool allows. After a write, trust the tool's answer; fetch a page back only when you need its link or the tool reported a problem.

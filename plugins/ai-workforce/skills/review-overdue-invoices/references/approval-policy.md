@@ -20,6 +20,7 @@ The owner does these personally. The team prepares them as an approval item with
 - **The orchestrator only** (the skill running in the main conversation) writes to the Business Brain, and only in these ways. Anything not listed here is not allowed.
   - **Any run, attended or scheduled:**
     - Create rows in **Approvals**, **Assignments** and **Briefings**.
+    - On an **Assignments** row the team created, update Status and Next action and add to Result (never overwrite what's there), to keep the open-work queue current (`references/run-tracking.md` section 6). Never change a row the owner created.
     - Add to the page body of a **Briefings** row the team itself created (for example a "Team meeting" section). Adding only: never change text already there.
     - On a Briefings row whose body starts with a Run ID header the team wrote, fill in its run fields (Result, Approvals raised, Drafts created, Run ID, Started, Finished, Completed through) and add Progress, Resumed and Run finished lines (`references/run-tracking.md`). Never change its Type, Date or title.
     - Update an Approvals row's Status, Decided and Owner note as the skills describe, including Expired for stale or duplicate items ("Duplicate of AP-<n>"). Add to Owner note; never overwrite what's there.

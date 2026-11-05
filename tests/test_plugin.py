@@ -219,12 +219,12 @@ class FreePlanAndEfficiency(unittest.TestCase):
             self.assertIn(must, t)
         rt = read(REFS / "run-tracking.md")
         self.assertIn("Never estimate credits or cost", rt)
-        self.assertIn("at most three", rt)
+        self.assertIn("at least every 30 minutes", rt)
 
     def test_open_work_queue(self):
         rt = read(REFS / "run-tracking.md")
         for must in ["## 6. The open-work queue", "whatever their age", "Prepared", "Handed to you",
-                     "Blocked", "one row per source and action"]:
+                     "Blocked", "one row per source and action", "limit: 100", "Carried over"]:
             self.assertIn(must, rt)
 
     def test_no_upsell_in_reports(self):
