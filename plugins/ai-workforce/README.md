@@ -4,6 +4,15 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 **You run the business. Your team handles the work.**
 
+## What's new in 0.4.2 (from the first unattended run)
+- **The team does the work.** Briefings now include prepared work, not just a list: meeting preps (context, key points from shared files, agenda, decisions with a recommendation), draft replies to emails waiting on the owner, and one useful thing from Marketing toward the quarter's goals even without data. Approvals are still required for sending, commitments, spending, publishing and anything else consequential.
+- **A briefing you can act on:** top priorities, what the team handled (with links), every open decision with a recommendation, what's blocked and why, and what was spotted. Details and verification stay in Notion.
+- **Links everywhere:** the Notion briefing link in every chat reply and phone notification, and a checked link to every Gmail draft. Each reply is labeled "Saved in Gmail" or "Suggested text, not saved".
+- **The full approval queue every time**, with one-line instructions to approve, reject or change several at once. Duplicates and stale items leave the queue but keep their history.
+- **Honest about what's visible:** "none visible in Gmail" instead of "no leads" when a source isn't connected.
+- **No spreadsheet suggestions:** Notion is the workspace.
+- **No duplicate briefings, drafts or approvals** from retried runs.
+
 ## What's new in 0.4.1 (reliability fixes, no new features)
 - **Self-test tells the truth about who ran.** Each team member is reported as a separate agent, a briefed assistant, or (in regular chat) handled by the Chief of Staff alone, and the verdict says "no separate agents ran" when that's the case. Failures are failures.
 - **Every skill can find its files.** Each skill now carries the reference files it uses, with simple `references/…` paths. Plugin-root paths weren't substituted on every surface, and chat only sees the running skill's folder.

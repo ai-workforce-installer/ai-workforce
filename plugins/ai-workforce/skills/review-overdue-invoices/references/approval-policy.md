@@ -21,7 +21,7 @@ The owner does these personally. The team prepares them as an approval item with
   - **Any run, attended or scheduled:**
     - Create rows in **Approvals**, **Assignments** and **Briefings**.
     - Add to the page body of a **Briefings** row the team itself created (for example a "Team meeting" section). Adding only: never change text already there.
-    - Update an Approvals row's Status, Decided and Owner note as the skills describe (including Expired for stale items).
+    - Update an Approvals row's Status, Decided and Owner note as the skills describe, including Expired for stale or duplicate items ("Duplicate of AP-<n>"). Add to Owner note; never overwrite what's there.
     - Add new questions under "Waiting for an answer from you" on the FAQs page (skip ones already listed).
     - On the **Paste Box**, move a handled email under **Handled** with the line "Handled <date>, see Briefings". Move it; never delete it or change its text.
     - Add dated lines under "Suggestions from your Chief of Staff" on the Your Team page (at most one a week from briefings; the team meeting may add the ideas the owner didn't pick).

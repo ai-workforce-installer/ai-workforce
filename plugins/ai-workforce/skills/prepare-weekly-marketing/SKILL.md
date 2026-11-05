@@ -2,7 +2,7 @@
 name: prepare-weekly-marketing
 description: This skill should be used when the user asks to "prepare weekly marketing", "plan next week's marketing", "weekly marketing review", "marketing plan for the week", or wants last week's results reviewed and next week's content, tests and budget proposals prepared. Also used by the scheduled weekly marketing task.
 metadata:
-  version: "0.4.1"
+  version: "0.4.2"
 ---
 
 # Prepare Weekly Marketing

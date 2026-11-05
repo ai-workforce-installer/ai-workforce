@@ -2,7 +2,7 @@
 name: review-approvals
 description: This skill should be used when the user asks to "review my approvals", "what's waiting for me", "clear my approvals", "approve AP-12", "what does the team need from me", or wants to go through the AI team's pending approval queue and decide on each item.
 metadata:
-  version: "0.4.1"
+  version: "0.4.2"
 ---
 
 # Review Approvals (the owner's daily 15 minutes)
@@ -15,7 +15,7 @@ This skill only runs with the owner present. It is the one place where queued ac
 
 0. **Decisions already given?** If the owner's message already names AP numbers with decisions (for example replying to the daily briefing's Waiting for you cards), load just those rows and go straight to step 4. Don't re-list the queue.
 1. **Load the queue.** Find the Approvals database in the Business Brain and query rows with Status = Pending or Approved, oldest first. "Approved" means the owner ticked it in Notion but hasn't confirmed here yet. Also load rows marked Handed to you and show them separately as "Still on your list", so the owner can say "I sent it" and you mark them Done. If the queue is empty, say so in one line and stop.
-2. **Present the queue** as a compact list grouped by Department. For each item show: AP number, Item, Exact action, Risk if wrong, Reversible, Draft link. Mark items whose Status is already "Approved" in Notion: those were ticked in Notion, but still need a yes here.
+2. **Present the queue** as a compact list grouped by Department. For each item show: AP number, Item, Exact action, the recommendation from Why, Risk if wrong, Reversible, Draft link (re-check a Gmail draft with get_draft before showing it; if it's gone, say so). Mark items whose Status is already "Approved" in Notion: those were ticked in Notion, but still need a yes here.
 3. **Ask for decisions** in one message: "Reply with the AP numbers to approve, reject or change, e.g. 'approve 12, 14; reject 13; change 15: make it $79'." If a multiple-choice question tool is available and there are 4 or fewer items, you may offer the choices that way; otherwise ask in plain text.
 4. **For each approved item, carry out exactly the Exact action**, nothing more, one item at a time:
    - **Send message:** find the draft (by Draft link or subject): a Gmail draft, or the reply under Replies ready to copy in the linked Briefings page. Re-read it and check the recipient and content match Exact action. If they match, tell the owner it's ready and where it is (Gmail Drafts and subject line; or show the full reply text in the chat so they can copy it into their email) so they send it themselves; this avoids duplicate sends. If the draft is missing or differs, stop and show the difference. If the owner asked for a change, update the draft (Gmail draft, or the text in the Briefings page) and show it again.

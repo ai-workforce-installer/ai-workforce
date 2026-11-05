@@ -34,10 +34,10 @@ A Notion page in the Business Brain named **Paste Box** (📥), with three secti
 
 | Path | Where drafts go |
 |---|---|
-| Gmail | A Gmail draft, as a reply in the same thread. Draft link = the thread, or "Gmail draft, subject: ...". |
+| Gmail | A Gmail draft, as a reply in the same thread. **Draft link = the `viewUrl` that create_draft returns.** Then call get_draft with the draft's ID and check it exists with the right recipient and subject before listing it as **Saved in Gmail**. Never build a Gmail link by hand. If the check fails, show the full text as **Suggested text, not saved** and say why. |
 | Outlook, Paste mode | No draft is created in the mailbox. Put each reply under a heading **Replies ready to copy** in the run's Briefings page: recipient, subject, then the full reply text. Draft link = that Briefings page. Tell the owner to copy it into their email and send it themselves. |
 
-Count every reply in "Drafts created" whichever path it used.
+Count every reply in "Drafts created" whichever path it used. Always label each one either **Saved in Gmail** (with its checked link) or **Suggested text, not saved**.
 
 **Avoiding duplicates:** Gmail: skip threads that already have a draft reply. Outlook: skip messages (same sender and subject) that already appear under "Replies ready to copy" in an earlier Inbox triage or Daily briefing row in Briefings. Paste mode: after handling a pasted email, move it under **Handled** on the Paste Box with the line "Handled <date>, see Briefings" (move, never delete).
 
@@ -58,6 +58,9 @@ Count every reply in "Drafts created" whichever path it used.
 | Google Drive | Search and read Drive. |
 | OneDrive | Microsoft 365 search (`sharepoint_search` covers OneDrive and SharePoint). |
 | None | Use Notion and anything the owner attaches or pastes. In scheduled runs, say what was missing instead of guessing. |
+
+## Saying what's visible
+When reporting "no emails", "no leads" or similar, say where you looked: "none visible in Gmail". If Where things live names a place the team can't reach (for example the owner's CRM), say so in the same line, so the owner never mistakes "not visible" for "none".
 
 ## When the chosen app is unavailable at run time
 

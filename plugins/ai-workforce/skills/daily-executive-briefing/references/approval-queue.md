@@ -13,10 +13,10 @@ All approval requests go to one place: the **Approvals** database inside the own
   Department: <Operations | Marketing | Sales | Client Success | Finance | Chief of Staff> (custom team members: Chief of Staff, with "[Member name]" at the start of Item)
   Action type: <Send message | Spend money | Financial record | Calendar with others | Publish | Irreversible change | Other>
   Exact action: <exactly what would be done: recipient, subject, amount, record, new value>
-  Why: <one sentence>
+  Why: <"Recommend: approve / hold / reject, because …", then one sentence>
   Risk if wrong: <one sentence>
   Reversible: <yes | no>
-  Draft link: <link to the Gmail thread, the Briefings page holding the reply, or a document; otherwise "Gmail draft, subject: <subject>"; or "none">
+  Draft link: <the Gmail draft's checked viewUrl, the Briefings page holding the reply text, or a document link; or "none">
 ```
 
 ## Writing items to Notion (orchestrator)
@@ -31,5 +31,8 @@ All approval requests go to one place: the **Approvals** database inside the own
 4. Read back the created rows to get each `AP` number, and use those numbers in the report as AP-<number> (AP-12, AP-13...), whether or not the database shows the AP prefix.
 5. If Notion is not reachable, list the items in the report with temporary IDs (TEMP-1, TEMP-2) and say clearly that they were not queued.
 
-## Expiry
-Any orchestrator may set a Pending item older than 7 days to `Expired` when the underlying situation has clearly passed (for example a meeting date in the past). Note this in the report. Never delete rows.
+## The active queue
+The active queue is every row with Status Pending or Approved. Briefings and reviews always show all of them, not only new ones. Handed to you rows are shown separately ("Still on your list"). Done, Rejected and Expired rows stay in the database as history and never appear in the active queue.
+
+## Expiry and duplicates
+Any orchestrator may set a Pending item to `Expired` when the underlying situation has clearly passed (for example a meeting date in the past), or when it duplicates an older open item: then add "Duplicate of AP-<n>" to Owner note (never overwriting what's there). Note this in the report. Never delete rows.
