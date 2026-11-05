@@ -162,10 +162,12 @@ Databases: Approvals, Assignments, Briefings, Pricing & Offers, Customers & Lead
 
 Needs a paid Claude plan that includes plugins and scheduled tasks. How much of your plan's usage the team needs depends on how many recurring tasks you turn on; we haven't yet measured whether the Pro plan covers daily use, so start with one recurring task (the daily briefing) and add more once you see the usage. Notion's **free** plan works: the team reads your Business Brain through saved views, which keep working when the free plan's query allowance runs out (existing workspaces: say "update my team workspace" once to add them). Required: Notion. Optional: email, calendar and file apps.
 
-**Option A (recommended):** in the Claude desktop app, open **Customize** in the left sidebar (in Cowork, open the Cowork tab first) and go to the **Plugins** tab. Under **Personal plugins**, click **+** → **Add marketplace** → **Add from a repository**, and enter `https://github.com/reedfloren/ai-workforce`. Then click **Browse plugins** and **Install** next to **AI Workforce**. (Claude's menus change from time to time; if yours look different, see Anthropic's guide, [Use plugins in Claude](https://support.claude.com/en/articles/13837440).)
-In Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workforce`
+**Access:** the repository is private. Accept your GitHub invitation (it arrives by email) and stay signed in to that GitHub account before installing; without it the link and the download below won't open.
 
-**Option B (file):** download [ai-workforce.plugin](https://github.com/reedfloren/ai-workforce/raw/main/download/ai-workforce.plugin), then in **Customize → Plugins** use the option to upload a plugin file. A file install doesn't update itself: upload the new file for each release.
+**Option A (recommended):** in the Claude desktop app, open **Customize** in the left sidebar (in Cowork, open the Cowork tab first) and go to the **Plugins** tab. Under **Personal plugins**, click **+** → **Add marketplace** → **Add from a repository**, and enter `https://github.com/ai-workforce-installer/ai-workforce`. Then click **Browse plugins** and **Install** next to **AI Workforce**. (Claude's menus change from time to time; if yours look different, see Anthropic's guide, [Use plugins in Claude](https://support.claude.com/en/articles/13837440).)
+In Claude Code: `/plugin install ai-workforce --marketplace ai-workforce-installer/ai-workforce`
+
+**Option B (file):** download [ai-workforce.plugin](https://github.com/ai-workforce-installer/ai-workforce/raw/main/download/ai-workforce.plugin), then in **Customize → Plugins** use the option to upload a plugin file. A file install doesn't update itself: upload the new file for each release.
 
 Then:
 1. Optional: connect Notion (required) and your email, calendar and file apps. If you skip this, setup asks what you use (Google, Microsoft 365, or neither) and walks you through each one, waiting until it is connected.
