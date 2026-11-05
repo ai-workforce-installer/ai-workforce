@@ -4,11 +4,13 @@ The Business Brain must work on Notion's Free plan. Notion's connection offers s
 
 ## 1. How to read a database (in this order)
 
-1. **Saved view** (`mode: "view"` with the view's link): use it when a view already shows what you need (for example the Approvals "Decision board", or Briefings "Newest first"). Views page through results: when the answer says there are more, ask for the next page with its cursor until there are none.
-2. **Rows with filters** (`mode: "rows"` with a structured `filter` and `sort`): the default for everything else, e.g. Approvals where Status is Pending or Approved; Pricing & Offers where Active is checked; Assignments where Status is not Done. Always ask rows mode for `limit: 100` (its default is 50). It returns at most 100 rows and no next page: if exactly 100 come back, the answer may be cut off, so narrow the filter (by date or status) or use a view, and never treat it as the full list.
-3. **SQL** (`mode: "sql"`): only when the question truly needs it (joining two databases, counting across thousands of rows) and nothing else can answer it. It may be unavailable on the owner's plan. If it fails, fall back to 1 or 2; never stop at the failure.
+1. **Saved view** (`mode: "view"` with the view's link): the default for routine reads. In live tests on Notion Free, saved views kept working after the plan's query allowance ran out, while both SQL and filtered rows stopped. The Business Brain has these views (added by setup or the 0.5.2 upgrade): Approvals **"Active approvals"**, Assignments **"Open work"**, Briefings **"Newest first"**, Pricing & Offers **"Active offers"**, Customers & Leads **"All contacts"**.
+   - **Check what a view really shows** before relying on it: fetch the database once per run, read the view's filter and sort, and use it only if they match what you need (a view showing all offers is not an active-offers view). If the expected view is missing or its filter was changed, use another way below; never change the owner's views.
+   - **Follow every page:** keep asking with the next cursor until the answer says there are no more.
+2. **Rows with filters** (`mode: "rows"` with a structured `filter`, `sort` and `limit: 100`): when no suitable view exists. It may be rationed too, so don't assume it works when SQL has stopped. It returns at most 100 rows and no next page: if exactly 100 come back, the answer may be cut off, so narrow the filter or use a view, and never treat it as the full list.
+3. **SQL** (`mode: "sql"`): only when the question truly needs it (joining two databases, counting across thousands of rows) and nothing else can answer it. It may be unavailable on the owner's plan; then the answer is Unavailable, not empty.
 
-Fetching a database page returns its schema, not its rows. A page (Workforce Settings, Priorities, Brand & Tone) is read with fetch.
+If a method fails, try the next one once; then record the outcome (section 3). Fetching a database page returns its schema and views, not its rows. A page (Workforce Settings, Priorities, Brand & Tone) is read with fetch.
 
 **Know the limits once per run.** If the connection offers a "tool access" check, call it once at the start, note which modes and tools are restricted, and use that for the whole run instead of discovering limits by failing. Don't assume a method is unlimited because it isn't SQL.
 
@@ -16,7 +18,7 @@ Fetching a database page returns its schema, not its rows. A page (Workforce Set
 
 The Chief of Staff (the skill running the conversation) reads the shared context once at the start: Workforce Settings, Priorities, Brand & Tone, Your Team, Pricing & Offers (active rows), Policies, FAQs, the open queue (Approvals and Assignments that aren't finished), and the schemas of the databases it will write to. It keeps them for the whole run and gives each team member only the parts that member needs. Team members don't re-read what they were given. Re-read only something this run itself changed.
 
-Findings from an earlier run may be reused only when they carry a date and the source hasn't changed since (for example last week's competitor notes, marked "as of Nov 3"). Anything about money, deadlines, availability or the queue is read fresh.
+**Reusing a recent run's reads.** If another run finished in the last 3 hours and its record lists what it read, the stable pages (Brand & Tone, Your Team, Policies, FAQs, Company Profile) may be reused from it, marked "as of <time>", unless this run has reason to think they changed. Always read fresh: Approvals, Assignments, Pricing & Offers, Workforce Settings, anything about money, security, deadlines or availability, and anything a claim to the owner depends on.
 
 ## 3. Every read has one of four outcomes
 
@@ -41,4 +43,4 @@ Retry a failed read once, using the next method in section 1. Then record the ou
 In the run record, list each source read and its outcome in one line ("Notion: Settings read, Pricing read (8), Approvals read (5), Assignments unavailable").
 
 ## 4. Write sparingly
-Create the run record once at the start and finish it once at the end; add Progress lines only at the main stages, plus one at least every 30 minutes during a long stage, so another session never mistakes a working run for a stuck one. Batch new rows into one call when the tool allows. After a write, trust the tool's answer; fetch a page back only when you need its link or the tool reported a problem.
+Create the run record once at the start and finish it once at the end; add a Progress line only when 30 minutes have passed since the run started or since the last Progress line, so another session never mistakes a working run for a stuck one; no other mid-run writes. Batch new rows into one call when the tool allows. After a write, trust the tool's answer; fetch a page back only when you need its link or the tool reported a problem.

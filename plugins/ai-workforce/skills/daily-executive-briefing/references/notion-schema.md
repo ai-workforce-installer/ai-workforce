@@ -26,13 +26,15 @@ Description: Everything the AI team wants to do that needs your yes. The team ad
 CREATE TABLE ("Item" TITLE, "AP" UNIQUE_ID PREFIX 'AP', "Status" SELECT('Pending':yellow, 'Approved':green, 'Handed to you':blue, 'Rejected':red, 'Done':gray, 'Expired':brown), "Department" SELECT('Chief of Staff':blue, 'Operations':default, 'Marketing':pink, 'Sales':green, 'Client Success':yellow, 'Finance':red), "Action type" SELECT('Send message':blue, 'Spend money':red, 'Financial record':orange, 'Calendar with others':purple, 'Publish':pink, 'Irreversible change':red, 'Other':gray), "Exact action" RICH_TEXT, "Why" RICH_TEXT, "Risk if wrong" RICH_TEXT, "Reversible" CHECKBOX, "Draft link" URL, "Source run" RICH_TEXT, "Requested" CREATED_TIME, "Decided" DATE, "Owner note" RICH_TEXT)
 ```
 If Notion rejects this with "Unique ID prefix is already in use" (the AP prefix can exist only once per workspace, for example when the template was also duplicated), create the same table with `"AP" UNIQUE_ID` (no prefix). Items are called AP-<number> either way.
-Then add a board view named "Decision board": `GROUP BY "Status" SHOW EMPTY; SHOW "AP", "Department", "Action type", "Exact action", "Draft link"; CARD LAYOUT compact`
+Then add a board view named "Decision board": `GROUP BY "Status" SHOW EMPTY; SHOW "AP", "Department", "Action type", "Exact action", "Draft link"; CARD LAYOUT compact`, and a table view named "Active approvals": `FILTER "Status" IN ("Pending", "Approved", "Handed to you"); SORT BY "AP" ASC`
 
 ### Assignments
 Description: Every task the Chief of Staff hands to a team member, and the team's open work: anything found but not finished stays here until it's done.
 ```
 CREATE TABLE ("Assignment" TITLE, "Task ID" RICH_TEXT, "Owner" SELECT('Chief of Staff':blue, 'Operations':default, 'Marketing':pink, 'Sales':green, 'Client Success':yellow, 'Finance':red), "Status" SELECT('Planned':gray, 'In progress':blue, 'Prepared':purple, 'Handed to you':orange, 'Blocked':brown, 'Done':green, 'Failed':red), "Source" RICH_TEXT, "Next action" RICH_TEXT, "Verification" SELECT('Verified':green, 'Unverified':yellow, 'Failed':red), "Run type" SELECT('Manual':blue, 'Scheduled':purple, 'Unknown':gray), "Result" RICH_TEXT, "Date" DATE)
 ```
+
+Then add a table view named "Open work": `FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC`
 
 ### Briefings
 Description: Every report your AI team produces, newest first.
@@ -47,11 +49,14 @@ Description: What you sell and the price rules. Sales may only quote what is her
 CREATE TABLE ("Offer" TITLE, "Price" NUMBER FORMAT 'dollar', "Billing" SELECT('One-time':blue, 'Monthly':green, 'Annual':purple, 'Free':gray), "Lowest allowed price" NUMBER FORMAT 'dollar', "Max discount %" NUMBER, "Includes" RICH_TEXT, "Link" URL, "Active" CHECKBOX, "Notes" RICH_TEXT)
 ```
 
+Then add a table view named "Active offers": `FILTER "Active" = TRUE; SORT BY "Offer" ASC`
+
 ### Customers & Leads
 Description: People you sell to and support. Sales and Client Success read this to know who is who.
 ```
 CREATE TABLE ("Name" TITLE, "Company" RICH_TEXT, "Email" EMAIL, "Stage" SELECT('Lead':gray, 'Contacted':blue, 'Proposal':purple, 'Customer':green, 'At risk':orange, 'Lost':red), "Value" NUMBER FORMAT 'dollar', "Last contact" DATE, "Next step" RICH_TEXT, "Notes" RICH_TEXT)
 ```
+Then add a table view named "All contacts": `SORT BY "Last contact" DESC`
 
 ## Root page content
 Put the "Start here" text from `references/page-templates.md` at the top of the Business Brain page (insert at start; never replace existing content).

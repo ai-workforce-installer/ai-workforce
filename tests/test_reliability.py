@@ -4,6 +4,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from notion_logic import (MockNotion, read_database, describe, run_result, reconcile,
+                          view_usable, handed_to_you_status, duplicate_schedule_warning,
+                          notification_line, metric_label,
                           find_secrets, redact, security_flag, actions_from_content,
                           members_to_launch, should_prepare)
 
@@ -63,6 +65,57 @@ class NotionReads(unittest.TestCase):
         bad = read_database(MockNotion(pending, fail={"view", "rows"}, sql_quota=0))
         self.assertEqual(describe("Approvals", *bad), "Approvals could not be verified")
         self.assertEqual(run_result({"Approvals": bad[0]}, ["Approvals"])[0], "Partial")
+
+
+    def test_sql_is_not_used_unless_needed(self):
+        db = MockNotion(OFFERS, sql_quota=5, fail={"view", "rows"})
+        self.assertEqual(read_database(db)[0], "unavailable")
+        self.assertNotIn("sql", [c[0] for c in db.calls])
+        db2 = MockNotion(OFFERS, sql_quota=5, fail={"view", "rows"})
+        self.assertEqual(read_database(db2, need_sql=True)[0], "read")
+        self.assertIn("sql", [c[0] for c in db2.calls])
+
+    def test_free_plan_allowance_stops_rows_and_sql_but_views_work(self):
+        db = MockNotion(OFFERS, sql_quota=5, allowance_exhausted=True)
+        outcome, rows = read_database(db, lambda r: r["active"], need_sql=True)
+        self.assertEqual((outcome, len(rows)), ("read", 8))
+        self.assertEqual({c[0] for c in db.calls}, {"view"})
+
+    def test_free_plan_allowance_without_a_view_is_unavailable_not_empty(self):
+        db = MockNotion(OFFERS, sql_quota=5, allowance_exhausted=True, has_view=False)
+        outcome, rows = read_database(db, need_sql=True)
+        self.assertEqual(describe("Pricing & Offers", outcome, rows), "Pricing & Offers could not be verified")
+
+    def test_a_view_is_used_only_if_its_filter_matches(self):
+        self.assertFalse(view_usable(None, ("Active", True)))          # shows all offers
+        self.assertTrue(view_usable(("Active", True), ("Active", True)))
+
+
+class StatusesAndSchedules(unittest.TestCase):
+    def test_owner_only_items_on_old_workspaces_stay_pending(self):
+        self.assertEqual(handed_to_you_status(["Pending", "Approved", "Done"]), ("Pending", "Handed to you: "))
+        self.assertEqual(handed_to_you_status(["Pending", "Handed to you", "Done"])[0], "Handed to you")
+        self.assertNotEqual(handed_to_you_status(["Pending", "Done"])[0], "Done")
+
+    def test_run_now_on_odd_days_is_not_a_duplicate_schedule(self):
+        tasks = [{"responsibility": "weekly marketing", "enabled": True},
+                 {"responsibility": "daily briefing", "enabled": True}]
+        # a Thursday Run now of the Monday task, and two briefings today, change nothing here
+        self.assertFalse(duplicate_schedule_warning(tasks, "weekly marketing"))
+        self.assertFalse(duplicate_schedule_warning(tasks, "daily briefing"))
+        tasks.append({"responsibility": "daily briefing", "enabled": True})
+        self.assertTrue(duplicate_schedule_warning(tasks, "daily briefing"))
+
+    def test_notification_status_never_claims_delivery_from_submission(self):
+        self.assertEqual(notification_line({"accepted": True}), "requested, accepted by the tool")
+        self.assertEqual(notification_line({"delivered": True}), "confirmed")
+        self.assertEqual(notification_line({"error": "timeout"}), "failed: timeout")
+        self.assertEqual(notification_line({}), "unknown")
+        self.assertEqual(notification_line(None), "not requested")
+
+    def test_missing_marketing_data_is_unavailable_not_zero(self):
+        self.assertEqual(metric_label(None), "Unavailable")
+        self.assertEqual(metric_label(0), "Verified")
 
 
 class Counts(unittest.TestCase):

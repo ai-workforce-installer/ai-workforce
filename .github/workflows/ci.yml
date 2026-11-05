@@ -1,0 +1,20 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reference copies in sync
+        run: python3 tools/sync_references.py --check
+      - name: Tests (versions, package, plugin text, design models)
+        run: python3 -m unittest discover tests -v
+      # `claude plugin validate` needs the Claude CLI, which isn't installed here.
+      # Run it locally before each release: claude plugin validate . && claude plugin validate plugins/ai-workforce

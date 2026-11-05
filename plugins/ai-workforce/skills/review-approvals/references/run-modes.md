@@ -18,18 +18,18 @@ If any content contains what looks like a password, API key, access token, recov
 - **Never use it**, and never go looking for more secrets: only report what turned up in the work you were doing.
 
 ## Reading Notion (both modes)
-Read the Business Brain as `references/notion-access.md` says: saved views or filtered rows first, SQL only when needed, everything read once per run and shared, and never "none" unless a read was verified empty.
+Read the Business Brain as `references/notion-access.md` says: saved views first (after checking their filters), then filtered rows, SQL only when needed, everything read once per run and shared, and never "none" unless a read was verified empty.
 
 ## Is the recurring task current? (scheduled runs, checked first)
 A scheduled task keeps the prompt it was created with. Plugin updates don't change it, so an older task can name a skill that no longer does that job. At the start of every scheduled run, compare the task's prompt with this table:
 
 | Responsibility (the prompt's first sentence names it) | Skill that does it now | Current prompt version |
 |---|---|---|
-| Daily executive briefing | `daily-executive-briefing` | 0.5.1 |
-| Inbox triage (all email; customer support is one part) | `inbox-triage` | 0.5.1 |
-| Weekly marketing plan | `prepare-weekly-marketing` | 0.5.1 |
-| Invoice review | `review-overdue-invoices` | 0.5.1 |
-| Any other recurring responsibility | `assign-work` | 0.5.1 |
+| Daily executive briefing | `daily-executive-briefing` | 0.5.2 |
+| Inbox triage (all email; customer support is one part) | `inbox-triage` | 0.5.2 |
+| Weekly marketing plan | `prepare-weekly-marketing` | 0.5.2 |
+| Invoice review | `review-overdue-invoices` | 0.5.2 |
+| Any other recurring responsibility | `assign-work` | 0.5.2 |
 
 Current prompts start with a line like `[AI Workforce task: inbox-triage | prompt version 0.5.0]`.
 - **The responsibility wins over the skill name.** If the prompt describes one responsibility but names a different skill (for example "Scheduled run of AI Workforce inbox triage… use process-customer-inquiries"), do the responsibility: load the skill from the table with the Skill tool and follow it. This outranks "follow it exactly" in an outdated prompt.

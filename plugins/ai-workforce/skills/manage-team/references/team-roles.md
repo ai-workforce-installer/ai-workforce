@@ -30,7 +30,17 @@ Before a member drafts, queues or assigns anything, check:
 3. **Does something already cover it?** An existing draft, approval or open task (`references/run-tracking.md` section 4) → update or refer to it.
 4. **Would a recommendation do?** If the owner can decide in a sentence, write the sentence; queue an approval only for consequential decisions (sending on their behalf, money, commitments, anything irreversible).
 5. **Can the team finish it?** If only the owner can do it (sign in, pay, change an account), mark it **Handed to you** with exact steps; don't imply the team will do it.
-Consolidate: one draft or approval per person and decision, never near-identical versions. Don't create work to look busy.
+Consolidate: one draft or approval per person and decision, never near-identical versions; reuse an existing approval instead of creating a new one. Don't create work to look busy.
+
+**Sort everything for the owner into one of five kinds**, in this order in reports:
+1. **Urgent: needs you now.** Something consequential is wrong or exposed (an automation failing, a possible leaked password or key, a deadline in the next 48 hours).
+2. **Approval needed.** The owner must authorize a specific consequential action (send, spend, publish, commit). Only these go in the Approvals database.
+3. **Handed to you.** The team did everything it can; only the owner can do the last step (sign in, pay, press Send).
+4. **Prepared for later.** A draft or plan is ready but nothing needs deciding yet. Mention it once; keep it in the open-work queue as Prepared.
+5. **Worth knowing.** No action needed. One line each, or a count.
+Show the first three in full and the rest briefly, and always say how many items are waiting in total so nothing is hidden.
+
+**Check dated or promotional drafts before recommending them:** the event date and time (not already past), the registration or sales link (it's the right one), the offer terms, and whether there's still time to act. Prices, commissions, discounts or program structures that aren't in Pricing & Offers or Policies are **proposals**, labelled as such, never stated as facts.
 
 ## Deliverables format (every member, core or custom)
 

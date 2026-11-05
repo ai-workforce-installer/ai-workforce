@@ -2,7 +2,7 @@
 name: team-report
 description: This skill should be used when the owner asks "what's my team been working on?", "what did the team do this week?", "did the morning briefing run?", "what's scheduled?", "is the team working?", "any problems?", or wants a truthful summary of the team's actual activity, results, failures and pending decisions.
 metadata:
-  version: "0.5.1"
+  version: "0.5.2"
 ---
 
 # Team Report
@@ -26,6 +26,7 @@ A truthful account of what the team actually did. Every line rests on a record i
    - Listed in Workforce Settings but missing from the schedule list, or disabled → **not actually scheduled**.
    - Saved as "proposed, not scheduled" → **not set up yet**.
    - A record still running with no Progress for over 45 minutes → **stuck**: the next run will finish it. Not run records are normal (two runs overlapped) and aren't problems. Abandoned records are problems: say what was left undone.
+   - **Never call runs duplicates because of their timing.** Several runs in one day, or a weekly task running on another day, usually mean the owner pressed Run now. Mention a duplicate schedule only if the scheduled-task list shows two tasks for the same responsibility.
    - A row or task with a configuration warning, or a task whose prompt lacks the current `prompt version` line (`references/run-modes.md`, "Is the recurring task current?") → **uses older instructions**: say what it does differently and offer "update my recurring tasks".
    - Runs whose row says the plugin or an app wasn't available → say so plainly, with the fix (reconnect the app, or keep AI Workforce turned on under Customize → Plugins).
 4. **Report in this order**, short and plain:

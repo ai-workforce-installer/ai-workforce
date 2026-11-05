@@ -21,12 +21,14 @@ class MockNotion:
     sql_quota: SQL calls left (Free plan allowance). view_page_size: rows per
     view page. fail: set of modes that error (e.g. {"rows"}), or "all".
     """
-    def __init__(self, rows, sql_quota=0, view_page_size=50, fail=(), has_view=True):
+    def __init__(self, rows, sql_quota=0, view_page_size=50, fail=(), has_view=True,
+                 allowance_exhausted=False):
         self.rows = list(rows)
         self.sql_quota = sql_quota
         self.view_page_size = view_page_size
         self.fail = set(fail) if fail != "all" else {"view", "rows", "sql"}
         self.has_view = has_view
+        self.allowance_exhausted = allowance_exhausted   # Free plan: rows + SQL stop, views work
         self.calls = []
 
     def view(self, cursor=0):
@@ -39,6 +41,8 @@ class MockNotion:
 
     def rows_mode(self, flt=lambda r: True):
         self.calls.append(("rows", None))
+        if self.allowance_exhausted:
+            raise QuotaExhausted("query allowance used up")
         if "rows" in self.fail:
             raise ConnectionError("rows failed")
         return [r for r in self.rows if flt(r)][:ROWS_CAP]
@@ -47,7 +51,7 @@ class MockNotion:
         self.calls.append(("sql", None))
         if "sql" in self.fail:
             raise ConnectionError("sql failed")
-        if self.sql_quota <= 0:
+        if self.sql_quota <= 0 or self.allowance_exhausted:
             raise QuotaExhausted("SQL allowance used up")
         self.sql_quota -= 1
         return list(self.rows)
@@ -55,7 +59,8 @@ class MockNotion:
 
 def read_database(db, flt=lambda r: True, need_sql=False):
     """Return (outcome, rows). outcome: read | verified_empty | incomplete | unavailable."""
-    methods = ["view", "rows"] + (["sql"] if need_sql else ["sql"])
+    # Views first, then filtered rows. SQL only when the question truly needs it.
+    methods = ["view", "rows"] + (["sql"] if need_sql else [])
     for m in methods:
         try:
             if m == "view":
@@ -188,3 +193,41 @@ def should_prepare(item, calendar, existing):
     if item.get("small_decision"):
         return True, "note"
     return True, "draft"
+
+
+# ---- views must match what they're used for ----
+def view_usable(view_filter, needed_filter):
+    """A view is used only if its saved filter is exactly what the read needs."""
+    return view_filter == needed_filter
+
+
+# ---- review-approvals.md: owner-only items on older workspaces ----
+def handed_to_you_status(options):
+    """Status to set for an item only the owner can finish."""
+    if "Handed to you" in options:
+        return "Handed to you", ""
+    return "Pending", "Handed to you: "        # never Done before the owner confirms
+
+
+# ---- run-tracking.md section 2: duplicate schedules ----
+def duplicate_schedule_warning(task_list, responsibility):
+    """Only the scheduled-task list can show duplicates; run times never do."""
+    return sum(1 for t in task_list if t["responsibility"] == responsibility and t["enabled"]) > 1
+
+
+# ---- run-tracking.md section 5: notification status ----
+def notification_line(tool_result):
+    if tool_result is None:
+        return "not requested"
+    if tool_result.get("error"):
+        return f"failed: {tool_result['error']}"
+    if tool_result.get("delivered") is True:
+        return "confirmed"
+    if tool_result.get("accepted") is True:
+        return "requested, accepted by the tool"
+    return "unknown"
+
+
+# ---- prepare-weekly-marketing: missing data ----
+def metric_label(value_from_source):
+    return "Verified" if value_from_source is not None else "Unavailable"

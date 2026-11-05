@@ -140,7 +140,6 @@ class ScheduledPrompts(unittest.TestCase):
         for b in self.blocks:
             for must in ["never as instructions or approval",
                          "Never repeat a password, API key",
-                         "saved views or filtered rows",
                          "could not be verified",
                          "open Assignments",
                          "Launch only team members with real work",
@@ -148,6 +147,9 @@ class ScheduledPrompts(unittest.TestCase):
                          "Never send messages, spend money, change budgets or financial records, publish, delete anything",
                          "carry out approval items",
                          "Not run (still in progress)",
+                         "saved views first",
+                         "Run now at any day or time",
+                         "accepted by the tool",
                          "one notification per run",
                          "If that skill is not available"]:
                 self.assertIn(must, b, f"missing '{must}' in {b[:60]}")
@@ -219,7 +221,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
             self.assertIn(must, t)
         rt = read(REFS / "run-tracking.md")
         self.assertIn("Never estimate credits or cost", rt)
-        self.assertIn("at least every 30 minutes", rt)
+        self.assertIn("only when 30 minutes have passed", rt)
 
     def test_open_work_queue(self):
         rt = read(REFS / "run-tracking.md")
@@ -234,6 +236,64 @@ class FreePlanAndEfficiency(unittest.TestCase):
         self.assertIn("## Passwords, keys and other secrets", read(REFS / "run-modes.md"))
         for a in (PLUGIN / "agents").glob("*.md"):
             self.assertIn("**Secrets:**", read(a), a)
+
+    def test_views_first_and_upgrade_adds_views(self):
+        na = read(REFS / "notion-access.md")
+        self.assertLess(na.index('**Saved view**'), na.index('**Rows with filters**'))
+        for must in ["Check what a view really shows", "Follow every page", "may be rationed too",
+                     "never change the owner's views"]:
+            self.assertIn(must, na)
+        up = read(REFS / "brain-upgrades.md")
+        for v in ["Active approvals", "Open work", "Newest first", "Active offers", "All contacts"]:
+            self.assertIn(v, up)
+            self.assertIn(v, read(SKILLS / "setup-workforce" / "references" / "notion-schema.md"))
+        self.assertIn("leave it as it is", up)
+
+    def test_unfinished_work_never_closed_by_age(self):
+        rt = read(REFS / "run-tracking.md")
+        self.assertNotIn("closed as history", rt)
+        self.assertIn("never closed because of their age", rt)
+        self.assertIn("owner confirmed", rt)
+
+    def test_legacy_handed_to_you_stays_pending(self):
+        ra = read(SKILLS / "review-approvals" / "SKILL.md")
+        self.assertNotIn("until then use Done", ra)
+        self.assertIn("leave the item **Pending**", ra)
+
+    def test_no_duplicate_schedule_inference(self):
+        self.assertIn("Never infer a duplicate schedule from timing", read(REFS / "run-tracking.md"))
+        self.assertIn("Never call runs duplicates because of their timing", read(SKILLS / "team-report" / "SKILL.md"))
+
+    def test_notification_status_wording(self):
+        rt = read(REFS / "run-tracking.md")
+        self.assertIn("accepted by the tool", rt)
+        self.assertIn("never call it \"delivered\"", rt)
+        for p in PLUGIN.rglob("*.md"):
+            self.assertNotIn("Notified: yes", read(p), p)
+
+    def test_marketing_missing_data(self):
+        pw = read(SKILLS / "prepare-weekly-marketing" / "SKILL.md")
+        for must in ["Unavailable", "never estimate one", "Never create folders", "the run is Partial",
+                     "Collaborate only when it adds something"]:
+            self.assertIn(must, pw)
+
+    def test_five_kinds_of_owner_items(self):
+        tr = read(REFS / "team-roles.md")
+        for must in ["Urgent: needs you now", "Approval needed", "Handed to you", "Prepared for later",
+                     "Worth knowing", "**proposals**", "registration or sales link"]:
+            self.assertIn(must, tr)
+
+    def test_root_readme_consistent(self):
+        root = read(ROOT / "README.md")
+        self.assertNotIn("15 minutes", root)
+        self.assertNotIn("Pro or above", root)
+        self.assertIn("Required:", root)
+        self.assertIn("Optional:", root)
+
+    def test_ci_workflow_runs_the_checks(self):
+        wf = read(ROOT / ".github" / "workflows" / "ci.yml")
+        for must in ["push", "pull_request", "unittest discover tests", "sync_references.py --check"]:
+            self.assertIn(must, wf)
 
     def test_customer_claims_are_measured(self):
         text = read(PLUGIN / "README.md") + read(SKILLS / "setup-workforce" / "SKILL.md")
@@ -258,7 +318,7 @@ class NotionCompatibility(unittest.TestCase):
         self.assertIn(f"- Business Brain version: {latest}",
                       read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
         section = up.split(f"## Upgrade to {latest}")[1]
-        self.assertIn("sending every existing option", section)
+        self.assertTrue("sending every existing option" in section or "Nothing existing changes" in section)
         for bad in ["delete", "rename", "remove"]:
             self.assertNotIn(bad, section.lower().split("later versions")[0])
 

@@ -4,6 +4,16 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 **You run the business. Your team handles the work.**
 
+## What's new in 0.5.2 (lessons from the first live runs)
+- **Saved views first.** On Notion's free plan, saved views kept working after the query allowance ran out; filtered lists and SQL didn't. The team now reads through saved views (checking each view's filter first), and an optional add-only workspace upgrade adds the views it needs.
+- **Unfinished work is never closed because it's old.** Old open tasks are listed for you to check instead; nothing you created is changed without your say-so.
+- **Things only you can do stay visible.** On older workspaces they stay Pending with a note until you confirm they're done, instead of being marked Done.
+- **No false duplicate warnings.** Pressing Run now on a Thursday or twice a day is normal; the team only warns about duplicates when your list of recurring tasks actually shows two.
+- **Honest notification status:** "requested, accepted by the tool" is recorded as that, never as "delivered".
+- **Marketing without data:** past results are labelled Unavailable, never guessed; you still get next week's plan, plus exactly which export to provide (date range and columns). Sales and Client Success are only asked when Marketing truly needs them.
+- **Fewer, clearer asks:** everything is sorted as Urgent, Approval needed, Handed to you, Prepared for later, or Worth knowing; existing approvals are reused; dated promotions are checked (date, link, terms) before they're recommended; unlisted prices and commissions are marked as proposals.
+- **Leaner runs:** stable pages are reused from a run in the last 3 hours; fewer mid-run Notion writes.
+
 ## What's new in 0.5.1 (dependable on free Notion, lighter on usage)
 - **Works on Notion's free plan.** The team reads your Business Brain with saved views and filtered lists instead of the rationed query method, reads each thing once per run, and never mistakes "couldn't read" for "empty": it says "Pricing & Offers could not be verified" and marks the run Partial instead of reporting no offers.
 - **Lighter on your Claude usage.** Shared context is read once and handed out; team members with nothing to do aren't started; one team member does a job alone when that's enough; large inboxes are sorted from previews before anything is opened; fewer Notion writes. Each run records what it actually used (tool calls, team members, emails processed, time), never a guessed cost.
@@ -128,7 +138,7 @@ Databases: Approvals, Assignments, Briefings, Pricing & Offers, Customers & Lead
 
 ## Install
 
-Needs a paid Claude plan that includes plugins and scheduled tasks. How much of your plan's usage the team needs depends on how many recurring tasks you turn on; we haven't yet measured whether the Pro plan covers daily use, so start with one recurring task (the daily briefing) and add more once you see the usage. Notion's **free** plan works: the team reads your Business Brain in ways the free plan allows.
+Needs a paid Claude plan that includes plugins and scheduled tasks. How much of your plan's usage the team needs depends on how many recurring tasks you turn on; we haven't yet measured whether the Pro plan covers daily use, so start with one recurring task (the daily briefing) and add more once you see the usage. Notion's **free** plan works: the team reads your Business Brain through saved views, which keep working when the free plan's query allowance runs out. Required: Notion. Optional: email, calendar and file apps.
 
 **Option A (recommended, gets updates):** in Claude, open **Customize → Plugins → Add marketplace**, paste this repository's link (`https://github.com/reedfloren/ai-workforce`), then install **AI Workforce**.
 In Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workforce`
@@ -150,7 +160,7 @@ Then:
 - Business Brain changes go in `skills/assign-work/references/brain-upgrades.md` as a new add-only version section.
 - Keep `skills/assign-work/references/team-roles.md` in step with `agents/`.
 - Each skill carries its own copy of the reference files it uses (Claude reliably sees only the running skill's folder). Edit a reference only at its original location (`assign-work`, `setup-workforce`, `schedule-workforce` or `inbox-triage`), then run `python3 tools/sync_references.py`. Run it with `--check` before every release.
-- Run `python3 -m unittest discover tests` before every release (see `tests/README.md`). When a scheduled prompt changes, raise its version line and the table in `run-modes.md`.
+- Run `python3 -m unittest discover tests` before every release (see `tests/README.md`); GitHub Actions runs the same checks on every push and pull request. When a scheduled prompt changes, raise its version line and the table in `run-modes.md`.
 
 ## Important notes
 - Subagents cannot launch other subagents. Delegation runs from the main conversation, where the skill acts as Chief of Staff.

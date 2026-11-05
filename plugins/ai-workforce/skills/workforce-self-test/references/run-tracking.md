@@ -20,7 +20,7 @@ Window: <start> – <end>            (inbox triage only)
 
 If the Briefings database has the newer properties (`Run ID`, `Started`, `Finished`, `Completed through`; added by the 0.5.0 upgrade in `references/brain-upgrades.md`), fill them too. If it doesn't, the header alone is enough; never fail a run over a missing property.
 
-**Show progress.** After each main stage (for example search done, team members back, approvals queued), and at least every 30 minutes during a long stage, add a line `Progress <time>: <stage>` to the record. Keep it to that: no other mid-run writes. Other sessions use the newest Progress line to tell a working run from a stuck one.
+**Show progress.** Add a line `Progress <time>: <stage>` only when 30 minutes have passed since the start or the last Progress line. No other mid-run writes. Other sessions use the newest Progress line to tell a working run from a stuck one.
 
 **Check before finishing.** Verify, and fix or report anything that fails:
 - **Sources:** each source the run needed and its outcome (`references/notion-access.md` section 3: read, verified empty, incomplete, unavailable).
@@ -42,7 +42,7 @@ Usage: <n> tool calls, <n> team members launched, <n> emails or records processe
 Notified: no
 ```
 
-and set the Result, Approvals raised, Drafts created (and Finished, if present) properties. Then send the notification (section 5) and add `Notified: yes <time>`.
+and set the Result, Approvals raised, Drafts created (and Finished, if present) properties. Then send the notification (section 5) and record what the tool reported.
 
 Count tool calls and launches yourself; add model or token usage only if the platform shows it. Never estimate credits or cost. A run that can't finish properly still writes these lines with Result Partial or Failed and says what was left undone.
 
@@ -56,6 +56,8 @@ Report only what is known:
 - **Unknown (started from a recurring task):** a recurring task's prompt started the session but nothing says whether it fired on schedule or was started by hand. This is the honest default for unattended runs. In reports say "started from your recurring <responsibility>".
 
 A run finished by a later session keeps its original Source; the later session adds "Resumed by <a recurring task | the owner>".
+
+**Never infer a duplicate schedule from timing.** A Monday task running on Thursday, or two briefings in one day, usually means someone pressed Run now. Only warn about duplicate recurring tasks when the scheduled-task list itself shows two tasks for the same responsibility. Whenever a recurring task starts, do the responsibility its prompt names, whatever the day or time.
 
 Save Source in the header. Set the Run type property to Manual or Scheduled when known; to Unknown if that option exists, otherwise leave it empty. Never guess from the clock.
 
@@ -91,7 +93,14 @@ Before each action, check:
 Write the source key at the end of Exact action (approvals) and in Task ID (assignments), for example "… (source: gmail:18f3a2b4c5d6e7f8)".
 
 ## 5. Notifications
-Send one notification per run, after the record is finished and fetched back for its link, then add `Notified: yes <time>`. A resumed run sends one only if the record has no `Notified: yes` line. A Not run or Abandoned record sends none. Partial or Failed runs, and configuration warnings, are said plainly in the first line.
+Send one notification per run, after the record is finished and fetched back for its link; the notification always includes that full Notion link as plain text. Then add one line saying what actually happened:
+- `Notified: not requested` (no notification tool, or none due)
+- `Notified: requested <time>, accepted by the tool`: the tool took the request. This is not proof the owner received it; never call it "delivered".
+- `Notified: confirmed <time>`: only if the tool's answer explicitly says it was delivered.
+- `Notified: failed <time>: <reason>`
+- `Notified: unknown` (the tool gave no clear answer)
+
+A resumed run sends a notification only if the record has no `Notified: requested` or `confirmed` line. A Not run or Abandoned record sends none.
 
 ## 6. The open-work queue (unfinished work never disappears)
 
@@ -101,6 +110,6 @@ Work the team found but hasn't finished lives in the **Assignments** database, n
 - **Status:** Planned (to do), In progress, Prepared (a draft or recommendation is ready and waiting on the owner), Handed to you (only the owner can do it, e.g. update payout details in their account), Blocked (missing access or information; say what's missing), Done, Failed. Without the 0.5.1 options, use Planned, In progress, Done or Failed and begin Result with "[Prepared]", "[Handed to you]" or "[Blocked]". Use Assignments for things only the owner can do (Handed to you); use Approvals only for decisions.
 - **Every run starts with the queue:** read Assignments whose Status isn't Done or Failed (filtered rows, `limit: 100`, `references/notion-access.md`), whatever their age. Each run works only the rows for its own job (inbox triage: rows whose Source is an email; a recurring member task: that member's rows); the daily briefing lists the rest under what's waiting, without redoing them. Finish what can be finished now; leave the rest with an up-to-date Next action.
 - **If the queue can't be read or written**, don't create rows that might duplicate it. List the unfinished items under **Carried over** in the run record instead (source key, owner, next action); the next run reads the last run's Carried over list and moves those items into the queue once it's readable.
-- **Older rows:** Assignments rows from before 0.5.1 with no Source that are more than 14 days old and still Planned or In progress are history, not open work. The first run that finds them closes them (Status Done, Result "closed as history by the 0.5.1 update") so they don't crowd the queue.
+- **Older rows:** unfinished rows are never closed because of their age. Rows from before 0.5.1 (no Source) that look like old logs rather than open work are listed once, in the daily briefing, under "Please check: old open tasks" with their links, so the owner can say which to close; nothing changes until they do. Rows the owner created are never changed without their say-so.
 - **Deduplicate** by source and intended action: one row per source and action. Update the existing row (Status, Next action, Result) instead of adding another.
-- **Close rows** when the work is done, the owner handled it, or it no longer matters (Status Done, with a one-line reason).
+- **Close rows** only when the work is done, the owner confirmed they handled it, or the owner said it no longer matters (Status Done, with a one-line reason).

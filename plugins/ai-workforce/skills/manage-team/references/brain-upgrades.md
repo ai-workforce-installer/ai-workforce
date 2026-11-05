@@ -37,4 +37,14 @@ Lets the Assignments database hold the team's open work so nothing found is forg
 2. **Assignments properties.** Add `Source` (text) and `Next action` (text) if missing.
 3. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.1`.
 
+## Upgrade to 0.5.2
+Adds saved views, which keep working on Notion's free plan after its query allowance runs out. Nothing existing changes: no records are edited and no existing view is changed. Safe to repeat.
+1. Fetch each database to see its views. For each view below that **doesn't exist yet by that name**, create it as a table view with the notion-create-view tool. If one with that name exists, leave it as it is, even if its filter differs (runs check a view's filter before using it).
+   - Approvals → "Active approvals": `FILTER "Status" IN ("Pending", "Approved", "Handed to you"); SORT BY "AP" ASC`. On a workspace without the "Handed to you" option, leave that value out.
+   - Assignments → "Open work": `FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC`, leaving out options the database doesn't have.
+   - Briefings → "Newest first": `SORT BY "Date" DESC` (only if missing).
+   - Pricing & Offers → "Active offers": `FILTER "Active" = TRUE; SORT BY "Offer" ASC`.
+   - Customers & Leads → "All contacts": `SORT BY "Last contact" DESC`.
+2. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.2`.
+
 Later versions add their own section here, below this one, and run in order.

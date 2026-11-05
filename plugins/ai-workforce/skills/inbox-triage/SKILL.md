@@ -2,7 +2,7 @@
 name: inbox-triage
 description: This skill should be used when the owner asks to "triage my inbox", "go through my email", "check my email", "what's in my inbox", "anything important in my email?", "what did I miss?", or wants all their email reviewed, sorted and followed up, not only customer messages. Also used by the scheduled inbox triage task.
 metadata:
-  version: "0.5.1"
+  version: "0.5.2"
 ---
 
 # Inbox Triage (all email, not just customers)
