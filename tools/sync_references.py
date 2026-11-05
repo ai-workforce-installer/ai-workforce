@@ -18,6 +18,7 @@ CANONICAL_HOME = {  # file -> skill folder that owns the original
        "connections.md", "just-in-time.md", "run-modes.md", "talking-to-the-owner.md", "team-roles.md"]},
     **{f: "setup-workforce" for f in ["interview.md", "notion-schema.md", "page-templates.md"]},
     "scheduled-prompts.md": "schedule-workforce",
+    "inbox-coverage.md": "inbox-triage",
 }
 REF = re.compile(r"references/([a-z0-9-]+\.md)")
 

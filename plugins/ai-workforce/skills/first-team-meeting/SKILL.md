@@ -2,7 +2,7 @@
 name: first-team-meeting
 description: This skill should be used at the end of setup, and when the owner asks "what can my team take off my plate?", "what should my team work on?", "let's have a team meeting", "what else can you handle?", or wants the Chief of Staff to recommend responsibilities and get the team doing real work.
 metadata:
-  version: "0.4.2"
+  version: "0.4.3"
 ---
 
 # Team Meeting
@@ -19,7 +19,7 @@ The owner should leave with real work done, not a plan. Recommend a few responsi
 
    | Responsibility | Team member | Runs with |
    |---|---|---|
-   | Review customer emails and prepare replies | Client Success | `process-customer-inquiries` |
+   | Review all email, catch what matters and prepare replies | Chief of Staff with the team | `inbox-triage` |
    | Morning briefing: today's priorities, meetings, what needs you | Chief of Staff + team | `daily-executive-briefing` |
    | Find leads that need a follow-up and draft them | Sales | `assign-work` (Sales) |
    | Check the next week of commitments and flag problems | Operations | `assign-work` (Operations) |
@@ -42,7 +42,7 @@ The owner should leave with real work done, not a plan. Recommend a few responsi
 
 6. **Show the result:** what was done (counts, for example "4 reply drafts ready in Gmail"), the link to where it's saved, what needs the owner, and anything the team couldn't do and why. The first time approvals appear, explain them in one line: "Anything that needs your yes gets a number. Reply 'approve 3' or 'change 3: shorter' and I'll take care of it."
 
-7. **Offer to make it recurring:** "Want Client Success to do this every weekday morning?" Suggest a sensible cadence. On yes, use `schedule-workforce` for this one responsibility only, which creates the recurring run, then confirms it exists. If recurring runs aren't available on their account, say so plainly and tell them they can ask for this any time ("Triage my inbox").
+7. **Offer to make it recurring:** "Want the team to do this every weekday morning?" Suggest a sensible cadence. On yes, use `schedule-workforce` for this one responsibility only, which creates the recurring run, then confirms it exists. If recurring runs aren't available on their account, say so plainly and tell them they can ask for this any time ("Triage my inbox").
 
 8. **Save the meeting** without creating a second record: add a short "Team meeting" section at the top of the Briefings row the work just created, with the recommendations and their reasons, what was chosen, and whether it's now recurring. Add the recommendations not chosen to "Suggestions from your Chief of Staff" on the Your Team page, each with today's date and "open", so they aren't lost or repeated.
 

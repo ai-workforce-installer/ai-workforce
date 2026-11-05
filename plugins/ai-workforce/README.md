@@ -4,6 +4,13 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 **You run the business. Your team handles the work.**
 
+## What's new in 0.4.3 (inbox triage covers all email)
+- **"Triage my inbox" now means all email**, not just customer messages. A new `inbox-triage` skill catches deadlines, people waiting on you, opportunities, payment and account notices, and meeting context, then has the right team member do the follow-up: drafts, reconciliations, research, approval items. Customer support stays its own job (`process-customer-inquiries`) and is one part of inbox triage.
+- **It searches everywhere mail lands:** archived, labeled and every Gmail tab, every page of results. Your Gmail filters don't need changing.
+- **Every report shows its coverage:** the window, the exact searches, how many threads were found, read, prioritized and filtered out, and which inboxes the team can't reach.
+- **Precise wording:** "no customer emails visible in Gmail" is never reported as "inbox clear" or "nothing to do".
+- **Manual runs are labeled Manual**, including a scheduled task started by hand outside its time.
+
 ## What's new in 0.4.2 (from the first unattended run)
 - **The team does the work.** Briefings now include prepared work, not just a list: meeting preps (context, key points from shared files, agenda, decisions with a recommendation), draft replies to emails waiting on the owner, and one useful thing from Marketing toward the quarter's goals even without data. Approvals are still required for sending, commitments, spending, publishing and anything else consequential.
 - **A briefing you can act on:** top priorities, what the team handled (with links), every open decision with a recommendation, what's blocked and why, and what was spotted. Details and verification stay in Notion.
@@ -66,7 +73,8 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 | "What's my team been working on?" | `team-report` | What ran, what failed, what's waiting for you |
 | "From now on…" / "Add a team member" | `manage-team` | Saves how you want work done; adds roles, reuse first |
 | "Run the daily briefing" | `daily-executive-briefing` | Every active department reports; one-screen briefing |
-| "Triage my inbox" | `process-customer-inquiries` | Sorts customer emails, drafts replies, grows the FAQ |
+| "Triage my inbox" | `inbox-triage` | Reviews all email, catches deadlines, people waiting, opportunities and money notices, prepares replies, and shows how much was checked |
+| "Handle customer emails" | `process-customer-inquiries` | Customer support only: sorts customer emails, drafts replies, grows the FAQ |
 | "Review overdue invoices" | `review-overdue-invoices` | Aging report and reminder drafts (read-only) |
 | "Prepare weekly marketing" | `prepare-weekly-marketing` | Last week's results and next week's plan |
 | "Get the team on this: ..." | `assign-work` | Chief of Staff splits any request across departments |
