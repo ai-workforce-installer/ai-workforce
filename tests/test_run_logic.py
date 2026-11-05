@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from run_logic import (Record, Message, Mailbox, decide, make_run_id, next_window,
+from run_logic import (Record, Message, Mailbox, OpenWork, decide, make_run_id, next_window,
                        triage, last_checkpoint)
 
 T0 = datetime(2026, 11, 5, 8, 0)
@@ -117,11 +117,13 @@ class Coverage(unittest.TestCase):
 
     def test_draft_limit_carries_over_and_next_run_picks_up(self):
         msgs = mail(40, T0 - timedelta(hours=20), every_important=1)
-        recs, actions = [], []
-        r1 = triage(recs, Mailbox(msgs), T0, actions=actions, draft_limit=5)
-        self.assertEqual(len(r1.carried_over), 35)
+        recs, actions, q = [], [], OpenWork()
+        r1 = triage(recs, Mailbox(msgs), T0, actions=actions, draft_limit=5, queue=q)
+        self.assertEqual(len(r1.pending), 35)
+        self.assertEqual(r1.result, "Complete")            # search complete, work queued
+        self.assertEqual(r1.completed_through, T0)
         for i in range(1, 10):
-            triage(recs, Mailbox(msgs), T0 + timedelta(hours=i), actions=actions, draft_limit=5)
+            triage(recs, Mailbox(msgs), T0 + timedelta(hours=i), actions=actions, draft_limit=5, queue=q)
         keys = [k for _, k in actions]
         self.assertEqual(len(keys), len(set(keys)))
         self.assertEqual(set(keys), {f"gmail:{m.id}" for m in msgs})
@@ -146,6 +148,36 @@ class Coverage(unittest.TestCase):
         self.assertEqual(end - start, timedelta(hours=24))
         self.assertIsNone(gap)
         self.assertIsNone(last_checkpoint([]))
+
+
+class OpenWorkQueue(unittest.TestCase):
+    def test_unresolved_work_survives_a_long_gap(self):
+        msgs = mail(20, T0 - timedelta(hours=20), every_important=1)
+        recs, actions, q = [], [], OpenWork()
+        triage(recs, Mailbox(msgs), T0, actions=actions, draft_limit=5, queue=q)
+        later = T0 + timedelta(days=21)                  # three weeks, far past any 7-day look-back
+        for i in range(4):
+            triage(recs, Mailbox([]), later + timedelta(hours=i), actions=actions, draft_limit=5, queue=q)
+        self.assertEqual({k for _, k in actions}, {f"gmail:{m.id}" for m in msgs})
+        self.assertEqual(q.open_items(), [])
+
+    def test_queue_unreadable_keeps_bookmark_and_creates_no_duplicates(self):
+        msgs = mail(10, T0 - timedelta(hours=5), every_important=1)
+        recs, actions, q = [], [], OpenWork()
+        first = Record("IT-0", "Inbox triage", T0 - timedelta(days=1), finished=T0 - timedelta(days=1),
+                       result="Complete", completed_through=T0 - timedelta(hours=6))
+        recs.append(first)
+        q.readable = False
+        r = triage(recs, Mailbox(msgs), T0, actions=actions, draft_limit=3, queue=q)
+        self.assertEqual(r.result, "Partial")
+        self.assertEqual(r.completed_through, first.completed_through)
+        self.assertEqual(q.rows, {})
+
+    def test_one_row_per_source_and_action(self):
+        q = OpenWork()
+        q.upsert("gmail:a", "Planned"); q.upsert("gmail:a", "Planned"); q.upsert("gmail:a", "Prepared")
+        self.assertEqual(len(q.rows), 1)
+        self.assertEqual(q.writes, 2)
 
 
 class Notifications(unittest.TestCase):

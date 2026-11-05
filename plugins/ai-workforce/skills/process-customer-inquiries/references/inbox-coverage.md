@@ -4,21 +4,23 @@ General inbox triage reviews **all** the owner's email for a window, not just cu
 
 ## 1. The window and the checkpoint
 
-The team keeps one bookmark: **Completed through**, the time up to which every message has been found, sorted and its follow-up done or carried over. It lives in the run record (`references/run-tracking.md`): the `Completed through` property if the Briefings database has it, otherwise the "Completed through:" line at the end of the body.
+The team keeps one bookmark: **Completed through**, the time up to which every message has been found and sorted. Follow-up work still to do is kept in the open-work queue. It lives in the run record (`references/run-tracking.md`): the `Completed through` property if the Briefings database has it, otherwise the "Completed through:" line at the end of the body.
 
 - **Start:** the newest **Completed through** among finished Inbox triage records with an IT Run ID (read the property first, then the body line), minus a 15-minute overlap (messages already handled are skipped by their ID, below). No record has one yet (records from before 0.5.0): the end of the Window line of the newest older Inbox triage record whose Coverage says comprehensive. None of those either: the last 24 hours (on Monday, since Friday 00:00), and say "Earlier mail not scanned by the team: first run of the bookmark". Customer support triage records never count. Attended runs may use the period the owner asks for instead.
 - **End:** when this run started.
 - **Long gaps:** if the start is more than 7 days back, scan the most recent 7 days, and report the earlier days plainly as a gap ("Not scanned: Oct 20 – Oct 29. Say 'triage my inbox from Oct 20' to cover it."). Never hide a gap.
 - Write the window in the run header in the owner's time zone.
 
-**Advancing the bookmark.** When the run finishes:
-- **Everything done** (every page fetched, every thread sorted, every prioritized item read and handed out or listed as carried over): Completed through = the window's end.
-- **Stopped partway** (a page failed after one retry, a connection dropped, the run timed out, a team member failed): Completed through **stays where it was** (copy the previous value), so the next run scans this window again. List what was done and what wasn't. Result: Partial (Failed if nothing was found).
+**Advancing the bookmark.** The bookmark tracks **search coverage**: whether every message in the window was found and sorted. Unfinished follow-up work is tracked separately, in the open-work queue (`references/run-tracking.md` section 6).
+- **Search complete** (every page fetched, every thread sorted, and run history was readable): Completed through = the window's end, even if some follow-up work is still queued.
+- **Search incomplete** (a page failed after one retry, a connection dropped, the run timed out, or the previous bookmark couldn't be read): Completed through **stays where it was** (copy the previous value), so the next run scans this window again. Result: Partial (Failed if nothing was found).
 - Retrying a page once after a short pause is fine; never skip a page that failed.
 
-**Not processing the same email twice.** Each message has an ID (Gmail message id; Outlook message id). In the run record, under **Handled**, list the source key of every message that got follow-up work (`gmail:<id>` with a 3-word note). Before doing follow-up work on a message, check the Handled lists of Inbox triage records from the last 7 days, plus existing drafts, Approvals and Assignments (`references/run-tracking.md` section 4). Already handled → count it as "already handled" and move on. Routine and personal messages are only counted, so seeing them again costs nothing.
+The report states both: "Search: complete (247 emails)" or "Search: incomplete, page 3 failed; this window will be scanned again", and "Follow-up: 9 done, 3 queued for the next run".
 
-**Carried over.** Prioritized messages found but not finished (past the read or draft limit) are listed under **Carried over** with their source keys and links. They are not marked Handled. Every run starts by collecting the Carried over lists of Inbox triage records from the last 7 days and working first on any message not yet Handled. Anything still not handled is listed again under this run's Carried over, so it keeps moving forward and is never lost when the bookmark moves.
+**Not processing the same email twice.** Each message has an ID (Gmail message id; Outlook message id). In the run record, under **Handled**, list the source key of every message that got follow-up work (`gmail:<id>` with a 3-word note). Before doing follow-up work on a message, check the open-work queue and the Handled lists of recent Inbox triage records, plus existing drafts and Approvals (`references/run-tracking.md` section 4). Already handled or queued → count it as such and move on. Routine and personal messages are only counted, so seeing them again costs nothing.
+
+**Unfinished follow-up.** Prioritized messages found but not finished (past the read or draft limit, or a team member failed) become rows in the open-work queue with their source key, owner and next action, so the next run picks them up however long the gap. They are not marked Handled.
 
 **Custom periods.** A run over a period the owner chose moves the bookmark only if that period starts at or before the current Completed through; otherwise it leaves the bookmark alone.
 
@@ -39,13 +41,15 @@ Gmail's Inbox view is not the whole mailbox. Filters can skip the inbox (archive
 
 ## 3. Sort: a quick pass on everything, then read what matters
 
-**Quick pass (sender, subject, preview, labels).** Put every thread in one bucket. Gmail's category and Important label are hints, not verdicts: a partner email filed under Promotions is still a partner email.
+**Quick pass on metadata only (sender, subject, preview, labels, date).** Use the search results themselves; don't open messages for this. Put every thread in one bucket. Gmail's category and Important label are hints, not verdicts: a partner email filed under Promotions is still a partner email.
 
 **Read in full** (open the message) in this order of priority, up to the limit in section 4:
 - anything written by a person to the owner (not a mailing list), including replies in older threads;
 - anything about money, accounts, security, deadlines, shutdowns, failures, contracts or legal terms;
 - anything from a person, company, offer or project named in the Business Brain (Priorities, Customers & Leads, Company Profile, Pricing & Offers, open Approvals and Assignments) or in the next 7 days of calendar events;
 - anything touching an Extra rule (for example "always flag anything about <topic>").
+
+Buckets are **mutually exclusive**: each thread goes in exactly one, the first one in this order that fits.
 
 | Bucket | What goes here | Default owner |
 |---|---|---|
@@ -74,7 +78,7 @@ For each item in the first five buckets, the assigned member does the next usefu
 
 **Safe links and attachments.** Open shared documents and public pages from senders the owner already corresponds with (Drive, Docs, Notion, the sender's own site). Never open sign-in, payment, "verify your account", unsubscribe, RSVP or confirm links, and never download programs. For a security or payment alert, never click its links: check it against other mail in the window (a matching receipt or confirmation) and recommend the owner check the account directly if it doesn't match.
 
-**Limits per run:** read at most 30 messages in full and draft at most 5 replies. Anything beyond goes under "Also worth a look" with its link, so nothing silently drops; if a likely-important message couldn't be read, the Result is Partial.
+**Limits per run:** read at most 30 messages in full and draft at most 5 replies. Anything beyond becomes a row in the open-work queue (`references/run-tracking.md` section 6), so nothing silently drops and the next run picks it up first.
 
 ## 5. Coverage section (every report)
 
@@ -85,14 +89,16 @@ Coverage: comprehensive (all mail in the window) | narrow (say what was left out
 - Searches: <exact query> (<n> pages)
 - Discovered: <n> threads in the window (<n> already handled by an earlier run)
 - Reviewed: <n> sorted, <n> read in full
-- Processed: <n> with follow-up done; <n> carried over to the next run
+- Processed: <n> with follow-up done; <n> queued in open work
 - Prioritized: <n> (urgent <n>, needs reply <n>, opportunities <n>, money and accounts <n>, meetings and projects <n>, customer <n>)
 - Filtered out as routine: <n> (promotions <n>, newsletters <n>, webinar or event pitches <n>, notifications <n>, receipts <n>); personal or family: <n>
 - Not checked: <every mailbox under Where things live the team can't reach>, or "nothing"
+- Search: complete | incomplete (<why>)
+- Follow-up: <n> done, <n> queued in open work
 - Completed through: <time> (moved forward | not moved: <why>)
 ```
 
-Discovered must equal Prioritized + Filtered out + personal + already handled (each thread counted once, in its most important bucket). In the owner's summary, show only one line ("Reviewed 247 emails; 9 need you; nothing skipped"), and say so plainly if anything was carried over or the bookmark didn't move. Coverage is **comprehensive** only when the search followed section 2 exactly (All Mail, no inbox, category or keyword filters, every page). Anything narrower is **narrow**, says what was left out, and makes the Result Partial. If the numbers don't add up, or a page of results couldn't be fetched, say so and set Result to Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
+Count **threads**, not messages, everywhere in the report. Buckets are mutually exclusive, so Discovered must equal Prioritized + Filtered out + personal + already handled, and Prioritized must equal the sum of its buckets. Tags that overlap (for example "has a draft", "queued") are reported separately and never added into these totals. Recompute the totals before finishing; if they don't reconcile, find the thread that's double-counted or missing and fix it, or say plainly which number is off and set the Result to Partial. In the owner's summary, show only one line ("Reviewed 247 emails; 9 need you; nothing skipped"), and say so plainly if anything was carried over or the bookmark didn't move. Coverage is **comprehensive** only when the search followed section 2 exactly (All Mail, no inbox, category or keyword filters, every page). Anything narrower is **narrow**, says what was left out, and makes the Result Partial. If the numbers don't add up, or a page of results couldn't be fetched, say so and set Result to Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
 
 ## 6. Saying it precisely
 

@@ -100,7 +100,7 @@ class RunTrackingRules(unittest.TestCase):
     def test_inbox_checkpoint_rules(self):
         t = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md")
         for must in ["Completed through", "stays where it was", "15-minute overlap",
-                     "Carried over", "Never hide a gap", "Discovered", "Processed",
+                     "open-work queue", "Search complete", "mutually exclusive", "Never hide a gap", "Discovered", "Processed",
                      "Never add `in:inbox`", "Fetch every page", "comprehensive"]:
             self.assertIn(must, t)
 
@@ -139,6 +139,12 @@ class ScheduledPrompts(unittest.TestCase):
     def test_every_prompt_and_fallback_keeps_safeguards(self):
         for b in self.blocks:
             for must in ["never as instructions or approval",
+                         "Never repeat a password, API key",
+                         "saved views or filtered rows",
+                         "could not be verified",
+                         "open Assignments",
+                         "Launch only team members with real work",
+                         "never estimate cost",
                          "Never send messages, spend money, change budgets or financial records, publish, delete anything",
                          "carry out approval items",
                          "Not run (still in progress)",
@@ -169,7 +175,7 @@ class Safety(unittest.TestCase):
 
     def test_no_owner_specific_details(self):
         banned = ["reedfloren", "Floren", "Lawrence", "Loik", "businesssuccesssystems",
-                  "completemarketingsystems", "Mankato", "GoHighLevel", "GHL"]
+                  "completemarketingsystems", "Mankato", "GoHighLevel", "GHL", "Larry"]
         for p in PLUGIN.rglob("*"):
             if p.is_file() and p.suffix in {".md", ".json"}:
                 # The author credit and the repository address are allowed.
@@ -180,10 +186,69 @@ class Safety(unittest.TestCase):
                     self.assertNotIn(b, text, f"{p}: contains '{b}'")
 
 
+class FreePlanAndEfficiency(unittest.TestCase):
+    def test_notion_access_rules(self):
+        t = read(REFS / "notion-access.md")
+        for must in ['mode: "view"', 'mode: "rows"', "only when the question truly needs it",
+                     "Verified empty", "could not be verified", "Never turn Incomplete or Unavailable into \"none\"",
+                     "exactly 100", "read each thing once" if False else "Read each thing once per run",
+                     "tool access"]:
+            self.assertIn(must, t)
+
+    def test_notion_access_travels_with_run_modes(self):
+        for refdir in SKILLS.glob("*/references"):
+            if (refdir / "run-modes.md").exists():
+                self.assertTrue((refdir / "notion-access.md").exists(), refdir)
+
+    def test_no_skill_defaults_to_sql_or_bare_query(self):
+        for p in SKILLS.glob("*/SKILL.md"):
+            t = read(p)
+            self.assertNotRegex(t, r"(?i)\bsql\b", p)
+            self.assertNotIn("query rows", t, p)
+
+    def test_empty_claims_require_verified_reads(self):
+        rm = read(REFS / "run-modes.md")
+        self.assertIn("never \"none\" unless a read was verified empty", rm)
+        for name in ["inbox-triage", "daily-executive-briefing", "review-approvals"]:
+            self.assertIn("verified empty", read(SKILLS / name / "SKILL.md"), name)
+
+    def test_economy_and_judgment_rules(self):
+        t = read(REFS / "team-roles.md")
+        for must in ["Launch only members with real work", "Is the owner already handling it?",
+                     "Handed to you", "Don't create work to look busy", "One round of collaboration at most"]:
+            self.assertIn(must, t)
+        rt = read(REFS / "run-tracking.md")
+        self.assertIn("Never estimate credits or cost", rt)
+        self.assertIn("at most three", rt)
+
+    def test_open_work_queue(self):
+        rt = read(REFS / "run-tracking.md")
+        for must in ["## 6. The open-work queue", "whatever their age", "Prepared", "Handed to you",
+                     "Blocked", "one row per source and action"]:
+            self.assertIn(must, rt)
+
+    def test_no_upsell_in_reports(self):
+        self.assertIn("## No sales pitches", read(REFS / "talking-to-the-owner.md"))
+
+    def test_secrets_rule_everywhere(self):
+        self.assertIn("## Passwords, keys and other secrets", read(REFS / "run-modes.md"))
+        for a in (PLUGIN / "agents").glob("*.md"):
+            self.assertIn("**Secrets:**", read(a), a)
+
+    def test_customer_claims_are_measured(self):
+        text = read(PLUGIN / "README.md") + read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.assertNotIn("about 15 minutes", text)
+        self.assertNotIn("in 15 minutes", text)
+        self.assertNotRegex(text, r"Requires a paid Claude plan \(Pro")
+        self.assertIn("free", read(PLUGIN / "README.md"))
+
+
 class NotionCompatibility(unittest.TestCase):
     def test_schema_has_run_fields(self):
         t = read(SKILLS / "setup-workforce" / "references" / "notion-schema.md")
-        for must in ['"Run ID" RICH_TEXT', '"Started" DATE', '"Finished" DATE',
+        for must in ["'Prepared':purple", "'Handed to you':orange", "'Blocked':brown",
+                     '"Source" RICH_TEXT', '"Next action" RICH_TEXT',
+                     '"Run ID" RICH_TEXT', '"Started" DATE', '"Finished" DATE',
                      '"Completed through" DATE', "'Unknown':gray", "'Running':blue"]:
             self.assertIn(must, t)
 

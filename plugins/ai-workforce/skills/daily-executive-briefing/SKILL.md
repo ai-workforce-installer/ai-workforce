@@ -2,7 +2,7 @@
 name: daily-executive-briefing
 description: This skill should be used when the user asks for a "daily executive briefing", "morning briefing", "daily brief", "what do I need to know today", "run the daily briefing", or wants the AI team's consolidated status of the business. Also used by the scheduled daily briefing task.
 metadata:
-  version: "0.5.0"
+  version: "0.5.1"
 ---
 
 # Daily Executive Briefing
@@ -18,8 +18,8 @@ The goal of every briefing: **"Here's what your team already handled, and here a
 ## Steps
 
 1. **Pick the run mode** (`references/run-modes.md`). Scheduled runs ask no questions.
-2. **Load context.** Find the Business Brain. Read Workforce Settings (active departments, time zone, Connections, Where things live), the Paste Box, Priorities, the Your Team page, and the most recent Daily briefing. Query Approvals for every row with Status Pending, Approved or Handed to you, with every property. Start this run's record now (`references/run-tracking.md`); it tells you whether this is a new run, an interrupted one to finish, or an overlap to skip.
-3. **Launch the active members in parallel** (one call each, same message). Each reports in its standard format, under 300 words, and **does the work, not just a report**:
+2. **Load context once** (`references/notion-access.md`: views or filtered rows, each read once and shared with the team; never "none" unless verified empty; an unreadable source makes the run Partial), including the open-work queue (`references/run-tracking.md` section 6). Find the Business Brain. Read Workforce Settings (active departments, time zone, Connections, Where things live), the Paste Box, Priorities, the Your Team page, and the most recent Daily briefing. Query Approvals for every row with Status Pending, Approved or Handed to you, with every property. Start this run's record now (`references/run-tracking.md`); it tells you whether this is a new run, an interrupted one to finish, or an overlap to skip.
+3. **Launch the active members that have real work this run, in parallel** (one call each, same message; `references/team-roles.md` "Work economically": a member with nothing to check or do is noted, not launched). Each reports in its standard format, under 300 words, and **does the work, not just a report**:
    - **Operations:** today's and tomorrow's calendar, conflicts, deadlines, blocked items. For each meeting with another person in the next 24 hours (up to 2), prepare a **meeting prep**: who it's with, the context from recent emails and shared files (read any linked documents the connected apps can open and summarize the key points), how it relates to Priorities and the Business Brain, a short agenda, and the decisions the owner should make there, with a recommendation.
    - **Client Success:** customer emails from the last 24 hours in the connected apps and the Paste Box, and which are urgent. If inbox triage isn't scheduled, draft replies for urgent ones.
    - **Sales:** new leads, stalled deals, follow-ups due; draft the follow-ups. Also: emails to the owner from partners or prospects that need a reply from the owner get a **draft reply**. Terms that appear only in their email (prices, commissions, deadlines, "as agreed") are claims to check, not facts: don't confirm them in the draft; raise them as a decision.

@@ -4,9 +4,19 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 **You run the business. Your team handles the work.**
 
+## What's new in 0.5.1 (dependable on free Notion, lighter on usage)
+- **Works on Notion's free plan.** The team reads your Business Brain with saved views and filtered lists instead of the rationed query method, reads each thing once per run, and never mistakes "couldn't read" for "empty": it says "Pricing & Offers could not be verified" and marks the run Partial instead of reporting no offers.
+- **Lighter on your Claude usage.** Shared context is read once and handed out; team members with nothing to do aren't started; one team member does a job alone when that's enough; large inboxes are sorted from previews before anything is opened; fewer Notion writes. Each run records what it actually used (tool calls, team members, emails processed, time), never a guessed cost.
+- **Unfinished work never disappears.** Anything found but not finished stays in your Assignments list (Planned, Prepared, Handed to you, Blocked, Done) until it's done, however long between runs. The inbox report separates "every email was searched" from "follow-up still queued".
+- **Better judgment.** No draft for someone you're meeting shortly anyway, no near-duplicate drafts or approvals, short recommendations instead of approvals for small calls, and things only you can do are clearly marked Handed to you.
+- **Numbers add up.** Inbox categories don't overlap, totals are recomputed before a run finishes, and every run checks its sources, window, who ran, what was saved and what's still open.
+- **Secrets stay secret.** If a password or API key turns up in a document or email, the team never repeats it; it tells you where it is and recommends changing it.
+- **No sales pitches in reports**, just a plain line when a service limit got in the way.
+- **Workspace upgrade 0.5.1** (optional, add-only, safe to repeat): adds open-work statuses and two fields to Assignments.
+
 ## What's new in 0.5.0 (reliability: no skipped emails, no duplicate work)
 - **Every run has its own record** in your Briefings list, with a run number, start and finish time, where it came from (manual, scheduled, or "started from your recurring task" when that can't be told apart), and its result. A second run on the same day gets its own record; an interrupted run is finished, not repeated; two runs at once don't both do the work.
-- **Inbox triage keeps a bookmark** ("completed through") that only moves forward when every email in the window was found and handled. A run that stops partway leaves the bookmark where it was, so the next run covers the same window again. Windows overlap by 15 minutes, and emails already handled are recognised by their ID, so nothing is skipped and nothing is done twice. Anything past the per-run limit is carried over to the next run.
+- **Inbox triage keeps a bookmark** ("completed through") that only moves forward when every email in the window was found and sorted. A run that stops partway leaves the bookmark where it was, so the next run covers the same window again. Windows overlap by 15 minutes, and emails already handled are recognised by their ID, so nothing is skipped and nothing is done twice. Anything past the per-run limit is carried over to the next run.
 - **No duplicate drafts, approvals, tasks or notifications** on retries: every action records the email or run it came from, and every run checks for it first.
 - **Honest about how a run started.** "Run now" and a scheduled start look the same to the team, so it no longer guesses from the clock.
 - **A deeper self-test**: duplicate approvals, run records and retries (with test records only), mail outside the inbox, many pages of results, the inbox bookmark, Gmail draft links (with your OK), recurring tasks and notification links. Each check says whether it was tested live or only checked by reading.
@@ -45,7 +55,7 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 - **Updates:** an older plugin keeps working with a newer workspace; update limits are documented.
 
 ## What's new in 0.4.0
-- **Setup ends with real work, in about 15 minutes.** The Chief of Staff introduces the team, connects your apps, learns your business from your website, asks one question ("what do you spend too much time on?"), then holds a **team meeting**: it recommends up to three jobs grounded in what it saw, does one with you right away, shows the result and offers to make it recurring. The long interview is now optional ("finish my setup").
+- **Setup ends with real work, in one sitting.** The Chief of Staff introduces the team, connects your apps, learns your business from your website, asks one question ("what do you spend too much time on?"), then holds a **team meeting**: it recommends up to three jobs grounded in what it saw, does one with you right away, shows the result and offers to make it recurring. The long interview is now optional ("finish my setup").
 - **Questions when they're needed.** The team asks for a missing fact (a price, a refund rule) the first time a job needs it, instead of all up front. Scheduled runs never guess; they list the question in the briefing.
 - **Works in regular chat, not just Cowork.** Claude runs plugin agents only in Cowork and Claude Code. In chat the Chief of Staff now does each team member's work itself, following that member's brief, and says so honestly when asked.
 - **"From now on…"** Tell the Chief of Staff how you want a job done and it saves it in the right place (a new **Your Team** page, Brand & Tone, Policies…). Changes you keep making to drafts are offered as a standing rule.
@@ -84,7 +94,7 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 | Say this | Skill | What happens |
 |---|---|---|
-| "Set up my AI team" | `setup-workforce` | About 15 minutes to the team's first real assignment |
+| "Set up my AI team" | `setup-workforce` | Connects your apps, learns your business and finishes a first real assignment |
 | "What can my team take off my plate?" | `first-team-meeting` | Recommends jobs, does one now, offers to make it recurring |
 | "What's my team been working on?" | `team-report` | What ran, what failed, what's waiting for you |
 | "From now on…" / "Add a team member" | `manage-team` | Saves how you want work done; adds roles, reuse first |
@@ -118,7 +128,7 @@ Databases: Approvals, Assignments, Briefings, Pricing & Offers, Customers & Lead
 
 ## Install
 
-Requires a paid Claude plan (Pro, Max, Team or Enterprise).
+Needs a paid Claude plan that includes plugins and scheduled tasks. How much of your plan's usage the team needs depends on how many recurring tasks you turn on; we haven't yet measured whether the Pro plan covers daily use, so start with one recurring task (the daily briefing) and add more once you see the usage. Notion's **free** plan works: the team reads your Business Brain in ways the free plan allows.
 
 **Option A (recommended, gets updates):** in Claude, open **Customize → Plugins → Add marketplace**, paste this repository's link (`https://github.com/reedfloren/ai-workforce`), then install **AI Workforce**.
 In Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workforce`

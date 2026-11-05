@@ -31,4 +31,10 @@ Adds run tracking fields so the team can tell retries from new runs and keep its
 3. **Assignments option.** Add `Unknown` (gray) to its Run type if missing, sending every existing option with it.
 4. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.0`.
 
+## Upgrade to 0.5.1
+Lets the Assignments database hold the team's open work so nothing found is forgotten between runs. Nothing existing changes; runs work without it (they keep the same details in each row's text). Safe to repeat: each step only adds what's missing.
+1. **Assignments options.** Add `Prepared` (purple), `Handed to you` (orange) and `Blocked` (brown) to Status if missing, sending every existing option with them.
+2. **Assignments properties.** Add `Source` (text) and `Next action` (text) if missing.
+3. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.1`.
+
 Later versions add their own section here, below this one, and run in order.

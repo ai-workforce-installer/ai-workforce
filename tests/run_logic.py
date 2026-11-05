@@ -35,6 +35,8 @@ class Record:
     notified: bool = False
     resumed: int = 0
     last_progress: datetime | None = None
+    search_complete: bool = False
+    pending: list = field(default_factory=list)
     code: str = "IT"
 
 
@@ -82,13 +84,26 @@ def next_window(records, now):
     return start, now, None
 
 
-def carried_over(records, now):
-    keys = []
-    handled = set().union(*[r.handled for r in records]) if records else set()
-    for r in records:
-        if r.rtype == "Inbox triage" and now - r.started <= MAX_WINDOW:
-            keys += [k for k in r.carried_over if k not in handled and k not in keys]
-    return keys
+class OpenWork:
+    """The open-work queue (Assignments rows). Survives any gap between runs.
+
+    key -> status; one row per (source, action). readable=False simulates
+    Notion being unavailable.
+    """
+    def __init__(self):
+        self.rows = {}
+        self.readable = True
+        self.writes = 0
+
+    def open_items(self):
+        if not self.readable:
+            raise ConnectionError("Assignments unavailable")
+        return [k for k, st in self.rows.items() if st not in ("Done", "Failed")]
+
+    def upsert(self, key, status):
+        if self.rows.get(key) != status:
+            self.rows[key] = status
+            self.writes += 1
 
 
 @dataclass
@@ -116,13 +131,14 @@ class Mailbox:
         return chunk, more
 
 
-def triage(records, mailbox, now, code="IT", draft_limit=5, actions=None):
+def triage(records, mailbox, now, code="IT", draft_limit=5, actions=None, queue=None):
     """Run inbox triage per the written rules. Returns the record.
 
     actions: shared list of (kind, source_key) actually created, so tests can
     check nothing is created twice across runs.
     """
     actions = [] if actions is None else actions
+    queue = OpenWork() if queue is None else queue
     kind, rec = decide(records, "Inbox triage", now)
     if kind == "overlap":
         r = Record(make_run_id(code, now, records), "Inbox triage", now,
@@ -140,7 +156,11 @@ def triage(records, mailbox, now, code="IT", draft_limit=5, actions=None):
 
     already = set().union(*[r.handled for r in records])
     existing_actions = {key for _, key in actions}
-    todo = carried_over([r for r in records if r is not rec], now)
+    try:
+        todo = queue.open_items()
+        queue_ok = True
+    except ConnectionError:
+        todo, queue_ok = [], False
 
     found, complete, page = [], True, 0
     while True:
@@ -158,22 +178,28 @@ def triage(records, mailbox, now, code="IT", draft_limit=5, actions=None):
         page += 1
 
     important = [f"gmail:{m.id}" for m in found if m.important]
-    queue = todo + [k for k in important if k not in todo]
+    worklist = todo + [k for k in important if k not in todo]
     drafted = 0
-    for key in queue:
+    for key in worklist:
         if key in already or key in existing_actions:
             continue                               # never process twice
         if drafted >= draft_limit:
-            if key not in rec.carried_over:
-                rec.carried_over.append(key)
+            if queue_ok:
+                queue.upsert(key, "Planned")       # stays in the queue, any gap
+            else:
+                rec.carried_over.append(key)       # reported; nothing that might duplicate
             continue
         actions.append(("draft", key))
         rec.handled.add(key)
+        if queue_ok:
+            queue.upsert(key, "Done")
         drafted += 1
 
     rec.finished = now
-    if complete:
-        rec.completed_through = end
+    rec.search_complete = complete
+    rec.pending = [k for k in (queue.rows if queue_ok else {}) if queue.rows[k] not in ("Done", "Failed")]
+    if complete and queue_ok:
+        rec.completed_through = end                  # search coverage complete
         rec.result = "Complete"
     else:
         rec.completed_through = prev_cp              # bookmark stays put

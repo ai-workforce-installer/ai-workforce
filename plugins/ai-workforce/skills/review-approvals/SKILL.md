@@ -2,10 +2,10 @@
 name: review-approvals
 description: This skill should be used when the user asks to "review my approvals", "what's waiting for me", "clear my approvals", "approve AP-12", "what does the team need from me", or wants to go through the AI team's pending approval queue and decide on each item.
 metadata:
-  version: "0.5.0"
+  version: "0.5.1"
 ---
 
-# Review Approvals (the owner's daily 15 minutes)
+# Review Approvals (the owner's few minutes a day)
 
 _Files named `references/…` are in this skill's own folder._
 
@@ -14,7 +14,7 @@ This skill only runs with the owner present. It is the one place where queued ac
 ## Steps
 
 0. **Decisions already given?** If the owner's message already names AP numbers with decisions (for example replying to the daily briefing's Waiting for you cards), load just those rows and go straight to step 4. Don't re-list the queue.
-1. **Load the queue.** Find the Approvals database in the Business Brain and query rows with Status = Pending or Approved, oldest first. "Approved" means the owner ticked it in Notion but hasn't confirmed here yet. Also load rows marked Handed to you and show them separately as "Still on your list", so the owner can say "I sent it" and you mark them Done. If the queue is empty, say so in one line and stop.
+1. **Load the queue.** Find the Approvals database in the Business Brain and read rows with Status = Pending or Approved (filtered rows or the Decision board view, every page, `references/notion-access.md`), oldest first. "Approved" means the owner ticked it in Notion but hasn't confirmed here yet. Also load rows marked Handed to you and show them separately as "Still on your list", so the owner can say "I sent it" and you mark them Done. If the queue is empty, say so in one line and stop. If the list can't be read completely, say "Your approval list couldn't be fully checked right now", show what was read, and never call the queue empty unless that read was verified empty.
 2. **Present the queue** as a compact list grouped by Department. For each item show: AP number, Item, Exact action, the recommendation from Why, Risk if wrong, Reversible, Draft link (re-check a Gmail draft with get_draft before showing it; if it's gone, say so). Mark items whose Status is already "Approved" in Notion: those were ticked in Notion, but still need a yes here.
 3. **Ask for decisions** in one message: "Reply with the AP numbers to approve, reject or change, e.g. 'approve 12, 14; reject 13; change 15: make it $79'." If a multiple-choice question tool is available and there are 4 or fewer items, you may offer the choices that way; otherwise ask in plain text.
 4. **For each approved item, carry out exactly the Exact action**, nothing more, one item at a time:

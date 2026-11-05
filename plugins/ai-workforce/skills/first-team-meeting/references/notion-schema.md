@@ -29,9 +29,9 @@ If Notion rejects this with "Unique ID prefix is already in use" (the AP prefix 
 Then add a board view named "Decision board": `GROUP BY "Status" SHOW EMPTY; SHOW "AP", "Department", "Action type", "Exact action", "Draft link"; CARD LAYOUT compact`
 
 ### Assignments
-Description: Every task the Chief of Staff hands to a manager, with its result and whether it was verified.
+Description: Every task the Chief of Staff hands to a team member, and the team's open work: anything found but not finished stays here until it's done.
 ```
-CREATE TABLE ("Assignment" TITLE, "Task ID" RICH_TEXT, "Owner" SELECT('Chief of Staff':blue, 'Operations':default, 'Marketing':pink, 'Sales':green, 'Client Success':yellow, 'Finance':red), "Status" SELECT('Planned':gray, 'In progress':blue, 'Done':green, 'Failed':red), "Verification" SELECT('Verified':green, 'Unverified':yellow, 'Failed':red), "Run type" SELECT('Manual':blue, 'Scheduled':purple, 'Unknown':gray), "Result" RICH_TEXT, "Date" DATE)
+CREATE TABLE ("Assignment" TITLE, "Task ID" RICH_TEXT, "Owner" SELECT('Chief of Staff':blue, 'Operations':default, 'Marketing':pink, 'Sales':green, 'Client Success':yellow, 'Finance':red), "Status" SELECT('Planned':gray, 'In progress':blue, 'Prepared':purple, 'Handed to you':orange, 'Blocked':brown, 'Done':green, 'Failed':red), "Source" RICH_TEXT, "Next action" RICH_TEXT, "Verification" SELECT('Verified':green, 'Unverified':yellow, 'Failed':red), "Run type" SELECT('Manual':blue, 'Scheduled':purple, 'Unknown':gray), "Result" RICH_TEXT, "Date" DATE)
 ```
 
 ### Briefings
