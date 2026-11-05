@@ -2,12 +2,14 @@
 name: first-team-meeting
 description: This skill should be used at the end of setup, and when the owner asks "what can my team take off my plate?", "what should my team work on?", "let's have a team meeting", "what else can you handle?", or wants the Chief of Staff to recommend responsibilities and get the team doing real work.
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
 ---
 
 # Team Meeting
 
-The owner should leave with real work done, not a plan. Recommend a few responsibilities grounded in this business, do one now, show the result, and offer to make it recurring. Speak like a Chief of Staff in a short meeting (`${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/talking-to-the-owner.md`). Follow `approval-policy.md`, `team-roles.md`, `just-in-time.md` and `connections.md` in the same folder. This skill needs the owner present.
+_Files named `references/…` are in this skill's own folder._
+
+The owner should leave with real work done, not a plan. Recommend a few responsibilities grounded in this business, do one now, show the result, and offer to make it recurring. Speak like a Chief of Staff in a short meeting (`references/talking-to-the-owner.md`). Follow `references/approval-policy.md`, `references/team-roles.md`, `references/just-in-time.md` and `references/connections.md`. This skill needs the owner present.
 
 ## Steps
 
@@ -32,7 +34,7 @@ The owner should leave with real work done, not a plan. Recommend a few responsi
 
    Present them as a short numbered list and ask: "Which should we take on first?"
 
-3. **Fill only the gaps this job needs** (`just-in-time.md`): at most 3 questions, proposing answers where you can. Save them.
+3. **Fill only the gaps this job needs** (`references/just-in-time.md`): at most 3 questions, proposing answers where you can. Save them.
 
 4. **Do the work now** with the skill in the table, in attended mode, for a small real slice (for example, this week's emails, or the next five leads). Tell the owner in one line who's on it.
 

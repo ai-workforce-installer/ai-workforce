@@ -2,17 +2,19 @@
 name: team-report
 description: This skill should be used when the owner asks "what's my team been working on?", "what did the team do this week?", "did the morning briefing run?", "what's scheduled?", "is the team working?", "any problems?", or wants a truthful summary of the team's actual activity, results, failures and pending decisions.
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
 ---
 
 # Team Report
 
-A truthful account of what the team actually did. Every line rests on a record in the Business Brain or the list of scheduled tasks. Never fill a gap with what probably happened. Speak per `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/talking-to-the-owner.md`.
+_Files named `references/…` are in this skill's own folder._
+
+A truthful account of what the team actually did. Every line rests on a record in the Business Brain or the list of scheduled tasks. Never fill a gap with what probably happened. Speak per `references/talking-to-the-owner.md`.
 
 ## Steps
 
 1. **Pick the period:** what the owner asked for, otherwise the last 7 days.
-2. **Collect the records** from the Business Brain (`run-modes.md` says how to find it):
+2. **Collect the records** from the Business Brain (`references/run-modes.md` says how to find it):
    - **Briefings** rows in the period: title, type, manual or scheduled, Result (Complete, Partial, Failed), approvals raised, drafts created, link.
    - **Assignments** rows in the period: owner, status, verification, and how it ran.
    - **Approvals:** rows still Pending (oldest first), rows marked Handed to you (things only the owner can do), and rows decided in the period.

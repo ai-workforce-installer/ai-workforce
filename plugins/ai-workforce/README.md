@@ -4,6 +4,14 @@ A ready-made AI team for business owners: a Chief of Staff and five team members
 
 **You run the business. Your team handles the work.**
 
+## What's new in 0.4.1 (reliability fixes, no new features)
+- **Self-test tells the truth about who ran.** Each team member is reported as a separate agent, a briefed assistant, or (in regular chat) handled by the Chief of Staff alone, and the verdict says "no separate agents ran" when that's the case. Failures are failures.
+- **Every skill can find its files.** Each skill now carries the reference files it uses, with simple `references/…` paths. Plugin-root paths weren't substituted on every surface, and chat only sees the running skill's folder.
+- **The approval policy lists every Notion write the team makes**, including adding to its own briefings and moving handled Paste Box emails. Anything not listed is not allowed.
+- **Faster, checked workspace setup:** pages in one call, databases together, views last, then a check that everything was created.
+- **Scheduled runs always leave an honest record:** how the work was done, and Complete / Partial / Failed with clear meanings.
+- **Updates:** an older plugin keeps working with a newer workspace; update limits are documented.
+
 ## What's new in 0.4.0
 - **Setup ends with real work, in about 15 minutes.** The Chief of Staff introduces the team, connects your apps, learns your business from your website, asks one question ("what do you spend too much time on?"), then holds a **team meeting**: it recommends up to three jobs grounded in what it saw, does one with you right away, shows the result and offers to make it recurring. The long interview is now optional ("finish my setup").
 - **Questions when they're needed.** The team asks for a missing fact (a price, a refund rule) the first time a job needs it, instead of all up front. Scheduled runs never guess; they list the question in the briefing.
@@ -96,9 +104,11 @@ Then:
 - Never rename a skill: customers' scheduled tasks call skills by name.
 - Business Brain changes go in `skills/assign-work/references/brain-upgrades.md` as a new add-only version section.
 - Keep `skills/assign-work/references/team-roles.md` in step with `agents/`.
+- Each skill carries its own copy of the reference files it uses (Claude reliably sees only the running skill's folder). Edit a reference only at its original location (`assign-work`, `setup-workforce` or `schedule-workforce`), then run `python3 tools/sync_references.py`. Run it with `--check` before every release.
 
 ## Important notes
 - Subagents cannot launch other subagents. Delegation runs from the main conversation, where the skill acts as Chief of Staff.
 - Plugin agents run only in Cowork and Claude Code. In regular chat the Chief of Staff does each member's work itself.
-- Customers who installed from the marketplace get updates when they select **Check for updates** or turn on **Sync automatically**. Customers who uploaded the file must upload the new one.
+- Customers who installed from the marketplace get updates when they select **Check for updates** or turn on **Sync automatically**. Customers who uploaded the file must upload the new one. Team and Enterprise accounts may not be allowed to add outside marketplaces at all. Don't assume every customer is on the latest version: an older plugin keeps working with a newer workspace, and a newer plugin offers the workspace upgrade.
+- A customer who edits the plugin's own files can lose those edits in an update. Everything customer-specific belongs in their Business Brain, which updates never touch.
 - Scheduled tasks need a plan that supports them. Each run uses part of your usage allowance; start with the daily briefing and add more once it's useful.

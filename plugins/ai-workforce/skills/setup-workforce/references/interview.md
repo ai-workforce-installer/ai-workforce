@@ -1,6 +1,6 @@
 # Business Brain Interview (complete version)
 
-Used when the owner says "finish my setup" or "update my Business Brain answers", and as the field map for saving any answer. The normal first-time setup does **not** run this whole interview: it learns from the website, asks one question, and the team asks the rest just in time (`assign-work/references/just-in-time.md`). Ask only about fields that are still empty.
+Used when the owner says "finish my setup" or "update my Business Brain answers", and as the field map for saving any answer. The normal first-time setup does **not** run this whole interview: it learns from the website, asks one question, and the team asks the rest just in time (`references/just-in-time.md`). Ask only about fields that are still empty.
 
 Goal: every field in the Business Brain is either answered by the owner or deliberately skipped, and every answer is saved to Notion as soon as the owner confirms it. The team relies on these answers for every draft, quote and decision, so cover all of them.
 

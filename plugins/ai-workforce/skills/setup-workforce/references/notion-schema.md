@@ -1,11 +1,11 @@
 # Business Brain structure (build exactly this)
 
 Root page: **Business Brain** (icon 🧠). Everything below is a direct child of it.
-Never delete or overwrite existing pages or databases. For an existing Business Brain, the add-only upgrade steps in `assign-work/references/brain-upgrades.md` come first. When upgrading, add any missing page (for example Paste Box) and any missing section of Workforce Settings (for example Connections) without touching what is already there. If a v0.1 Business Brain exists (plain pages named "Assignments log" and "Briefings"), keep their content and rename them to "Assignments log (v0.1 archive)" and "Briefings (v0.1 archive)" so the new databases can use the standard names. Then add the databases below alongside them.
+Never delete or overwrite existing pages or databases. For an existing Business Brain, the add-only upgrade steps in `references/brain-upgrades.md` come first. When upgrading, add any missing page (for example Paste Box) and any missing section of Workforce Settings (for example Connections) without touching what is already there. If a v0.1 Business Brain exists (plain pages named "Assignments log" and "Briefings"), keep their content and rename them to "Assignments log (v0.1 archive)" and "Briefings (v0.1 archive)" so the new databases can use the standard names. Then add the databases below alongside them.
 
-## Pages (create with notion-create-pages, parent = Business Brain page)
+## Pages (create all eight in a single notion-create-pages call, parent = Business Brain page)
 
-Use the template text in `page-templates.md` for each page's starting content.
+Use the template text in `references/page-templates.md` for each page's starting content.
 
 | Page | Icon |
 |---|---|
@@ -54,4 +54,4 @@ CREATE TABLE ("Name" TITLE, "Company" RICH_TEXT, "Email" EMAIL, "Stage" SELECT('
 ```
 
 ## Root page content
-Put the "Start here" text from `page-templates.md` at the top of the Business Brain page (insert at start; never replace existing content).
+Put the "Start here" text from `references/page-templates.md` at the top of the Business Brain page (insert at start; never replace existing content).

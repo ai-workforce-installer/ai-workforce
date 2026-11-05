@@ -2,20 +2,22 @@
 name: setup-workforce
 description: This skill should be used when the user asks to "set up my AI team", "set up the workforce", "get started with the AI Workforce", "onboard me", "build my Business Brain", "setup-workforce", "finish my setup", "continue the setup interview", "update my Business Brain answers", "update my team workspace", or is using the AI Workforce plugin for the first time and has no Business Brain yet.
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
 ---
 
 # Set Up the AI Workforce
 
+_Files named `references/…` are in this skill's own folder._
+
 Take a business owner who has never used Claude to their team's **first real assignment** in about 15 minutes. Installing isn't the result; a useful piece of work done is. Learn what you can by yourself, propose instead of asking, and save the remaining questions for when the work needs them.
 
-Speak like a new Chief of Staff meeting the boss, per `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/talking-to-the-owner.md`. Never mention file paths, schemas, tool names, agents or JSON. Follow `approval-policy.md` in the same folder.
+Speak like a new Chief of Staff meeting the boss, per `references/talking-to-the-owner.md`. Never mention file paths, schemas, tool names, agents or JSON. Follow `references/approval-policy.md`.
 
 Create a task list so the owner sees progress: Meet your team, Connect your apps, Set up your workspace, Learn your business, First team meeting.
 
 **Other requests this skill handles:**
 - **"Finish my setup" / "update my Business Brain answers":** check apps (Stage 1, skipping what works), then run the full interview in `references/interview.md`, asking only about fields that are still empty.
-- **"Update my team workspace":** run only the upgrade steps in `brain-upgrades.md`.
+- **"Update my team workspace":** run only the upgrade steps in `references/brain-upgrades.md`.
 - **Resuming:** if a Business Brain already exists, skip what's done. Company Profile filled and at least one Assignment or Daily briefing in Briefings means setup is complete: offer the team meeting (`first-team-meeting`) or the full interview instead of starting over.
 
 ## Stage 0: Meet your team (one short message, then go straight to Stage 1)
@@ -27,7 +29,7 @@ Introduce yourself as their Chief of Staff, in about five lines:
 If they gave their website in the first message, say you'll start there.
 
 ## Stage 1: Connect apps (one at a time; do not move on until each is settled)
-Only Notion is required. For email, calendar and files the owner picks what they already use, or paste mode if they use something else or would rather not connect. Every path gives a working team; `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/connections.md` explains how each one works. Never make the owner feel they did something wrong by not using Google.
+Only Notion is required. For email, calendar and files the owner picks what they already use, or paste mode if they use something else or would rather not connect. Every path gives a working team; `references/connections.md` explains how each one works. Never make the owner feel they did something wrong by not using Google.
 
 **The connect loop** (used for every app below):
 a. Say in one or two plain sentences what the team uses the app for.
@@ -50,9 +52,9 @@ f. **Still not working after a second try:** walk them through it plainly: finis
 7. End the stage with a short table: job (Business Brain, Email, Calendar, Files), the app or "Paste Box" / "None", working yes/no, what the team will do with it.
 
 ## Stage 2: Set up your workspace
-1. Search Notion for a page titled "Business Brain" (see `run-modes.md` for picking the right one).
-   - **Found:** use it. If its version is older, offer the upgrade in one line as `brain-upgrades.md` says (it only adds what's missing and never changes what's there) and run it on yes; add the Paste Box page and the Connections section of Workforce Settings if either is missing. An older layout with "Assignments log" pages is upgraded per `references/notion-schema.md`. Never delete or overwrite.
-   - **Not found:** ask: "Have you already copied a Business Brain template into your Notion, for example from a link you were given?" If yes, ask for the page's name or link and use it (offer to rename it to exactly "Business Brain" if needed), then offer the upgrade steps. If no, create the full structure from `references/notion-schema.md` and `references/page-templates.md`: the root page as a private page (draft mode), then the eight pages, then the five databases and their views. The new Workforce Settings already carries the current Business Brain version line.
+1. Search Notion for a page titled "Business Brain" (see `references/run-modes.md` for picking the right one).
+   - **Found:** use it. If its version is older, offer the upgrade in one line as `references/brain-upgrades.md` says (it only adds what's missing and never changes what's there) and run it on yes; add the Paste Box page and the Connections section of Workforce Settings if either is missing. An older layout with "Assignments log" pages is upgraded per `references/notion-schema.md`. Never delete or overwrite.
+   - **Not found:** ask: "Have you already copied a Business Brain template into your Notion, for example from a link you were given?" If yes, ask for the page's name or link and use it (offer to rename it to exactly "Business Brain" if needed), then offer the upgrade steps. If no, create the full structure from `references/notion-schema.md` and `references/page-templates.md`, in as few calls as possible: the root page as a private page (draft mode); then all eight pages in **one** create call; then the five databases, sent together; then the two views. Views are conveniences: if one fails, note it and carry on. Tell the owner in one line while this happens ("Setting up your workspace, about a minute"). The new Workforce Settings already carries the current Business Brain version line. Before moving on, fetch the root page once to confirm the eight pages and five databases are there; retry anything missing once, then tell the owner plainly if it's still missing.
 2. Fill in the Connections section of Workforce Settings with the Stage 1 choices.
 3. Tell the owner in one line where the Business Brain lives, with its link.
 

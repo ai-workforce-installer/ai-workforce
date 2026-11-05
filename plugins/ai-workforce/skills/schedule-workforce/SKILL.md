@@ -2,16 +2,18 @@
 name: schedule-workforce
 description: This skill should be used when the owner asks "can someone handle this every Friday?", "do this every morning", "make it a recurring responsibility", "schedule the team", "make the team run automatically", "schedule my briefing", "change the team's schedule", "pause the team", or wants team members to handle work on their own at set times.
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
 ---
 
 # Schedule the Workforce
+
+_Files named `references/…` are in this skill's own folder._
 
 Give team members recurring responsibilities that run on their own. With the owner, call them recurring responsibilities ("Client Success handles your inbox every weekday at 10"); in tool calls they are scheduled tasks. Never say triggers, routines or cron jobs.
 
 **One responsibility or the full set.** When called for one responsibility (from the team meeting, or "can someone handle this every Friday?"), propose and create only that one. Use the full default set below only when the owner asks to schedule the team.
 
-**Four states, never blurred:** *proposed* (discussed, not created), *scheduled* (created, and confirmed in the list of scheduled tasks), *ran* (a Briefings row exists for that run), *succeeded or failed* (that row's Result). Only say "scheduled" after step 5's check, and never say a run happened without its Briefings row. Follow `${CLAUDE_PLUGIN_ROOT}/skills/assign-work/references/approval-policy.md`.
+**Four states, never blurred:** *proposed* (discussed, not created), *scheduled* (created, and confirmed in the list of scheduled tasks), *ran* (a Briefings row exists for that run), and how it ended, from that row's Result: *succeeded* (Complete), *partly done* (Partial) or *failed* (Failed). Only say "scheduled" after step 5's check, and never say a run happened without its Briefings row. Follow `references/approval-policy.md`.
 
 ## Steps
 
