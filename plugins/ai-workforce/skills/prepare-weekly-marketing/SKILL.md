@@ -15,7 +15,7 @@ Follow `references/approval-policy.md`, `references/approval-queue.md` and `refe
 
 ## Steps
 
-1. **Pick the run mode** (`references/run-modes.md`).
+1. **Pick the run mode and start this run's record** (`references/run-tracking.md`) (`references/run-modes.md`).
 2. **Gather inputs.** Read the Business Brain: Workforce Settings (where marketing data lives), Company Profile, Brand & Tone, Priorities, Pricing & Offers, and last week's Weekly marketing row in Briefings. Look for last week's performance data in the named location, then Notion and the owner's file app (Google Drive or OneDrive, per Connections). If none exists: attended, ask the user to paste or attach an export; scheduled, plan from the Business Brain alone and state that no performance data was found.
 3. **Delegate** to `marketing-manager` (Agent tool): analyze last week, name winners and losers with numbers, then draft next week's plan: content calendar, 3-5 creative or copy variants to test with a hypothesis each, and budget change proposals with exact values. End with Approvals Needed and a Run receipt.
 4. **Collaborate.** Launch `sales-manager` for which offers or lead sources are converting and what objections prospects raise, and `client-success-manager` for recurring customer questions worth content. Pass their findings to marketing for a second pass if they change the plan.

@@ -21,7 +21,7 @@ Never label a member "separate agent" unless that launch returned the code.
 
 ## Steps
 
-1. **Read Connections** in Workforce Settings so you know which apps this owner chose (Gmail / Outlook / Paste mode, and so on). The test checks those apps, not apps the owner never chose.
+1. **Start this run's record** (`references/run-tracking.md`, Type Self-test, code ST), then **read Connections** in Workforce Settings so you know which apps this owner chose (Gmail / Outlook / Paste mode, and so on). The test checks those apps, not apps the owner never chose.
 2. **Generate a code.** Create a random 6-character code (for example `K7Q2XM`) and keep it.
 3. **Test the five members** (Operations, Marketing, Sales, Client Success, Finance), all at once where possible. For each, use the first option that is available:
    - The named agent (`operations-manager`, `marketing-manager`, `sales-manager`, `client-success-manager`, `finance-manager`), or, if the named agents aren't available,
@@ -31,11 +31,12 @@ Never label a member "separate agent" unless that launch returned the code.
 4. **Check each reply:** correct role, exact code echoed, connections honestly reported, hard-limit sentence present. Missing code or role = Failed for that member. If one launch fails, retry that member once before marking it Failed.
 5. **Check the Business Brain.** If none exists yet (a clean install), say so plainly ("Your team's workspace isn't set up yet. Say 'set up my AI team' to start."), mark the checks that need it as skipped, and still test the team members and connections. Otherwise search Notion for "Business Brain" and confirm these exist: pages Workforce Settings (with a Connections section and a Business Brain version line), Company Profile, Priorities, Policies, Brand & Tone, FAQs, Paste Box, Your Team (missing pieces from older versions: offer the upgrade in `references/brain-upgrades.md`); databases Approvals, Assignments, Briefings, Pricing & Offers, Customers & Leads. Count "not set" markers (they read back as `<i>not set</i>`) on each page as a completeness score. Count active rows in Pricing & Offers.
 6. **Check the approval queue end to end, including duplicates:** create one Approvals row: Item "Self-test: queue check <code>", Department "Chief of Staff", Action type "Other", Exact action "No action. Test row. (source: selftest:<code>)", Status "Pending", Source run "<Run ID> Self-test". Read it back to confirm an AP number was assigned. Then try to queue the same item again following `references/approval-queue.md`: PASS only if the duplicate check finds the existing row by its source key and no second row is created. Then list the whole active queue (every Pending and Approved row) with the one-line reply instructions, exactly as a briefing would, and confirm the count matches the database. Set the test row's Status to "Done". Never delete it.
-6b. **Check run tracking with test records** (Type = Self-test only, so real runs are never touched):
-   - Create record A per `references/run-tracking.md` (header with Run ID, Started now, Source Manual, Status Running). Apply section 3 as if a second run started now: PASS if it's classified as **still in progress** (no new record).
-   - Create record B, unfinished, whose header says it started 60 minutes ago. Apply section 3: PASS if it's classified as **interrupted, resume B** (a "Resumed" section is added to B, no new record).
-   - Finish A and B (Run finished lines, Result Complete). Apply section 3 again: PASS if a **new record** would be created, so two legitimate runs on one day stay separate.
-   - Fetch record A back by its link: PASS if the link opens it and the header reads back intact.
+6b. **Check run tracking with test records.** Use only records titled "Self-test fixture <code> A/B" (Type Self-test). Real runs ignore fixtures, and these checks look only at fixtures, never at this run's own record. Apply `references/run-tracking.md` section 3 as if a run of the responsibility "fixture <code>" were starting now:
+   - Create fixture A (header: Run ID ST-<code>-A, Started now, Source Manual, Status Running). PASS if section 3 says **still in progress, don't run**.
+   - Finish A (Run finished, Result Complete). Create fixture B, unfinished, header saying it started 60 minutes ago with no Progress lines. PASS if section 3 says **interrupted, resume B** (add a "Resumed" section to B; no new record).
+   - Finish B. PASS if section 3 now says **new run**, so two legitimate runs on one day stay separate.
+   - Fetch A back by its link: PASS if it opens and the header reads back intact.
+   - If anything in this step fails, still finish both fixtures before moving on, so none is left unfinished.
 6c. **Check the inbox safeguards** (read-only, Gmail or Outlook owners; skip on paste mode):
    - **Outside the inbox:** run the inbox triage search (`references/inbox-coverage.md` section 2) for the last 24 hours and count threads without the Inbox label (archived by filters) and in each tab. PASS if the search returns them; report the counts ("14 of 63 emails never reached your inbox; the team still sees them").
    - **Many pages:** run the same search for the last 7 days with 50 per page, following next-page tokens up to 5 pages. PASS if every token was followed; report pages and threads, and Gmail's own estimate next to the real count.

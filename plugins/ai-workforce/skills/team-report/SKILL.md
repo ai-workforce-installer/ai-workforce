@@ -15,7 +15,7 @@ A truthful account of what the team actually did. Every line rests on a record i
 
 1. **Pick the period:** what the owner asked for, otherwise the last 7 days.
 2. **Collect the records** from the Business Brain (`references/run-modes.md` says how to find it):
-   - **Briefings** rows in the period: title, type, manual or scheduled, Result (Complete, Partial, Failed), approvals raised, drafts created, link.
+   - **Briefings** rows in the period: title, type, Source (manual, scheduled, or "started from a recurring task" when unknown), status (finished, still running, Not run because another run was working, Abandoned), Result (Complete, Partial, Failed), approvals raised, drafts created, link.
    - **Assignments** rows in the period: owner, status, verification, and how it ran.
    - **Approvals:** rows still Pending (oldest first), rows marked Handed to you (things only the owner can do), and rows decided in the period.
    - **Workforce Settings → Schedule:** each recurring responsibility and its saved state.
@@ -25,6 +25,7 @@ A truthful account of what the team actually did. Every line rests on a record i
    - Expected run with no row → **no record**: it didn't run, or it didn't finish. Give the last-run status from the schedule list if you have it. Don't guess which.
    - Listed in Workforce Settings but missing from the schedule list, or disabled → **not actually scheduled**.
    - Saved as "proposed, not scheduled" → **not set up yet**.
+   - A record still running with no Progress for over 45 minutes → **stuck**: the next run will finish it. Not run records are normal (two runs overlapped) and aren't problems. Abandoned records are problems: say what was left undone.
    - A row or task with a configuration warning, or a task whose prompt lacks the current `prompt version` line (`references/run-modes.md`, "Is the recurring task current?") → **uses older instructions**: say what it does differently and offer "update my recurring tasks".
    - Runs whose row says the plugin or an app wasn't available → say so plainly, with the fix (reconnect the app, or keep AI Workforce turned on under Customize → Plugins).
 4. **Report in this order**, short and plain:

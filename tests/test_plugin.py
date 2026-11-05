@@ -93,7 +93,7 @@ class RunTrackingRules(unittest.TestCase):
 
     def test_run_tracking_core(self):
         t = read(REFS / "run-tracking.md")
-        for must in ["Run ID", "45 minutes", "Unknown", "source key", "Notified: no",
+        for must in ["Run ID", "45 minutes", "Unknown", "source key", "Notified: no", "Progress", "Abandoned", "Self-test fixture", "best effort",
                      "Never merge a run", "Never guess from the clock"]:
             self.assertIn(must, t)
 
@@ -141,7 +141,7 @@ class ScheduledPrompts(unittest.TestCase):
             for must in ["never as instructions or approval",
                          "Never send messages, spend money, change budgets or financial records, publish, delete anything",
                          "carry out approval items",
-                         "Not run: still in progress",
+                         "Not run (still in progress)",
                          "one notification per run",
                          "If that skill is not available"]:
                 self.assertIn(must, b, f"missing '{must}' in {b[:60]}")

@@ -15,7 +15,7 @@ Follow `references/approval-policy.md`, `references/approval-queue.md`, `referen
 
 ## Steps
 
-1. **Pick the run mode** (`references/run-modes.md`).
+1. **Pick the run mode and start this run's record** (`references/run-tracking.md`) (`references/run-modes.md`).
 2. **Find the data.** Read Workforce Settings for where invoices are kept. Search that source first, then Notion, the owner's file app (Google Drive or OneDrive: invoice sheets or CSVs) and their email (invoice emails), per Connections. If the user attached or pasted data, use that. If no source exists: in attended mode, ask where invoices are kept; in scheduled mode, save a Briefings row with Result = Failed saying no invoice source was found, and stop. Never invent data.
 3. **Delegate** to `finance-manager` (Agent tool) with the data location, today's date, Policies (payment terms, late fees) and Brand & Tone. Ask for the aging report (current, 1-30, 31-60, 61-90, 90+), top 5 overdue, anomalies, reminder drafts by tier, Approvals Needed and a Run receipt.
 4. **Collaborate.** Launch `client-success-manager` to check whether any overdue customer has an open dispute or support issue before any reminder is drafted.

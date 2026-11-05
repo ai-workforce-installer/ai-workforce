@@ -34,18 +34,23 @@ class Record:
     carried_over: list = field(default_factory=list)
     notified: bool = False
     resumed: int = 0
+    last_progress: datetime | None = None
+    code: str = "IT"
 
 
 # ---- run-tracking.md section 3: new run, retry, or overlap ----
-def decide(records, rtype, now):
+def decide(records, rtype, now, code="IT"):
     """Return ('new', None) | ('overlap', rec) | ('resume', rec)."""
+    for r in records:                       # older than 24h and unfinished -> abandoned
+        if r.rtype == rtype and r.finished is None and now - r.started > timedelta(hours=RETRY_LOOKBACK_HOURS):
+            r.finished, r.result = now, "Failed"
     open_recs = [r for r in records
-                 if r.rtype == rtype and r.finished is None
-                 and now - r.started <= timedelta(hours=RETRY_LOOKBACK_HOURS)]
+                 if r.rtype == rtype and r.finished is None and r.code == code]
     if not open_recs:
         return "new", None
     rec = max(open_recs, key=lambda r: r.started)
-    if now - rec.started < timedelta(minutes=OVERLAP_MINUTES):
+    last = max(rec.started, rec.last_progress or rec.started)
+    if now - last < timedelta(minutes=OVERLAP_MINUTES):
         return "overlap", rec
     return "resume", rec
 
@@ -61,7 +66,8 @@ def make_run_id(code, started, records):
 
 # ---- inbox-coverage.md section 1: window and checkpoint ----
 def last_checkpoint(records):
-    done = [r for r in records if r.rtype == "Inbox triage" and r.finished and r.completed_through]
+    done = [r for r in records if r.rtype == "Inbox triage" and r.code == "IT"
+            and r.finished and r.completed_through]
     return max((r.completed_through for r in done), default=None)
 
 

@@ -50,6 +50,22 @@ class RunIdentity(unittest.TestCase):
         self.assertEqual(len(keys), len(set(keys)), "a draft was created twice")
         self.assertEqual(r.resumed, 1)
 
+    def test_long_run_with_recent_progress_is_not_taken_over(self):
+        rec = Record("IT-1", "Inbox triage", T0, last_progress=T0 + timedelta(minutes=50))
+        self.assertEqual(decide([rec], "Inbox triage", T0 + timedelta(minutes=70))[0], "overlap")
+
+    def test_record_older_than_a_day_is_abandoned(self):
+        rec = Record("IT-1", "Inbox triage", T0 - timedelta(hours=30))
+        kind, _ = decide([rec], "Inbox triage", T0)
+        self.assertEqual(kind, "new")
+        self.assertEqual(rec.result, "Failed")
+
+    def test_customer_only_runs_never_block_or_set_the_bookmark(self):
+        cs = Record("CS-1", "Inbox triage", T0, code="CS")
+        self.assertEqual(decide([cs], "Inbox triage", T0 + timedelta(minutes=5))[0], "new")
+        cs.finished, cs.completed_through = T0, T0
+        self.assertIsNone(last_checkpoint([cs]))
+
     def test_other_types_do_not_block(self):
         recs = [Record("DB-1", "Daily briefing", T0)]
         self.assertEqual(decide(recs, "Inbox triage", T0 + timedelta(minutes=5))[0], "new")

@@ -19,7 +19,7 @@ Act as the Chief of Staff in the main conversation. Read these and apply them th
 
 ## Steps
 
-1. **Pick the run mode** (`references/run-modes.md`).
+1. **Pick the run mode and start this run's record** (`references/run-tracking.md`) (`references/run-modes.md`).
 2. **Load context.** Find the Business Brain (`references/run-modes.md`). Read Workforce Settings (Connections, active departments, Extra rules), Brand & Tone, the Your Team page (each member's notes and any custom members), and whatever else the work touches. If Notion isn't connected, say so and work from what the owner gave you. No Workforce Settings page: suggest `setup-workforce` and carry on.
 3. **Route.**
    - The owner named a member ("have Marketing…"), or the job clearly belongs to one: give it to that member. No plan table; say in one line who's on it.
