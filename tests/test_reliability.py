@@ -143,6 +143,15 @@ class AutoUpdate(unittest.TestCase):
     def test_current_prompt_untouched(self):
         self.assertEqual(auto_update_plan([self.task(self.NEW)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "none")
 
+    def test_reformatted_whitespace_still_counts_as_unmodified(self):
+        reformatted = self.OLD.replace("\n", "\r\n") + "   "
+        self.assertEqual(auto_update_plan([self.task(reformatted)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "update")
+
+    def test_current_version_line_but_different_text_is_not_current(self):
+        stamped = "[AI Workforce task: inbox-triage | prompt version 0.5.2]\nsomething else"
+        self.assertEqual(auto_update_plan([self.task(stamped)], "inbox-triage", self.H, "0.5.2", "0.5.2"),
+                         ("warn", "custom instructions"))
+
     def test_customized_prompt_preserved(self):
         custom = self.OLD + "\nAlso always cc my assistant."
         self.assertEqual(auto_update_plan([self.task(custom)], "inbox-triage", self.H, "0.5.2", "0.5.2"),

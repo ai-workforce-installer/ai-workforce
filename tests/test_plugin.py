@@ -297,11 +297,13 @@ class FreePlanAndEfficiency(unittest.TestCase):
         rm = read(REFS / "run-modes.md")
         for must in ["Keep the task up to date automatically", "Recurring tasks update themselves: no",
                      "update **only the prompt**", "never create, pause or delete a task",
-                     "None, or more than one: stop and ask the owner",
+                     "None, or more than one: change nothing and report it",
                      "Custom responsibilities are never replaced", "exactly** one released version",
-                     "never judge by the version line alone", "Previous recurring-task instructions (backup)",
+                     "Never judge by the version line alone", "Previous recurring-task instructions (backup)",
                      "put the backed-up instructions back", "Never report success that wasn't verified",
-                     "Nothing new to accept"]:
+                     "Nothing new to accept", "if the backup can't be saved and read back, don't update",
+                     "start with `[AI Workforce task: <this skill> |`", "whatever version line they carry",
+                     "line endings and spaces at the ends of lines"]:
             self.assertIn(must, rm)
         self.assertNotIn("A run never changes its own scheduled task", rm)
         self.assertIn("prompt only", read(REFS / "approval-policy.md"))
@@ -319,7 +321,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
                 self.assertIn(f"## {sk} {v}", h)
 
     def test_setup_explains_auto_updates_in_one_sentence(self):
-        self.assertIn("These keep themselves up to date when AI Workforce improves",
+        self.assertIn("These keep their instructions up to date when AI Workforce improves",
                       read(SKILLS / "schedule-workforce" / "SKILL.md"))
         setup = read(SKILLS / "setup-workforce" / "SKILL.md")
         self.assertNotIn("minutes)", setup)
@@ -342,6 +344,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
 
     def test_root_readme_consistent(self):
         root = read(ROOT / "README.md")
+        self.assertIn("still being proven live", root)
         self.assertNotIn("15 minutes", root)
         self.assertNotIn("Pro or above", root)
         self.assertIn("Required:", root)

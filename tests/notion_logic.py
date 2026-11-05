@@ -238,6 +238,11 @@ STANDARD = {"daily-executive-briefing", "inbox-triage", "prepare-weekly-marketin
 SETTINGS = ("cron", "timezone", "enabled", "notifications", "model", "approval")
 
 
+def normalize(text):
+    """The only differences allowed when comparing prompts: line endings and trailing spaces."""
+    return "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").split("\n")).strip()
+
+
 def vkey(v):
     return [int(x) for x in v.split(".")]
 
@@ -259,12 +264,12 @@ def auto_update_plan(tasks, responsibility, history, current_version, brain_vers
     task = matches[0]
     current_text, needs = history[(responsibility, current_version)]
     current_text = current_text.replace("<BRAIN>", brain_title)
-    if task["prompt"] == current_text:
+    if normalize(task["prompt"]) == normalize(current_text):
         return "none", None
     if not can_compare:
         return "warn", "can't compare reliably"
     released = {v: t.replace("<BRAIN>", brain_title) for (r, v), (t, _) in history.items() if r == responsibility}
-    found = [v for v, text in released.items() if text == task["prompt"]]
+    found = [v for v, text in released.items() if normalize(text) == normalize(task["prompt"])]
     if not found:
         return "warn", "custom instructions"          # includes unknown old versions
     if vkey(brain_version) < vkey(needs):
