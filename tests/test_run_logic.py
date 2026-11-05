@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from run_logic import (Record, Message, Mailbox, OpenWork, decide, make_run_id, next_window,
+from run_logic import (start_together, bookmark_check, pagination_check, Report, send_with_recovery, open_gaps, backfill, search_all,
+                       Record, Message, Mailbox, OpenWork, decide, make_run_id, next_window,
                        triage, last_checkpoint)
 
 T0 = datetime(2026, 11, 5, 8, 0)
@@ -159,9 +160,10 @@ class OpenWorkQueue(unittest.TestCase):
         for i in range(4):
             triage(recs, Mailbox([]), later + timedelta(hours=i), actions=actions, draft_limit=5, queue=q)
         self.assertEqual({k for _, k in actions}, {f"gmail:{m.id}" for m in msgs})
-        self.assertEqual(q.open_items(), [])
+        self.assertEqual([k for k in q.open_items() if not k.startswith("inbox-gap:")], [])
+        self.assertTrue(open_gaps(q))                   # the unscanned weeks are still tracked
 
-    def test_queue_unreadable_keeps_bookmark_and_creates_no_duplicates(self):
+    def test_queue_unreadable_carries_over_durably_and_creates_no_duplicates(self):
         msgs = mail(10, T0 - timedelta(hours=5), every_important=1)
         recs, actions, q = [], [], OpenWork()
         first = Record("IT-0", "Inbox triage", T0 - timedelta(days=1), finished=T0 - timedelta(days=1),
@@ -170,8 +172,14 @@ class OpenWorkQueue(unittest.TestCase):
         q.readable = False
         r = triage(recs, Mailbox(msgs), T0, actions=actions, draft_limit=3, queue=q)
         self.assertEqual(r.result, "Partial")
-        self.assertEqual(r.completed_through, first.completed_through)
-        self.assertEqual(q.rows, {})
+        self.assertEqual(r.completed_through, T0)        # search was complete; leftovers are in Carried over
+        self.assertEqual(len(r.carried_over), 7)
+        self.assertEqual(q.rows, {})                     # nothing written that might duplicate
+        q.readable = True
+        triage(recs, Mailbox([]), T0 + timedelta(hours=2), actions=actions, draft_limit=100, queue=q)
+        keys = [k for _, k in actions]
+        self.assertEqual(sorted(keys), sorted(f"gmail:{m.id}" for m in msgs))   # all done, once each
+        self.assertEqual(len(keys), len(set(keys)))
 
     def test_one_row_per_source_and_action(self):
         q = OpenWork()
@@ -191,6 +199,192 @@ class Notifications(unittest.TestCase):
         self.assertTrue(r.notified)
         self.assertEqual(sum(1 for x in recs if x.notified), 1)
 
+
+class CheckpointPolicy(unittest.TestCase):
+    """The bookmark follows email search coverage, not the overall Result (self-test 6c checks the same)."""
+    def setUp(self):
+        self.recs = [Record("IT-0", "Inbox triage", T0 - timedelta(hours=6), finished=T0 - timedelta(hours=6),
+                            result="Complete", completed_through=T0 - timedelta(hours=6))]
+        self.msgs = mail(30, T0 - timedelta(hours=5), every_important=3)
+
+    def test_partial_run_with_complete_email_search_moves_the_bookmark(self):
+        r = triage(self.recs, Mailbox(self.msgs), T0, other_sources_ok=False)   # e.g. Notion pricing unreadable
+        self.assertEqual(r.result, "Partial")
+        self.assertTrue(r.search_complete)
+        self.assertEqual(r.completed_through, T0)
+        self.assertTrue(bookmark_check(self.recs))
+
+    def test_incomplete_email_search_keeps_the_bookmark(self):
+        r = triage(self.recs, Mailbox(self.msgs * 3, fail_on_page=0), T0)
+        self.assertFalse(r.search_complete)
+        self.assertEqual(r.completed_through, T0 - timedelta(hours=6))
+        self.assertTrue(bookmark_check(self.recs))
+
+    def test_bookmark_check_catches_a_wrong_move(self):
+        r = triage(self.recs, Mailbox(self.msgs, fail_on_page=0), T0)
+        r.completed_through = T0                          # moved although the search was incomplete
+        self.assertFalse(bookmark_check(self.recs))
+
+    def test_pagination_cap_with_another_page_is_incomplete(self):
+        many = [Message(f"x{i}", T0 - timedelta(minutes=i)) for i in range(300)]   # 6 pages of 50
+        self.assertEqual(pagination_check(Mailbox(many), T0 - timedelta(days=7), T0), "incomplete (stopped at 5 pages)")
+        few = many[:120]
+        self.assertEqual(pagination_check(Mailbox(few), T0 - timedelta(days=7), T0), "PASS")
+
+
+class InboxGaps(unittest.TestCase):
+    """inbox-coverage.md: a gap over 7 days becomes a durable row and is caught up 2 days per run."""
+    def setUp(self):
+        self.cp = T0 - timedelta(days=12)
+        self.recs = [Record("IT-0", "Inbox triage", self.cp, finished=self.cp, result="Complete",
+                            completed_through=self.cp)]
+        # one important email every 6 hours across the whole 12 days
+        self.msgs = [Message(f"m{i}", self.cp + timedelta(hours=6 * i), important=True) for i in range(48)]
+
+    def test_gap_over_7_days_is_saved_and_reported(self):
+        q = OpenWork()
+        r = triage(self.recs, Mailbox(self.msgs), T0, queue=q, draft_limit=1000)
+        self.assertEqual(r.window[1] - r.window[0], timedelta(days=7))
+        self.assertEqual(len(open_gaps(q)), 1)           # still open after the first catch-up
+        self.assertEqual(r.completed_through, T0)        # search coverage of its own window
+        self.assertTrue(r.gaps_open)                     # so the report can't imply full coverage
+
+    def test_later_runs_close_the_gap_without_missing_or_duplicating(self):
+        q, actions = OpenWork(), []
+        for d in range(5):
+            triage(self.recs, Mailbox(self.msgs), T0 + timedelta(days=d), queue=q, actions=actions, draft_limit=1000)
+        keys = [k for _, k in actions]
+        self.assertEqual(len(keys), len(set(keys)))       # nothing twice
+        self.assertEqual(set(keys), {f"gmail:{m.id}" for m in self.msgs})   # nothing missed
+        self.assertEqual(open_gaps(q), [])
+        self.assertEqual(len(q.gaps), 1)                  # one row, closed
+
+    def test_failed_catch_up_leaves_the_gap_row_as_it_was(self):
+        q = OpenWork()
+        triage(self.recs, Mailbox(self.msgs), T0, queue=q, draft_limit=1000)
+        before = open_gaps(q)
+        class Flaky(Mailbox):
+            def search(self, start, end, page):
+                if end <= T0 - timedelta(days=6):         # only the gap searches fail
+                    raise ConnectionError("down")
+                return super().search(start, end, page)
+        r = triage(self.recs, Flaky(self.msgs), T0 + timedelta(hours=2), queue=q, draft_limit=1000)
+        self.assertEqual(open_gaps(q), before)
+        self.assertEqual(r.result, "Complete")           # its own window was covered; the gap is tracked
+
+    def test_overlapping_gaps_share_one_row(self):
+        q = OpenWork()
+        q.add_gap(T0 - timedelta(days=20), T0 - timedelta(days=10))
+        q.add_gap(T0 - timedelta(days=12), T0 - timedelta(days=8))
+        self.assertEqual(len(q.gaps), 1)
+        self.assertEqual(open_gaps(q), [(T0 - timedelta(days=20), T0 - timedelta(days=8))])
+
+    def test_owner_backfill_covers_the_requested_period(self):
+        q, actions = OpenWork(), []
+        q.add_gap(self.cp, T0 - timedelta(days=7))
+        self.assertTrue(backfill(q, Mailbox(self.msgs), self.cp, T0 - timedelta(days=7), self.recs, actions))
+        wanted = {f"gmail:{m.id}" for m in self.msgs if m.at < T0 - timedelta(days=7)}
+        self.assertEqual({k for _, k in actions}, wanted)
+        self.assertEqual(open_gaps(q), [])
+
+    def test_unreadable_queue_reports_the_gap_instead(self):
+        q = OpenWork(); q.readable = False
+        r = triage(self.recs, Mailbox(self.msgs), T0, queue=q)
+        self.assertTrue(any(c.startswith("inbox-gap") for c in r.carried_over))
+        self.assertEqual(r.result, "Partial")
+
+
+class NotificationRecovery(unittest.TestCase):
+    """run-tracking.md section 5: finished work whose notification never went out."""
+    NOW = T0 + timedelta(days=1)
+
+    def notifier(self, *outcomes):
+        calls, seq = [], list(outcomes)
+        def send(links):
+            calls.append(links)
+            return seq.pop(0)
+        return send, calls
+
+    def test_interrupted_before_notifying_is_caught_up_without_redoing_work(self):
+        old = Report("IT-1", "IT", T0, notified="pending")
+        cur = Report("IT-2", "IT", self.NOW)
+        send, calls = self.notifier("accepted")
+        send_with_recovery(cur, [old], "IT", self.NOW, send)
+        self.assertEqual(calls, [["IT-2", "IT-1"]])       # one notification, both links
+        self.assertEqual((old.notified, old.work_done), ("accepted", 1))
+        self.assertNotEqual(old.notified, "confirmed")   # accepted by the tool is not delivery
+
+    def test_explicit_failure_is_retried_up_to_three_times(self):
+        old = Report("IT-1", "IT", T0, notified="failed", attempts=["attempt 1: failed"])
+        for i, outcome in enumerate(["failed", "failed", "failed"]):
+            send, calls = self.notifier(outcome)
+            send_with_recovery(Report(f"IT-{i+2}", "IT", self.NOW), [old], "IT", self.NOW, send)
+        self.assertEqual(len(old.attempts), 3)           # the third run left it alone
+
+    def test_permanent_failure_is_never_retried(self):
+        old = Report("IT-1", "IT", T0, notified="failed (permanent)")
+        send, calls = self.notifier("accepted")
+        send_with_recovery(Report("IT-2", "IT", self.NOW), [old], "IT", self.NOW, send)
+        self.assertEqual(calls, [["IT-2"]])
+
+    def test_successful_retry(self):
+        old = Report("IT-1", "IT", T0, notified="failed", attempts=["attempt 1: failed"])
+        send, _ = self.notifier("confirmed")
+        send_with_recovery(Report("IT-2", "IT", self.NOW), [old], "IT", self.NOW, send)
+        self.assertEqual(old.notified, "confirmed")
+        send, calls = self.notifier("accepted")
+        send_with_recovery(Report("IT-3", "IT", self.NOW), [old], "IT", self.NOW, send)
+        self.assertEqual(calls, [["IT-3"]])               # never sent again
+
+    def test_unknown_outcome_retried_once_with_duplicate_warning(self):
+        old = Report("IT-1", "IT", T0, notified="unknown", attempts=["attempt 1: unknown"])
+        send, _ = self.notifier("unknown")
+        send_with_recovery(Report("IT-2", "IT", self.NOW), [old], "IT", self.NOW, send)
+        self.assertIn("may arrive twice", old.attempts[-1])
+        send, calls = self.notifier("accepted")
+        send_with_recovery(Report("IT-3", "IT", self.NOW), [old], "IT", self.NOW, send)
+        self.assertEqual(calls, [["IT-3"]])
+
+    def test_bounded_to_same_responsibility_and_8_days(self):
+        other = Report("DB-1", "DB", T0, notified="pending")
+        stale = Report("IT-0", "IT", self.NOW - timedelta(days=8, hours=1), notified="pending")
+        send, calls = self.notifier("accepted")
+        send_with_recovery(Report("IT-2", "IT", self.NOW), [other, stale], "IT", self.NOW, send)
+        self.assertEqual(calls, [["IT-2"]])
+
+    def test_weekly_report_missed_last_week_is_caught_up(self):
+        old = Report("WM-1", "WM", self.NOW - timedelta(days=7), notified="failed", attempts=["attempt 1: failed"])
+        send, calls = self.notifier("accepted")
+        send_with_recovery(Report("WM-2", "WM", self.NOW), [old], "WM", self.NOW, send)
+        self.assertEqual(calls, [["WM-2", "WM-1"]])
+
+    def test_not_run_record_sends_nothing(self):
+        old = Report("IT-1", "IT", T0, notified="pending")
+        send, calls = self.notifier()
+        self.assertIsNone(send_with_recovery(Report("IT-2", "IT", self.NOW), [old], "IT", self.NOW, send,
+                                             sends_own=False))
+        self.assertEqual((calls, old.notified), ([], "pending"))
+
+
+class ConcurrentStarts(unittest.TestCase):
+    """Best effort only: there is no atomic lock. The look-again step settles most same-minute starts;
+    the duplicate checks are the backstop for retries."""
+    def test_same_minute_starts_leave_one_session_working(self):
+        recs = []
+        proceed = start_together(recs, T0)
+        self.assertEqual(len(proceed), 1)
+        self.assertEqual(proceed[0].run_id, "IT-20261105-0800")
+        self.assertEqual(sorted(r.result for r in recs if r.finished), ["Partial"])   # the other: Not run
+        self.assertEqual(len({r.run_id for r in recs}), 2)
+
+    def test_immediate_retry_creates_no_duplicate_work(self):
+        msgs = mail(10, T0 - timedelta(hours=5), every_important=1)
+        recs, actions, q = [], [], OpenWork()
+        triage(recs, Mailbox(msgs), T0, actions=actions, queue=q, draft_limit=1000)
+        triage(recs, Mailbox(msgs), T0, actions=actions, queue=q, draft_limit=1000)   # retry, same minute
+        keys = [k for _, k in actions]
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertEqual(len({r.run_id for r in recs}), len(recs))
 
 if __name__ == "__main__":
     unittest.main()

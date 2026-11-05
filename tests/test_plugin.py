@@ -296,12 +296,15 @@ class FreePlanAndEfficiency(unittest.TestCase):
     def test_recurring_tasks_update_themselves_safely(self):
         rm = read(REFS / "run-modes.md")
         for must in ["Keep the task up to date automatically", "Recurring tasks update themselves: no",
-                     "update **only the prompt**", "never create, pause or delete a task",
+                     "Change the instructions only", "never create, pause or delete a task",
                      "None, or more than one: change nothing and report it",
                      "Custom responsibilities are never replaced", "exactly** one released version",
                      "Never judge by the version line alone", "Previous recurring-task instructions (backup)",
-                     "put the backed-up instructions back", "Never report success that wasn't verified",
-                     "Nothing new to accept", "if the backup can't be saved and read back, don't update",
+                     "put the backed-up instructions back", "Never report a restore or a success that wasn't verified",
+                     "Nothing new to accept", "If the backup can't be saved and read back complete, stop: no change",
+                     "checking the instructions **and** every setting separately", "Instructions back but a setting differs",
+                     "Don't change settings without the owner's yes", "If the read fails, the result is **unverified**",
+                     "Check nothing moved", "paused stays paused",
                      "start with `[AI Workforce task: <this skill> |`", "whatever version line they carry",
                      "line endings and spaces at the ends of lines"]:
             self.assertIn(must, rm)
@@ -311,13 +314,42 @@ class FreePlanAndEfficiency(unittest.TestCase):
             self.assertTrue((SKILLS / sk / "references" / "scheduled-prompts.md").exists(), sk)
             self.assertTrue((SKILLS / sk / "references" / "prompt-history.md").exists(), sk)
 
+    def test_attended_update_has_the_same_protections(self):
+        sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
+        for must in ["Changing a recurring task's instructions safely", "Owner's additions",
+                     "a paused task stays paused: updating instructions never resumes it"]:
+            self.assertIn(must, sw)
+        self.assertNotIn("name or prompt mentions AI Workforce", sw)
+
+    def test_notification_recovery_is_bounded(self):
+        rt = read(REFS / "run-tracking.md")
+        for must in ["Catching up on missed notifications", "Don't redo their work", "at most 3 attempts per record",
+                     "failed (permanent)", "may arrive twice", "last 8 days"]:
+            self.assertIn(must, rt)
+        for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
+            sp = read(SKILLS / sk / "references" / "scheduled-prompts.md")
+            self.assertEqual(sp.count("without redoing its work"), 5, sk)
+
+    def test_inbox_gaps_are_durable(self):
+        ic = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md")
+        for must in ["Inbox not scanned: <from> – <to>", "inbox-gap:<from>", "oldest 2 days",
+                     "Gap catch-up never moves Completed through", "Older mail not yet scanned"]:
+            self.assertIn(must, ic)
+        sp = read(SKILLS / "inbox-triage" / "references" / "scheduled-prompts.md")
+        self.assertIn("Inbox not scanned", sp)
+
+    def test_self_test_checkpoint_follows_search_coverage(self):
+        st = read(SKILLS / "workforce-self-test" / "SKILL.md")
+        for must in ["Search: complete", "incomplete (stopped at 5 pages)", "Inbox not scanned"]:
+            self.assertIn(must, st)
+
     def test_prompt_history_records_current_templates(self):
         r = subprocess.run([sys.executable, str(ROOT / "tools" / "prompt_history.py"), "--check"],
                            capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         h = read(SKILLS / "schedule-workforce" / "references" / "prompt-history.md")
         for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
-            for v in ["0.5.0", "0.5.1", "0.5.2"]:
+            for v in ["0.5.0", "0.5.1", "0.5.2", "0.5.4"]:
                 self.assertIn(f"## {sk} {v}", h)
 
     def test_setup_explains_auto_updates_in_one_sentence(self):
@@ -376,8 +408,13 @@ class NotionCompatibility(unittest.TestCase):
     def test_upgrade_is_add_only_and_versions_line_up(self):
         up = read(REFS / "brain-upgrades.md")
         latest = re.findall(r"## Upgrade to ([0-9.]+)", up)[-1]
-        self.assertIn(f"- Business Brain version: {latest}",
+        # Fresh setup starts "in progress"; the latest version is set only after the structure check.
+        self.assertIn("- Business Brain version: setup in progress",
                       read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
+        self.assertIn("Structure check and repair", up)
+        setup = read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.assertIn("Structure check and repair", setup)
+        self.assertIn("setup in progress", read(REFS / "run-modes.md"))
         section = up.split(f"## Upgrade to {latest}")[1]
         self.assertTrue("sending every existing option" in section or "Nothing existing changes" in section)
         for bad in ["delete", "rename", "remove"]:

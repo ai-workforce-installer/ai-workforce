@@ -11,9 +11,9 @@ A ready-made AI team: a Chief of Staff and five team members (Operations, Market
 
 ## Install
 
-**Option A (recommended, gets updates):** in Claude, open **Customize → Plugins → Add → Add marketplace**, paste `https://github.com/reedfloren/ai-workforce`, then install **AI Workforce**. Turn on **Sync automatically**.
+**Option A (recommended):** in the Claude desktop app, open **Customize** in the left sidebar (in Cowork, open the Cowork tab first) and go to the **Plugins** tab. Under **Personal plugins**, click **+** → **Add marketplace** → **Add from a repository**, and enter `https://github.com/reedfloren/ai-workforce`. Then click **Browse plugins** and **Install** next to **AI Workforce**. (Claude's menus change from time to time; if yours look different, see Anthropic's guide, [Use plugins in Claude](https://support.claude.com/en/articles/13837440).)
 
-**Option B (file):** download [ai-workforce.plugin](https://github.com/reedfloren/ai-workforce/raw/main/download/ai-workforce.plugin), then in Claude open **Customize → Plugins**, choose the upload option and select the file.
+**Option B (file):** download [ai-workforce.plugin](https://github.com/reedfloren/ai-workforce/raw/main/download/ai-workforce.plugin), then in **Customize → Plugins** use the option to upload a plugin file. A file install doesn't update itself: upload the new file for each release.
 
 Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workforce`
 

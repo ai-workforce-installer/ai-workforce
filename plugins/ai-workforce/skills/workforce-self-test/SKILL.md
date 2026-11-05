@@ -2,7 +2,7 @@
 name: workforce-self-test
 description: This skill should be used when the user asks to "test the workforce", "verify the subagents run", "run the self-test", "check that the AI team works", or wants proof of how the team members and connections actually run.
 metadata:
-  version: "0.5.3"
+  version: "0.5.4"
 ---
 
 # Workforce Self-Test
@@ -39,11 +39,12 @@ Never label a member "separate agent" unless that launch returned the code.
    - If anything in this step fails, still finish both fixtures before moving on, so none is left unfinished.
 6c. **Check the inbox safeguards** (read-only, Gmail or Outlook owners; skip on paste mode):
    - **Outside the inbox:** run the inbox triage search (`references/inbox-coverage.md` section 2) for the last 24 hours and count threads without the Inbox label (archived by filters) and in each tab. PASS if the search returns them; report the counts ("14 of 63 emails never reached your inbox; the team still sees them").
-   - **Many pages:** run the same search for the last 7 days with 50 per page, following next-page tokens up to 5 pages. PASS if every token was followed; report pages and threads, and Gmail's own estimate next to the real count.
-   - **Bookmark:** read the newest finished Inbox triage records. PASS if each Partial or Failed run kept the previous Completed through, and no finished run left a gap between one window's end and the next start (older records without these lines: "not checked: from before this check existed").
+   - **Many pages:** run the same search for the last 7 days with 50 per page, following next-page tokens up to 5 pages. PASS if the results ended within those pages; if a next page still remained at the cap, report it as **incomplete (stopped at 5 pages)**, not passed. Report pages and threads, and Gmail's own estimate next to the real count.
+   - **Bookmark:** read the newest finished Inbox triage records. PASS if each run moved Completed through only when its report says the search was complete ("Search: complete"), kept it when the search was incomplete (whatever the overall Result), and no finished run left a gap between one window's end and the next start that isn't recorded as an open "Inbox not scanned" item. Older records without these lines: "not checked: from before this check existed".
 6d. **Check Gmail draft links** (attended, Gmail owners, only after the owner says yes, since it leaves one draft in their Drafts folder): create a draft to the owner's own address, subject "AI Workforce self-test <code>: safe to delete", body one line. Check it with get_draft and confirm the `viewUrl` opens that draft. Never send it. Tell the owner it's there to delete whenever they like.
 6e. **Check recurring tasks** (read-only): follow `schedule-workforce` "Check and update recurring responsibilities" steps 1-3 only. Report each task as current or using older instructions. Change nothing.
 6f. **Check the notification text:** write the summary a scheduled run would send for this test record. PASS if it contains the record's full Notion link as plain text on its own line and that link matches the fetched record.
+6g. **Check the saved views** (read-only): fetch each Business Brain database once. For each standard view in `references/notion-schema.md`, report: present with the expected filter and sort (PASS), present with a different filter ("kept as the owner set it; the team reads that list another way"), or missing (FAIL, fixable with "update my team workspace"). Don't create or change views here.
 7. **Report two tables and one verdict:**
    - Team members: member, how it ran (separate agent / briefed assistant / single assistant), code matched (yes/no/not applicable), Notion, then one column per chosen app (or "Paste mode" for email or calendar), result (Verified / Failed / "Not tested separately" in single-assistant mode). A chosen app that is unavailable is a warning, not a failure: the team falls back to the Paste Box.
    - Business Brain: item, present (yes/no), fields still not set.

@@ -2,7 +2,7 @@
 name: setup-workforce
 description: This skill should be used when the user asks to "set up my AI team", "set up the workforce", "get started with the AI Workforce", "onboard me", "build my Business Brain", "setup-workforce", "finish my setup", "continue the setup interview", "update my Business Brain answers", "update my team workspace", or is using the AI Workforce plugin for the first time and has no Business Brain yet.
 metadata:
-  version: "0.5.3"
+  version: "0.5.4"
 ---
 
 # Set Up the AI Workforce
@@ -17,8 +17,8 @@ Create a task list so the owner sees progress: Meet your team, Connect your apps
 
 **Other requests this skill handles:**
 - **"Finish my setup" / "update my Business Brain answers":** check apps (Stage 1, skipping what works), then run the full interview in `references/interview.md`, asking only about fields that are still empty.
-- **"Update my team workspace":** run only the upgrade steps in `references/brain-upgrades.md`.
-- **Resuming:** if a Business Brain already exists, skip what's done. Company Profile filled and at least one Assignment or Daily briefing in Briefings means setup is complete: offer the team meeting (`first-team-meeting`) or the full interview instead of starting over.
+- **"Update my team workspace":** run any upgrade sections still due in `references/brain-upgrades.md` (all of them if the version line is missing or says "setup in progress"; each skips what's already there), then its structure check and repair, even if the version already looks current. The version line reaches the latest version only at the end of the structure check.
+- **Resuming:** if a Business Brain already exists, skip what's done. Setup is complete only when Workforce Settings shows a version number (not "setup in progress" and not missing), Company Profile is filled and there's at least one Assignment or Daily briefing in Briefings. If the version line still says "setup in progress" or is missing, finish the workspace first ("Update my team workspace" above), then carry on from where setup stopped. When setup is complete: offer the team meeting (`first-team-meeting`) or the full interview instead of starting over.
 
 ## Stage 0: Meet your team (one short message, then go straight to Stage 1)
 Introduce yourself as their Chief of Staff, in about five lines:
@@ -54,7 +54,7 @@ f. **Still not working after a second try:** walk them through it plainly: finis
 ## Stage 2: Set up your workspace
 1. Search Notion for a page titled "Business Brain" (see `references/run-modes.md` for picking the right one).
    - **Found:** use it. If its version is older, offer the upgrade in one line as `references/brain-upgrades.md` says (it only adds what's missing and never changes what's there) and run it on yes; add the Paste Box page and the Connections section of Workforce Settings if either is missing. An older layout with "Assignments log" pages is upgraded per `references/notion-schema.md`. Never delete or overwrite.
-   - **Not found:** ask: "Have you already copied a Business Brain template into your Notion, for example from a link you were given?" If yes, ask for the page's name or link and use it (offer to rename it to exactly "Business Brain" if needed), then offer the upgrade steps. If no, create the full structure from `references/notion-schema.md` and `references/page-templates.md`, in as few calls as possible: the root page as a private page (draft mode); then all eight pages in **one** create call; then the five databases, sent together; then the views listed in `references/notion-schema.md`. The team relies on the saved views on Notion's free plan: if one fails, retry it once, then note it and tell the owner they can say "update my team workspace" later to add it. Tell the owner in one line while this happens ("Setting up your workspace, about a minute"). The new Workforce Settings already carries the current Business Brain version line. Before moving on, fetch the root page once to confirm the eight pages and five databases are there; retry anything missing once, then tell the owner plainly if it's still missing.
+   - **Not found:** ask: "Have you already copied a Business Brain template into your Notion, for example from a link you were given?" If yes, ask for the page's name or link and use it (offer to rename it to exactly "Business Brain" if needed), then offer the upgrade steps. If no, create the full structure from `references/notion-schema.md` and `references/page-templates.md`, in as few calls as possible: the root page as a private page (draft mode); then all eight pages in **one** create call; then the five databases, sent together; then the views listed in `references/notion-schema.md`. The team relies on the saved views on Notion's free plan: if one fails, retry it once, then note it and tell the owner they can say "update my team workspace" later to add it. Tell the owner in one line while this happens ("Setting up your workspace, about a minute"). The new Workforce Settings starts with `Business Brain version: setup in progress`. Then run the structure check in `references/brain-upgrades.md` ("Structure check and repair"): it confirms every page, database, required property and saved view, retries anything missing once, and only then sets the version line to the current version. If something is still missing, the version stays "setup in progress", tell the owner plainly what's missing, carry on with the first assignment if Notion allows, and they can say "update my team workspace" later to finish it.
 2. Fill in the Connections section of Workforce Settings with the Stage 1 choices.
 3. Tell the owner in one line where the Business Brain lives, with its link.
 

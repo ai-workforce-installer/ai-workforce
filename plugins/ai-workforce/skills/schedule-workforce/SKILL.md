@@ -2,7 +2,7 @@
 name: schedule-workforce
 description: This skill should be used when the owner asks "can someone handle this every Friday?", "do this every morning", "make it a recurring responsibility", "schedule the team", "make the team run automatically", "schedule my briefing", "change the team's schedule", "pause the team", "check my scheduled tasks", "update my recurring tasks", or wants team members to handle work on their own at set times.
 metadata:
-  version: "0.5.3"
+  version: "0.5.4"
 ---
 
 # Schedule the Workforce
@@ -38,17 +38,15 @@ Recurring tasks for the four standard responsibilities normally update their own
 Use when the owner says "check my scheduled tasks" or "update my recurring tasks", when a run reported a configuration warning, after a plugin update, and whenever `setup-workforce` upgrades the Business Brain. Ask before changing anything.
 
 1. **List** the owner's scheduled tasks (include paused ones) and read Workforce Settings → Schedule.
-2. **Compare each AI Workforce task** (name or prompt mentions AI Workforce) with `references/scheduled-prompts.md` and the table in `references/run-modes.md` ("Is the recurring task current?"):
-   - **Skill:** does the prompt name the skill that does this responsibility now?
-   - **Version:** is the `prompt version` line present and current?
-   - **Fallback:** does the "If that skill is not available" part match the current one?
-   - **Schedule:** does the time match the Schedule line? Is it enabled?
+2. **Compare each AI Workforce task** (its instructions start with `[AI Workforce task: … |`, or its name or instructions mention AI Workforce) with `references/scheduled-prompts.md`, `references/prompt-history.md` and the table in `references/run-modes.md` ("Is the recurring task current?"):
+   - **Current:** the full instructions equal the current template (with the Business Brain's title; only line endings and trailing spaces may differ). The version line alone doesn't decide it.
+   - **Older, unchanged:** the full instructions equal a released version in `references/prompt-history.md`.
+   - **Customized:** anything else, including tasks with no version line. Work out, in plain words, what the owner added or changed compared with the closest released version.
+   - **Schedule:** does the time match the Schedule line? Paused tasks are reported as paused, never treated as a problem to fix.
    - **Duplicates:** two tasks for the same responsibility.
-3. **Show the owner a short list**, one line per task: "Inbox triage (weekdays 11:45): uses older instructions that check only customer emails. Update to the current version?" Up-to-date tasks get one line saying so. Never show raw prompts unless asked.
-4. **On yes, update each task in place** with the scheduling tool's update action: the current prompt from `references/scheduled-prompts.md`, keeping the owner's time, notifications and approval setting.
-   - **Customized tasks:** if a task's instructions aren't exactly a released version (`references/prompt-history.md`), show the owner what they added or changed, in plain words, and offer the current instructions with their changes kept under "Owner's additions" at the end. Update only after they say yes. Never drop their changes silently.
-   - **Back up first:** note the old instructions in the run's record before updating, and if the check in step 5 fails, put them back. Never create a new task to replace an old one, and never delete one unless the owner asks; for duplicates, offer to pause the extra one.
-5. **Confirm:** list the tasks again and check each updated one shows the new prompt (its version line), is enabled, and keeps its time and next run. Update the Schedule line if anything changed. Say plainly what changed and what didn't.
+3. **Show the owner a short list**, one line per task: "Inbox triage (weekdays 11:45): uses older instructions that check only customer emails. Update to the current version?" Up-to-date tasks get one line saying so. For a customized task, say what you'd keep: "You added 'always copy my assistant'; I'll keep that under Owner's additions." Never show raw instructions unless asked.
+4. **On yes, update each task in place**, following "Changing a recurring task's instructions safely" in `references/run-modes.md` (capture, back up and read back, re-check, change only the instructions, verify everything, restore if needed). The new instructions are the current template, plus, for a customized task, the owner's changes under "Owner's additions" at the end, exactly as the owner approved them. Never create a new task to replace an old one, and never delete one unless the owner asks; for duplicates, offer to pause the extra one.
+5. **Confirm** from the verification: the whole approved text is saved (including Owner's additions; a cut-off or missing section fails), every setting is as before (a paused task stays paused: updating instructions never resumes it), and the next run time still fits the task's existing schedule and time zone. Update the Schedule line only if the owner changed a time. Say plainly what changed and what didn't, using the same wording as `references/run-modes.md` for anything that failed.
 
 ## Changing or pausing
 For "pause the team", "change my briefing time" or "stop inbox triage": list existing tasks, update or disable the matching one, and update Workforce Settings. Never delete a task unless the owner asks for deletion.

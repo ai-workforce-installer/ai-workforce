@@ -3,7 +3,7 @@
 Plugin updates change how the team works. They never change the owner's Business Brain on their own. When a newer plugin needs something new in the Business Brain, it is added by these steps, with the owner's yes.
 
 ## When to upgrade
-Workforce Settings ends with an **About this workspace** section holding `- Business Brain version: <x.y.z>`. A missing section means version 0.3 or older.
+Workforce Settings ends with an **About this workspace** section holding `- Business Brain version: <x.y.z>`. A missing section means version 0.3 or older, or a setup that didn't finish; "setup in progress" means setup didn't finish. In every one of these cases, run every upgrade section below in order (each skips what's already there), skipping their version-line steps, then the structure check, which sets the version line at the end.
 - **Attended:** if the version is older than the latest below, say once, in one line: "I have a few improvements for your team's workspace in Notion. Nothing you've written changes. Add them now?" On yes, run the steps. On no, don't ask again in this conversation.
 - **Newer than this file knows** (the workspace was upgraded by a newer copy of the plugin, for example on another device): change nothing and carry on. In attended mode, mention once that their AI Workforce may be out of date and they can update it from Customize → Plugins.
 - **Scheduled:** never upgrade. Add one line to the briefing: "Workspace improvements are ready. Say 'update my team workspace' when you have a minute."
@@ -17,6 +17,16 @@ Workforce Settings ends with an **About this workspace** section holding `- Busi
 - **Version line last.** Update it only after every step succeeded, so a half-finished upgrade runs again next time.
 - If a step fails, stop, keep the old version line, and tell the owner which step didn't finish.
 - Templates for new pages and sections are in `references/page-templates.md`.
+
+## Structure check and repair (setup, and every "update my team workspace")
+Runs after any upgrade sections that are due (the version line reaches the latest version only here, at the end), and runs whatever the version line says, so a workspace that was only partly created, or lost a piece, gets repaired. Add-only and safe to repeat.
+1. Fetch the Business Brain root page and each database once.
+2. Compare with `references/notion-schema.md`: the eight pages, the five databases, each database's properties and select options, and the views it lists. Add only what's missing, with the rules above (select options: send every existing option). Never create a second copy of anything that exists by that name.
+3. **Views:** create a missing view by its name. If a view with that name exists but its filter or sort differs from the schema, leave it exactly as it is, tell the owner once ("Your 'Active offers' view has its own filter, so I left it alone; the team will read that list another way"), and don't count it as missing. Runs already check a view's filter before using it (`references/notion-access.md`).
+4. Fetch again and confirm everything added is there.
+5. **Version line:** only when nothing required is missing and every upgrade section that was due finished, set it to the latest version in this file (`- Business Brain version: <latest>`). If anything is still missing, keep the old line (or "setup in progress"), say exactly what's missing, and the owner can run it again.
+
+A version line of "setup in progress", or a missing line, means the upgrades and the structure check haven't finished: offer them when attended, mention it once when scheduled.
 
 ## Upgrade to 0.4.0
 1. **Your Team page.** If the Business Brain has no child page titled "Your Team", create it (icon 👥) from the Your Team template.

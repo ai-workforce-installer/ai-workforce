@@ -94,6 +94,20 @@ class OpenWork:
         self.rows = {}
         self.readable = True
         self.writes = 0
+        self.gaps = {}        # "inbox-gap:<from>" -> [from, to]; an "Inbox not scanned" row
+
+    def add_gap(self, start, end):
+        """One row per gap; an overlapping gap updates the existing row."""
+        if not self.readable:
+            raise ConnectionError("Assignments unavailable")
+        for key, (gs, ge) in self.gaps.items():
+            if start <= ge and end >= gs:
+                self.gaps[key] = [min(gs, start), max(ge, end)]
+                return key
+        key = f"inbox-gap:{start:%Y-%m-%d %H:%M}"
+        self.gaps[key] = [start, end]
+        self.rows[key] = "Planned"
+        return key
 
     def open_items(self):
         if not self.readable:
@@ -131,7 +145,72 @@ class Mailbox:
         return chunk, more
 
 
-def triage(records, mailbox, now, code="IT", draft_limit=5, actions=None, queue=None):
+GAP_CATCHUP = timedelta(days=2)
+
+
+def search_all(mailbox, start, end):
+    """Every page, one retry per failed page. Returns (messages, complete)."""
+    found, page, retried = [], 0, set()
+    while True:
+        try:
+            chunk, more = mailbox.search(start, end, page)
+        except ConnectionError:
+            if page not in retried and page not in mailbox.retry_used:
+                retried.add(page)
+                mailbox.retry_used.add(page)
+                continue
+            return found, False
+        found += chunk
+        if not more:
+            return found, True
+        page += 1
+
+
+def catch_up_gap(queue, mailbox):
+    """After the run's own window: scan the oldest 2 days of the oldest open gap.
+    Returns the messages found (empty if incomplete; the row is then unchanged)."""
+    open_gaps = sorted((v[0], k) for k, v in queue.gaps.items() if queue.rows.get(k) != "Done")
+    if not open_gaps:
+        return []
+    _, key = open_gaps[0]
+    gs, ge = queue.gaps[key]
+    piece_end = min(gs + GAP_CATCHUP, ge)
+    found, complete = search_all(mailbox, gs, piece_end)
+    if not complete:
+        return []
+    queue.gaps[key][0] = piece_end
+    if piece_end >= ge:
+        queue.rows[key] = "Done"
+    return found
+
+
+def backfill(queue, mailbox, start, end, records, actions):
+    """Owner-requested backfill: the whole requested period, in 2-day pieces."""
+    t, complete = start, True
+    already = set().union(*[r.handled for r in records]) | {k for _, k in actions}
+    while t < end:
+        found, ok = search_all(mailbox, t, min(t + GAP_CATCHUP, end))
+        if not ok:
+            complete = False
+            break
+        for m in found:
+            key = f"gmail:{m.id}"
+            if m.important and key not in already:
+                actions.append(("draft", key)); already.add(key)
+        for k, (gs, ge) in list(queue.gaps.items()):        # narrow or close covered gaps
+            if gs >= t and gs < min(t + GAP_CATCHUP, end):
+                queue.gaps[k][0] = min(t + GAP_CATCHUP, end, ge)
+                if queue.gaps[k][0] >= ge:
+                    queue.rows[k] = "Done"
+        t = min(t + GAP_CATCHUP, end)
+    return complete
+
+
+def open_gaps(queue):
+    return [tuple(v) for k, v in queue.gaps.items() if queue.rows.get(k) != "Done"]
+
+
+def triage(records, mailbox, now, code="IT", draft_limit=5, actions=None, queue=None, other_sources_ok=True):
     """Run inbox triage per the written rules. Returns the record.
 
     actions: shared list of (kind, source_key) actually created, so tests can
@@ -150,32 +229,34 @@ def triage(records, mailbox, now, code="IT", draft_limit=5, actions=None, queue=
         rec.resumed += 1
         start, end = rec.window
     else:
-        start, end, _gap = next_window(records, now)
+        start, end, gap = next_window(records, now)
         rec = Record(make_run_id(code, now, records), "Inbox triage", now, window=(start, end))
         records.append(rec)
+        if gap:
+            try:
+                queue.add_gap(*gap)                   # durable: an "Inbox not scanned" row
+            except ConnectionError:
+                rec.carried_over.append(f"inbox-gap {gap[0]:%Y-%m-%d} - {gap[1]:%Y-%m-%d}")
 
     already = set().union(*[r.handled for r in records])
     existing_actions = {key for _, key in actions}
     try:
-        todo = queue.open_items()
+        todo = [k for k in queue.open_items() if not k.startswith("inbox-gap:")]
         queue_ok = True
     except ConnectionError:
         todo, queue_ok = [], False
+    # the last finished run's Carried over list (queue was unreadable then) is read back
+    prev = [r for r in records if r is not rec and r.rtype == "Inbox triage" and r.code == code and r.finished]
+    if prev:
+        for key in max(prev, key=lambda r: r.finished).carried_over:
+            if key.startswith("gmail:") and key not in todo:
+                todo.append(key)
+                if queue_ok:
+                    queue.upsert(key, "Planned")      # moved into the queue once it's readable
 
-    found, complete, page = [], True, 0
-    while True:
-        try:
-            chunk, more = mailbox.search(start, end, page)
-        except ConnectionError:
-            if page not in mailbox.retry_used:      # retry a failed page once
-                mailbox.retry_used.add(page)
-                continue
-            complete = False
-            break
-        found += chunk
-        if not more:
-            break
-        page += 1
+    found, complete = search_all(mailbox, start, end)
+    if complete and queue_ok:
+        found += catch_up_gap(queue, mailbox)       # never moves Completed through
 
     important = [f"gmail:{m.id}" for m in found if m.important]
     worklist = todo + [k for k in important if k not in todo]
@@ -197,13 +278,111 @@ def triage(records, mailbox, now, code="IT", draft_limit=5, actions=None, queue=
 
     rec.finished = now
     rec.search_complete = complete
-    rec.pending = [k for k in (queue.rows if queue_ok else {}) if queue.rows[k] not in ("Done", "Failed")]
-    if complete and queue_ok:
-        rec.completed_through = end                  # search coverage complete
-        rec.result = "Complete"
+    rec.pending = [k for k in (queue.rows if queue_ok else {})
+                   if queue.rows[k] not in ("Done", "Failed") and not k.startswith("inbox-gap:")]
+    # The bookmark follows search coverage, with unfinished work kept durably (queue or Carried over);
+    # the overall Result also depends on the queue and every other source the run needed.
+    if complete:
+        rec.completed_through = end
     else:
         rec.completed_through = prev_cp              # bookmark stays put
-        rec.result = "Partial"
+    rec.result = "Complete" if (complete and queue_ok and other_sources_ok) else "Partial"
+    rec.gaps_open = open_gaps(queue) if queue_ok else []
     if not rec.notified:
         rec.notified = True
     return rec
+
+
+# ---- run-tracking.md section 3: two sessions starting in the same minute (best effort) ----
+def start_together(records, now, rtype="Inbox triage", code="IT"):
+    """Both sessions look before either writes, so both see nothing; each creates its record, then
+    looks again, and the later Run ID marks itself Not run. Returns the sessions that proceed."""
+    seen = [decide(records, rtype, now, code)[0] for _ in range(2)]
+    assert seen == ["new", "new"]
+    mine = []
+    for _ in range(2):
+        r = Record(make_run_id(code, now, records), rtype, now, code=code)
+        records.append(r); mine.append(r)
+    proceed = []
+    for r in mine:                                         # the look-again step
+        rivals = [o for o in records if o is not r and o.rtype == rtype and o.code == code
+                  and o.finished is None and o.started <= r.started]
+        if any(o.run_id < r.run_id for o in rivals):
+            r.finished, r.result = now, "Partial"           # Status: Not run (run <ID> still in progress)
+        else:
+            proceed.append(r)
+    return proceed
+
+
+# ---- workforce-self-test 6c: the live checks, restated ----
+def bookmark_check(records):
+    """PASS if every finished IT run moved Completed through only when its search was complete."""
+    done = sorted((r for r in records if r.rtype == "Inbox triage" and r.code == "IT" and r.finished),
+                  key=lambda r: r.finished)
+    prev = None
+    for r in done:
+        if not r.window:                                 # older record: only its bookmark is known
+            prev = r.completed_through
+            continue
+        if r.search_complete and r.completed_through != r.window[1]:
+            return False
+        if not r.search_complete and r.completed_through != prev:
+            return False
+        prev = r.completed_through
+    return True
+
+
+def pagination_check(mailbox, start, end, cap=5):
+    for page in range(cap):
+        _, more = mailbox.search(start, end, page)
+        if not more:
+            return "PASS"
+    return "incomplete (stopped at 5 pages)"
+
+
+# ---- run-tracking.md section 5: catching up on missed notifications ----
+MAX_NOTIFY_ATTEMPTS = 3
+NOTIFY_LOOKBACK = timedelta(days=8)   # reaches the previous weekly run
+
+
+@dataclass
+class Report:
+    """A finished record as far as notifications are concerned."""
+    run_id: str
+    code: str
+    finished: datetime
+    notified: str = "pending"     # pending | accepted | confirmed | failed | failed (permanent) | unknown | not requested
+    attempts: list = field(default_factory=list)
+    work_done: int = 1            # times its work ran; recovery must never raise it
+
+
+def notify_due(r, code, now):
+    if r.code != code or r.finished is None or now - r.finished > NOTIFY_LOOKBACK:
+        return False
+    if r.notified in ("accepted", "confirmed", "not requested", "failed (permanent)"):
+        return False
+    if len(r.attempts) >= MAX_NOTIFY_ATTEMPTS:
+        return False
+    if r.notified == "unknown" and any("unclear" in a for a in r.attempts):
+        return False                                  # an unknown outcome is retried once only
+    return r.notified in ("pending", "failed", "unknown")
+
+
+def send_with_recovery(current, older, code, now, notifier, sends_own=True):
+    """One notification for this run, carrying the links of older reports still due.
+
+    notifier(links) -> accepted | confirmed | failed | failed_permanent | unknown
+    Returns the outcome (None if nothing was sent).
+    """
+    if not sends_own:
+        return None                                   # a Not run record sends nothing, for anyone
+    due = [r for r in older if notify_due(r, code, now)]
+    outcome = notifier([current.run_id] + [r.run_id for r in due])
+    state = {"failed_permanent": "failed (permanent)"}.get(outcome, outcome)
+    for r in [current] + due:
+        note = f"attempt {len(r.attempts) + 1}: {outcome}"
+        if r is not current and r.notified == "unknown":
+            note += " (retried after an unclear answer; may arrive twice)"
+        r.attempts.append(note)
+        r.notified = state
+    return outcome
