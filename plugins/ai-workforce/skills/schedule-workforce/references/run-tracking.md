@@ -20,7 +20,7 @@ Window: <start> – <end>            (inbox triage only)
 
 If the Briefings database has the newer properties (`Run ID`, `Started`, `Finished`, `Completed through`; added by the 0.5.0 upgrade in `references/brain-upgrades.md`), fill them too. If it doesn't, the header alone is enough; never fail a run over a missing property.
 
-**Show progress.** Add a line `Progress <time>: <stage>` only when 30 minutes have passed since the start or the last Progress line. No other mid-run writes. Other sessions use the newest Progress line to tell a working run from a stuck one.
+**Show progress.** Add a line `Progress <time>: <stage>` when 30 minutes have passed since the start or the last Progress line, and also just before launching team members if 15 minutes or more have passed (the run can't write while it waits for them). No other mid-run writes. Other sessions use the newest Progress line to tell a working run from a stuck one.
 
 **Check before finishing.** Verify, and fix or report anything that fails:
 - **Sources:** each source the run needed and its outcome (`references/notion-access.md` section 3: read, verified empty, incomplete, unavailable).
@@ -39,10 +39,10 @@ Status: Finished
 Result: Complete | Partial | Failed
 Completed through: <time>          (inbox triage only, see references/inbox-coverage.md)
 Usage: <n> tool calls, <n> team members launched, <n> emails or records processed, <n> minutes
-Notified: no
+Notified: pending
 ```
 
-and set the Result, Approvals raised, Drafts created (and Finished, if present) properties. Then send the notification (section 5) and record what the tool reported.
+and set the Result, Approvals raised, Drafts created (and Finished, if present) properties. Then send the notification (section 5) and replace `Notified: pending` with what the tool reported.
 
 Count tool calls and launches yourself; add model or token usage only if the platform shows it. Never estimate credits or cost. A run that can't finish properly still writes these lines with Result Partial or Failed and says what was left undone.
 
@@ -70,9 +70,9 @@ Before creating the record, look at records of the **same responsibility** from 
 | What you find | What it means | What to do |
 |---|---|---|
 | None | A new run | Create a new record. |
-| An unfinished record with activity **in the last 45 minutes** | Another run is still working | Don't run alongside it. Create a short record of your own ending `Run finished: <time> / Status: Not run (run <ID> still in progress) / Result: Partial / Notified: no`, send no notification, and stop. Attended: tell the owner and offer to wait. |
+| An unfinished record with activity **in the last 45 minutes** | Another run is still working | Don't run alongside it. Create a short record of your own ending `Run finished: <time> / Status: Not run (run <ID> still in progress) / Result: Partial / Notified: not requested`, send no notification, and stop. Attended: tell the owner and offer to wait. |
 | An unfinished record with no activity for **45 minutes or more** | That run was interrupted | Scheduled or unattended: take it over: add "Resumed <time> by a new session" to **that** record, keep its Run ID, Source and window, and finish it. Attended: tell the owner ("A run from 9:10 didn't finish. I'll finish it now.") and do the same unless they say otherwise. |
-| An unfinished record older than 24 hours | Abandoned | Add `Run finished: <time> / Status: Abandoned / Result: Failed / Notified: no` to it (its work is picked up by normal duplicate checks and, for inbox triage, by the bookmark, which it never moved), then decide again. |
+| An unfinished record older than 24 hours | Abandoned | Add `Run finished: <time> / Status: Abandoned / Result: Failed / Notified: not requested` to it (its work is picked up by normal duplicate checks and, for inbox triage, by the bookmark, which it never moved), then decide again. |
 
 **Two sessions starting at the same moment** can both see nothing. Right after creating your record, look again: if another unfinished record of the same responsibility was created in the same minute or earlier, the one with the later Run ID (or later creation) marks itself Not run as above and stops. This is best effort; the duplicate checks in section 4 are the backstop.
 
@@ -87,20 +87,20 @@ Every action carries a **source key** so any later run (a retry, an overlapping 
 Before each action, check:
 - **Gmail draft:** the thread already has a draft reply → don't create another; reuse its link.
 - **Approval:** an Approvals row (any status in the last 14 days) whose Exact action or Why contains the same source key, or describes the same action for the same person → don't add one; refer to its AP number.
-- **Assignment:** an Assignments row with the same source key (Source, Task ID or Result) and the same intended action → update it instead of adding one.
+- **Assignment:** an Assignments row with the same source key (Source, Task ID or Result) and the same intended action, open or finished in the last 14 days (read the database's default view, not "Open work", which hides finished rows) → update or refer to it instead of adding one.
 - **Paste Box:** already moved under Handled → skip.
 
 Write the source key at the end of Exact action (approvals) and in Task ID (assignments), for example "… (source: gmail:18f3a2b4c5d6e7f8)".
 
 ## 5. Notifications
-Send one notification per run, after the record is finished and fetched back for its link; the notification always includes that full Notion link as plain text. Then add one line saying what actually happened:
+Send one notification per run, after the record is finished and fetched back for its link; the notification always includes that full Notion link as plain text. Then replace the `Notified: pending` line with what actually happened:
 - `Notified: not requested` (no notification tool, or none due)
 - `Notified: requested <time>, accepted by the tool`: the tool took the request. This is not proof the owner received it; never call it "delivered".
 - `Notified: confirmed <time>`: only if the tool's answer explicitly says it was delivered.
 - `Notified: failed <time>: <reason>`
 - `Notified: unknown` (the tool gave no clear answer)
 
-A resumed run sends a notification only if the record has no `Notified: requested` or `confirmed` line. A Not run or Abandoned record sends none.
+A resumed run sends a notification only if the record still says `Notified: pending`, `failed` or `unknown`. A Not run or Abandoned record sends none.
 
 ## 6. The open-work queue (unfinished work never disappears)
 
@@ -108,7 +108,7 @@ Work the team found but hasn't finished lives in the **Assignments** database, n
 - **When to add a row:** something worth doing was found (an email needing a reply, a deadline, a document to review) and this run won't finish it, or it was prepared and now waits on the owner. Routine items don't get rows.
 - **Fields:** Assignment (short title), Owner (team member), Status, Source (`gmail:<id>`, `notion:<page>`, `<Run ID>:<task>`), Next action (one line: who does what next), Date. If the database doesn't have Source and Next action yet (0.5.1 upgrade), put the source key in Task ID and start Result with the next action.
 - **Status:** Planned (to do), In progress, Prepared (a draft or recommendation is ready and waiting on the owner), Handed to you (only the owner can do it, e.g. update payout details in their account), Blocked (missing access or information; say what's missing), Done, Failed. Without the 0.5.1 options, use Planned, In progress, Done or Failed and begin Result with "[Prepared]", "[Handed to you]" or "[Blocked]". Use Assignments for things only the owner can do (Handed to you); use Approvals only for decisions.
-- **Every run starts with the queue:** read Assignments whose Status isn't Done or Failed (filtered rows, `limit: 100`, `references/notion-access.md`), whatever their age. Each run works only the rows for its own job (inbox triage: rows whose Source is an email; a recurring member task: that member's rows); the daily briefing lists the rest under what's waiting, without redoing them. Finish what can be finished now; leave the rest with an up-to-date Next action.
+- **Every run starts with the queue:** read open Assignments (the "Open work" view if its filter matches, otherwise filtered rows where Status isn't Done or Failed; `references/notion-access.md`), whatever their age. Each run works only the rows for its own job (inbox triage: rows whose Source is an email; a recurring member task: that member's rows); the daily briefing lists the rest under what's waiting, without redoing them. Finish what can be finished now; leave the rest with an up-to-date Next action.
 - **If the queue can't be read or written**, don't create rows that might duplicate it. List the unfinished items under **Carried over** in the run record instead (source key, owner, next action); the next run reads the last run's Carried over list and moves those items into the queue once it's readable.
 - **Older rows:** unfinished rows are never closed because of their age. Rows from before 0.5.1 (no Source) that look like old logs rather than open work are listed once, in the daily briefing, under "Please check: old open tasks" with their links, so the owner can say which to close; nothing changes until they do. Rows the owner created are never changed without their say-so.
 - **Deduplicate** by source and intended action: one row per source and action. Update the existing row (Status, Next action, Result) instead of adding another.

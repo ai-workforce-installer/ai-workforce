@@ -138,7 +138,7 @@ Databases: Approvals, Assignments, Briefings, Pricing & Offers, Customers & Lead
 
 ## Install
 
-Needs a paid Claude plan that includes plugins and scheduled tasks. How much of your plan's usage the team needs depends on how many recurring tasks you turn on; we haven't yet measured whether the Pro plan covers daily use, so start with one recurring task (the daily briefing) and add more once you see the usage. Notion's **free** plan works: the team reads your Business Brain through saved views, which keep working when the free plan's query allowance runs out. Required: Notion. Optional: email, calendar and file apps.
+Needs a paid Claude plan that includes plugins and scheduled tasks. How much of your plan's usage the team needs depends on how many recurring tasks you turn on; we haven't yet measured whether the Pro plan covers daily use, so start with one recurring task (the daily briefing) and add more once you see the usage. Notion's **free** plan works: the team reads your Business Brain through saved views, which keep working when the free plan's query allowance runs out (existing workspaces: say "update my team workspace" once to add them). Required: Notion. Optional: email, calendar and file apps.
 
 **Option A (recommended, gets updates):** in Claude, open **Customize → Plugins → Add marketplace**, paste this repository's link (`https://github.com/reedfloren/ai-workforce`), then install **AI Workforce**.
 In Claude Code: `/plugin install ai-workforce --marketplace reedfloren/ai-workforce`

@@ -5,7 +5,7 @@
 A ready-made AI team: a Chief of Staff and five team members (Operations, Marketing, Sales, Client Success, Finance). They learn your business, take work off your plate, and ask before anything leaves your hands. Everything they know lives in your own Notion.
 
 **What you need**
-- **Required:** a paid Claude plan that includes plugins and scheduled tasks, and a Notion account. Notion's free plan works: the team reads your workspace through saved views, which keep working when the free plan's query allowance runs out.
+- **Required:** a paid Claude plan that includes plugins and scheduled tasks, and a Notion account. Notion's free plan works: the team reads your workspace through saved views, which keep working when the free plan's query allowance runs out (existing workspaces: say "update my team workspace" once to add them).
 - **Optional:** email, calendar and files (Gmail and Google, or Outlook and Microsoft 365). Without them the team works from what you paste in.
 - **Usage:** how much of your Claude plan the team uses depends on how many recurring tasks you turn on. We haven't measured yet whether the Pro plan covers daily use, so start with one recurring task (the daily briefing) and add more once you've seen the usage.
 

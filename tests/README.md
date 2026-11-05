@@ -1,6 +1,6 @@
 # Tests
 
-Run everything (no installs, standard Python 3.10+):
+Run everything (no installs, standard Python 3.10+). GitHub Actions (`.github/workflows/ci.yml`) runs the first two on every push and pull request; `claude plugin validate` needs the Claude CLI and is run locally before each release:
 
 ```
 python3 -m unittest discover tests
@@ -32,4 +32,7 @@ Each of these has to be watched on a real account; nothing in this folder can do
 8. **Regular chat (single-assistant mode)** running the same skills with the same safeguards.
 9. **Notion Free plan behaviour** of saved views and filtered rows (whether they're also rationed, and how the connection reports a used-up allowance), and that a run with Notion partly unreachable says "could not be verified" and finishes as Partial.
 10. **Usage per run** on a real account (tool calls, team members started, time) for each recurring task, before saying anything about which Claude plan is enough.
-11. **The 0.5.1 workspace upgrade** on an existing Business Brain, run twice to confirm it's safe to repeat.
+11. **The 0.5.1 and 0.5.2 workspace upgrades** on an existing Business Brain, each run twice to confirm they're safe to repeat, and that the new saved views keep working after the Free plan's query allowance runs out.
+12. **A recurring task started with Run now on an unusual day**: no duplicate-schedule warning, Source "Unknown (started from a recurring task)", the right job done.
+13. **What the notification tool actually returns** (whether it ever confirms delivery), so the Notified line matches it.
+14. **Weekly marketing with no ad export available**: Partial, past metrics Unavailable, a usable plan, and the exact export request.

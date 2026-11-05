@@ -221,12 +221,13 @@ class FreePlanAndEfficiency(unittest.TestCase):
             self.assertIn(must, t)
         rt = read(REFS / "run-tracking.md")
         self.assertIn("Never estimate credits or cost", rt)
-        self.assertIn("only when 30 minutes have passed", rt)
+        self.assertIn("when 30 minutes have passed", rt)
+        self.assertIn("just before launching team members", rt)
 
     def test_open_work_queue(self):
         rt = read(REFS / "run-tracking.md")
         for must in ["## 6. The open-work queue", "whatever their age", "Prepared", "Handed to you",
-                     "Blocked", "one row per source and action", "limit: 100", "Carried over"]:
+                     "Blocked", "one row per source and action", "\"Open work\" view", "Carried over"]:
             self.assertIn(must, rt)
 
     def test_no_upsell_in_reports(self):
@@ -255,7 +256,12 @@ class FreePlanAndEfficiency(unittest.TestCase):
         self.assertIn("never closed because of their age", rt)
         self.assertIn("owner confirmed", rt)
 
+    def test_duplicate_checks_read_finished_rows(self):
+        self.assertIn("unfiltered \"Decision board\" view", read(REFS / "approval-queue.md"))
+        self.assertIn("not \"Open work\", which hides finished rows", read(REFS / "run-tracking.md"))
+
     def test_legacy_handed_to_you_stays_pending(self):
+        self.assertIn('Owner note starts \"Handed to you:\"', read(SKILLS / "daily-executive-briefing" / "SKILL.md"))
         ra = read(SKILLS / "review-approvals" / "SKILL.md")
         self.assertNotIn("until then use Done", ra)
         self.assertIn("leave the item **Pending**", ra)
@@ -266,6 +272,8 @@ class FreePlanAndEfficiency(unittest.TestCase):
 
     def test_notification_status_wording(self):
         rt = read(REFS / "run-tracking.md")
+        self.assertIn("Notified: pending", rt)
+        self.assertNotIn("Notified: no`", rt)
         self.assertIn("accepted by the tool", rt)
         self.assertIn("never call it \"delivered\"", rt)
         for p in PLUGIN.rglob("*.md"):

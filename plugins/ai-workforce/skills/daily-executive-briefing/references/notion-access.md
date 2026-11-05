@@ -18,7 +18,7 @@ If a method fails, try the next one once; then record the outcome (section 3). F
 
 The Chief of Staff (the skill running the conversation) reads the shared context once at the start: Workforce Settings, Priorities, Brand & Tone, Your Team, Pricing & Offers (active rows), Policies, FAQs, the open queue (Approvals and Assignments that aren't finished), and the schemas of the databases it will write to. It keeps them for the whole run and gives each team member only the parts that member needs. Team members don't re-read what they were given. Re-read only something this run itself changed.
 
-**Reusing a recent run's reads.** If another run finished in the last 3 hours and its record lists what it read, the stable pages (Brand & Tone, Your Team, Policies, FAQs, Company Profile) may be reused from it, marked "as of <time>", unless this run has reason to think they changed. Always read fresh: Approvals, Assignments, Pricing & Offers, Workforce Settings, anything about money, security, deadlines or availability, and anything a claim to the owner depends on.
+**Reusing a recent run's reads.** If another run finished in the last 3 hours and its record lists what it read, the stable pages (Brand & Tone, Your Team, Policies, FAQs, Company Profile) may be reused from it, marked "as of <time>", unless this run has reason to think they changed. Always read fresh (through views, which counts as fresh): Approvals, Assignments, Pricing & Offers, Workforce Settings, anything about money, security, deadlines or availability, and anything a claim to the owner depends on.
 
 ## 3. Every read has one of four outcomes
 
