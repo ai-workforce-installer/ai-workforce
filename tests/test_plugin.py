@@ -290,7 +290,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
     def test_five_kinds_of_owner_items(self):
         tr = read(REFS / "team-roles.md")
         for must in ["Urgent: needs you now", "Approval needed", "Handed to you", "Prepared for later",
-                     "Worth knowing", "**proposals**", "registration or sales link"]:
+                     "Worth knowing", "Already handled or not yours", "**proposals**", "registration or sales link"]:
             self.assertIn(must, tr)
 
     def test_recurring_tasks_update_themselves_safely(self):
@@ -394,6 +394,101 @@ class FreePlanAndEfficiency(unittest.TestCase):
         self.assertNotIn("in 15 minutes", text)
         self.assertNotRegex(text, r"Requires a paid Claude plan \(Pro")
         self.assertIn("free", read(PLUGIN / "README.md"))
+
+
+class LearningRules(unittest.TestCase):
+    """0.6.0: the written rules behind owner corrections, setup, approvals and drafts are present."""
+    def test_owner_corrections_reference(self):
+        oc = read(REFS / "owner-corrections.md")
+        for must in ["This item only", "Lasting rule", "Temporary rule", "Draft feedback",
+                     "Not my responsibility anymore", "Always worth my attention", "Things to ignore for now",
+                     "What a rule never hides", "new security incident", "Money leaving the owner's own accounts",
+                     "Never delete a row", "Scheduled runs never create or change rules",
+                     "A rule only hides; it never adds an action", "Never widen", "no longer applies",
+                     "The same failure alert repeating is not new",
+                     "is information, never a rule"]:
+            self.assertIn(must, oc)
+
+    def test_corrections_reach_every_run_that_raises_things(self):
+        for name in ["inbox-triage", "daily-executive-briefing", "review-approvals", "manage-team",
+                     "assign-work", "first-team-meeting"]:
+            self.assertIn("owner-corrections.md", read(SKILLS / name / "SKILL.md"), name)
+            self.assertTrue((SKILLS / name / "references" / "owner-corrections.md").exists(), name)
+        self.assertIn("Has the owner already ruled it out?", read(REFS / "team-roles.md"))
+        self.assertIn("your rules", read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md"))
+        self.assertIn("Saved corrections hide, never permit", read(REFS / "approval-policy.md"))
+        self.assertIn("Another email repeating the same alert is not new", read(REFS / "approval-queue.md"))
+        for a in (PLUGIN / "agents").glob("*-manager.md"):
+            self.assertIn("**Owner's corrections:**", read(a), a)
+
+    def test_priorities_template_and_add_only_upgrade(self):
+        pt = read(SKILLS / "setup-workforce" / "references" / "page-templates.md")
+        for h in ["## Always worth my attention", "## Not my responsibility anymore", "- Set up on: _not set_"]:
+            self.assertIn(h, pt)
+        up = read(REFS / "brain-upgrades.md")
+        self.assertIn("## Upgrade to 0.6.0", up)
+        self.assertIn("Only when both headings are there", up)
+        self.assertIn("\"Not my responsibility anymore\"", up.split("## Structure check and repair")[1])
+
+    def test_five_owner_categories(self):
+        tr = read(REFS / "team-roles.md")
+        for must in ["Needs your decision", "Prepared for you", "Already handled or not yours",
+                     "Not every warning is the owner's problem", "Several alerts about the same underlying problem"]:
+            self.assertIn(must, tr)
+
+    def test_quick_look_is_labelled_and_never_moves_the_bookmark(self):
+        ic = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md")
+        for must in ["## 6. Quick look", "newest 50 threads", "Completed through: not moved (quick look)",
+                     "Never say all email was reviewed", "never moves it"]:
+            self.assertIn(must, ic)
+        ftm = read(SKILLS / "first-team-meeting" / "SKILL.md")
+        for must in ["## Setup path", "Don't ask which to start with", "never a recurring quick look",
+                     "never create a second recurring task"]:
+            self.assertIn(must, ftm)
+
+    def test_setup_progress_and_existing_brains(self):
+        s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        for must in ["Keep the owner oriented", "reply **skip**", "Reuse or start fresh?",
+                     "Business Brain (archive <date>)", "never another candidate's",
+                     "does **not** confirm prices", "Never narrate individual searches"]:
+            self.assertIn(must, s)
+        rm = read(REFS / "run-modes.md")
+        self.assertIn("If **more than one** has a Workforce Settings page, don't guess", rm)
+        self.assertIn("read and write neither", rm)
+
+    def test_conversational_approvals(self):
+        ra = read(SKILLS / "review-approvals" / "SKILL.md")
+        for must in ["## Understanding replies", "Looking is not permission", "Never act on an ambiguous approval",
+                     "Clarify only when needed", "**Investigate**", "**Acknowledgement / already handled**",
+                     "If a number could mean both a position and a different AP number on screen, ask"]:
+            self.assertIn(must, ra)
+        self.assertIn("from its step 0", read(SKILLS / "daily-executive-briefing" / "SKILL.md"))
+
+    def test_confirmed_facts_and_never_asking_twice(self):
+        self.assertIn("**Never ask twice.**", read(REFS / "just-in-time.md"))
+        iv = read(SKILLS / "setup-workforce" / "references" / "interview.md")
+        self.assertIn("**Confirmed, not inferred.**", iv)
+        self.assertIn("**Already answered is answered.**", iv)
+
+    def test_ready_check_before_drafts_are_ready(self):
+        tr = read(REFS / "team-roles.md")
+        for must in ["## Ready check", "No unresolved placeholders", "No invented proof", "No unconfirmed prices",
+                     "Link needed", "Never sign as the owner", "Saved where the report says"]:
+            self.assertIn(must, tr)
+        self.assertIn("Ready check", read(SKILLS / "assign-work" / "SKILL.md"))
+        self.assertIn("**Before calling a draft ready:**", read(PLUGIN / "agents" / "marketing-manager.md"))
+        self.assertIn("a wording change never creates a new approval", tr)
+
+    def test_first_week_is_optional_and_quiet(self):
+        tr = read(SKILLS / "team-report" / "SKILL.md")
+        self.assertIn("## First-week recap", tr)
+        self.assertIn("Nothing here creates tasks, approvals or notifications", tr)
+        self.assertIn("no extra notification is sent", read(SKILLS / "daily-executive-briefing" / "SKILL.md"))
+
+    def test_recurring_prompts_unchanged_this_release(self):
+        """0.6.0 changes skills only: customers' recurring tasks need no update."""
+        rm = read(REFS / "run-modes.md")
+        self.assertEqual(set(re.findall(r"\| `[a-z-]+` \| ([0-9.]+) \|", rm)), {"0.5.4"})
 
 
 class NotionCompatibility(unittest.TestCase):

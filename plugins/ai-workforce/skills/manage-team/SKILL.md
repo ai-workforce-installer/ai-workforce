@@ -1,15 +1,15 @@
 ---
 name: manage-team
-description: This skill should be used when the owner changes how the team works or who is on it, such as "from now on…", "always…", "never…", "make those replies shorter and friendlier", "our refund policy changed", "we raised our prices", "add a team member", "I'd like someone handling my podcast", "do we need another person for this?", "turn off Finance", or "remove the Podcast Producer".
+description: This skill should be used when the owner changes how the team works or who is on it, or corrects what the team thinks matters, such as "from now on…", "always…", "never…", "make those replies shorter and friendlier", "our refund policy changed", "we raised our prices", "that isn't my responsibility anymore", "stop bringing this up", "that company isn't one of my businesses anymore", "this kind of email doesn't matter to me", "family and school emails matter", "add a team member", "I'd like someone handling my podcast", "do we need another person for this?", "turn off Finance", or "remove the Podcast Producer".
 metadata:
-  version: "0.5.4"
+  version: "0.6.0"
 ---
 
 # Manage the Team
 
 _Files named `references/…` are in this skill's own folder._
 
-The owner should never have to rebuild a team member. They say how they want the job done, in their own words, and you put it where the team will follow it every time. Everything is saved in the owner's Business Brain, so plugin updates never touch it. Follow `references/talking-to-the-owner.md`, `references/approval-policy.md` and `references/team-roles.md`. This skill needs the owner present.
+The owner should never have to rebuild a team member. They say how they want the job done, in their own words, and you put it where the team will follow it every time. Everything is saved in the owner's Business Brain, so plugin updates never touch it. Follow `references/talking-to-the-owner.md`, `references/approval-policy.md`, `references/team-roles.md` and `references/owner-corrections.md`. This skill needs the owner present.
 
 ## A. "From now on…" (how the work should be done)
 
@@ -23,7 +23,9 @@ The owner should never have to rebuild a team member. They say how they want the
    | A rule for everyone ("never offer more than 20% off", "copy my assistant on VIP replies") | Workforce Settings → Extra rules for my team |
    | A policy (refunds, discounts, payment terms, response times, cancellations) | Policies |
    | Prices or offers | Pricing & Offers (update the row; add one for a new offer; untick Active for a retired one) |
-   | What matters now, or what to ignore | Priorities |
+   | What matters now, or what to ignore | Priorities (This month's focus; Things to ignore for now) |
+   | What always deserves the owner's attention ("family and school emails") | Priorities → Always worth my attention |
+   | Something that isn't the owner's anymore (a business, client, account, automation) | Priorities → Not my responsibility anymore (`references/owner-corrections.md`) |
    | An answer to a customer question | FAQs → Answered (and mark the line under Waiting for an answer "(answered <date>)") |
    | Which members take part in briefings | Workforce Settings → Active departments |
    | A one-off change to a single draft | Nowhere: just change that draft |
@@ -33,6 +35,11 @@ The owner should never have to rebuild a team member. They say how they want the
 4. **Say how it applies:** "Done. Client Success will follow this from the next reply on." If drafts made under the old rule are still waiting (pending approvals, Replies ready to copy), offer to redo them.
 
 The team also learns this way from the review step: when the owner keeps changing drafts the same way, `review-approvals` offers to save the change here.
+
+## A2. "That's not mine anymore" / "stop bringing this up"
+The owner is correcting what the team thinks matters. Follow `references/owner-corrections.md`: decide whether it's about this item only, this thread, a lasting rule or a temporary one; for a lasting rule, confirm the exact line (and the related open items you'd close) in one message, save it on Priorities, close the related items with their history kept, and say how it applies: "Done. The team won't raise the old Northwind automations again. A new security problem on your own accounts would still come to you." Scheduled runs never save rules; they list a possible correction under Questions for you.
+
+To take a rule back ("actually, do tell me about Northwind"), add " · no longer applies <date>" to its line after the owner confirms; never delete it.
 
 ## B. Adding a team member
 

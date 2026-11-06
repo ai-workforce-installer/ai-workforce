@@ -315,7 +315,7 @@ class ViewUpgrade(unittest.TestCase):
         self.assertEqual(w["views"]["Approvals"]["Active approvals"], "owner's own filter")
         self.assertEqual(w["views"]["Approvals"]["Decision board"], "GROUP BY \"Status\"")
         self.assertIn("Active offers", w["views"]["Pricing & Offers"])
-        self.assertEqual(w["version"], "0.5.2")
+        self.assertEqual(w["version"], LATEST_BRAIN)
 
     def test_repeated_upgrade_adds_nothing(self):
         w = self.ws(); upgrade_views(w)
@@ -328,7 +328,7 @@ class ViewUpgrade(unittest.TestCase):
         self.assertFalse(upgrade_views(w, fail_on={"Customers & Leads"}))
         self.assertEqual(w["version"], "0.5.1")
         self.assertTrue(upgrade_views(w))              # safe to run again
-        self.assertEqual(w["version"], "0.5.2")
+        self.assertEqual(w["version"], LATEST_BRAIN)
 
 
 class SetupAndRepair(unittest.TestCase):
@@ -367,11 +367,11 @@ class SetupAndRepair(unittest.TestCase):
         w = {"version": "0.4.0", "dbs": set(REQUIRED_DBS), "views": {}}
         sections = []
         update_my_team_workspace(w, sections_run=sections)
-        self.assertEqual(sections, ["0.5.0", "0.5.1", "0.5.2"])
+        self.assertEqual(sections, ["0.5.0", "0.5.1", "0.5.2", "0.6.0"])
         w2 = {"version": "setup in progress", "dbs": set(), "views": {}}
         sections = []
         update_my_team_workspace(w2, sections_run=sections)
-        self.assertEqual(sections, ["0.4.0", "0.5.0", "0.5.1", "0.5.2"])
+        self.assertEqual(sections, ["0.4.0", "0.5.0", "0.5.1", "0.5.2", "0.6.0"])
 
     def test_repeated_repair_changes_nothing(self):
         w = self.fresh(); check_and_repair(w)

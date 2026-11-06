@@ -45,11 +45,16 @@ Gmail's Inbox view is not the whole mailbox. Filters can skip the inbox (archive
 
 **Quick pass on metadata only (sender, subject, preview, labels, date).** Use the search results themselves; don't open messages for this. Put every thread in one bucket. Gmail's category and Important label are hints, not verdicts: a partner email filed under Promotions is still a partner email.
 
+**The owner's corrections come first** (`references/owner-corrections.md` section 5). Before bucketing, check each thread against Priorities (Not my responsibility anymore, Things to ignore for now, Always worth my attention), Extra rules, and items the owner closed:
+- A thread a rule rules out goes to **Routine**, type "your rules", and gets no follow-up, unless it's one of the things a rule never hides (a new security incident on the owner's own account, money leaving their accounts, a legal threat, a deadline on them personally); then it's bucketed normally with one line naming the rule it would otherwise have matched.
+- A thread in the same thread as an item the owner closed as handled, saying nothing materially new, counts as already handled.
+- A thread matching Always worth my attention is read in full and shown at least under Worth knowing.
+
 **Read in full** (open the message) in this order of priority, up to the limit in section 4:
 - anything written by a person to the owner (not a mailing list), including replies in older threads;
 - anything about money, accounts, security, deadlines, shutdowns, failures, contracts or legal terms;
 - anything from a person, company, offer or project named in the Business Brain (Priorities, Customers & Leads, Company Profile, Pricing & Offers, open Approvals and Assignments) or in the next 7 days of calendar events;
-- anything touching an Extra rule (for example "always flag anything about <topic>").
+- anything touching an Extra rule (for example "always flag anything about <topic>"), or matching Always worth my attention on Priorities.
 
 Buckets are **mutually exclusive**: each thread goes in exactly one, the first one in this order that fits.
 
@@ -62,11 +67,13 @@ Buckets are **mutually exclusive**: each thread goes in exactly one, the first o
 | **Meetings and projects** | Relates to an upcoming meeting, a Priority, an open Assignment or Approval | Operations |
 | **Customer support** | A customer or would-be customer asking for help, a refund, access, a quote | Client Success (`process-customer-inquiries` steps) |
 | **Personal and family** | Family, school, medical, personal purchases | Count only (see Privacy) |
-| **Routine, safe to skip** | Newsletters, promotions, event and webinar pitches, social notifications, receipts that match a known charge, digests | Count by type only |
+| **Routine, safe to skip** | Newsletters, promotions, event and webinar pitches, social notifications, receipts that match a known charge, digests, and anything the owner's corrections rule out ("your rules") | Count by type only |
 
-A message can matter even if it looks routine: a marketing-style email saying a program or service the business relies on is closing is **Money and accounts**, not Routine.
+A message can matter even if it looks routine: a marketing-style email saying a program or service the business relies on is closing is **Money and accounts**, not Routine. And a warning can look urgent without being the owner's: an automation, account or service the Business Brain doesn't connect to this business is shown once under Worth knowing with "Is this still yours?", not raised as Urgent (`references/team-roles.md`).
 
-**Privacy.** Personal, family and medical mail is counted ("6 personal or family messages"), never summarised or quoted, unless the owner asks or the Business Brain says the inbox is business-only. Never put personal details in Notion.
+**One problem, one item.** Threads about the same underlying problem (the same automation failing, the same account notice, the same outage) are sorted into the same bucket and handled as one item, with the number of emails and the newest link. They still count as separate threads in the coverage totals.
+
+**Privacy.** Personal, family and medical mail is counted ("6 personal or family messages"), never summarised or quoted, unless the owner asks or the Business Brain says the inbox is business-only. When Always worth my attention covers it ("family and school emails"), name it in the report by sender and subject only ("School: early dismissal Friday"), never its contents. Never put personal details in Notion beyond that sender-and-subject line.
 
 ## 4. Follow-up work (do it, then report it)
 
@@ -93,7 +100,7 @@ Coverage: comprehensive (all mail in the window) | narrow (say what was left out
 - Reviewed: <n> sorted, <n> read in full
 - Processed: <n> with follow-up done; <n> queued in open work
 - Prioritized: <n> (urgent <n>, needs reply <n>, opportunities <n>, money and accounts <n>, meetings and projects <n>, customer <n>)
-- Filtered out as routine: <n> (promotions <n>, newsletters <n>, webinar or event pitches <n>, notifications <n>, receipts <n>); personal or family: <n>
+- Filtered out as routine: <n> (promotions <n>, newsletters <n>, webinar or event pitches <n>, notifications <n>, receipts <n>, your rules <n>); personal or family: <n>
 - Not checked: <every mailbox under Where things live the team can't reach>, or "nothing"
 - Search: complete | incomplete (<why>)
 - Follow-up: <n> done, <n> queued in open work
@@ -102,7 +109,16 @@ Coverage: comprehensive (all mail in the window) | narrow (say what was left out
 
 Count **threads**, not messages, everywhere in the report. Buckets are mutually exclusive, so Discovered must equal Prioritized + Filtered out + personal + already handled, and Prioritized must equal the sum of its buckets. Tags that overlap (for example "has a draft", "queued") are reported separately and never added into these totals. Recompute the totals before finishing; if they don't reconcile, find the thread that's double-counted or missing and fix it, or say plainly which number is off and set the Result to Partial. In the owner's summary, show only one line ("Reviewed 247 emails; 9 need you; nothing skipped"), and say so plainly if follow-up was queued for the next run or the bookmark didn't move. Coverage is **comprehensive** only when the search followed section 2 exactly (All Mail, no inbox, category or keyword filters, every page). Anything narrower is **narrow**, says what was left out, and makes the Result Partial. If the numbers don't add up, or a page of results couldn't be fetched, say so and set Result to Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
 
-## 6. Saying it precisely
+## 6. Quick look (first assignment during setup only)
+
+A brand-new owner should see a useful result in a few minutes, not wait for a full day's sweep of hundreds of emails. When `first-team-meeting` runs from setup and email is the first job, the team does a **quick look** instead of the full triage:
+- **Search:** the same All Mail search as section 2 for the last 24 hours, but only the **newest 50 threads** (one page, or as many pages as it takes to reach 50).
+- **Pick:** from metadata only, the threads where a person is waiting on the owner or something is time-sensitive (sections 3's first two buckets, after the owner's corrections). Read at most 10 in full; draft at most 3 replies; queue approvals only for real decisions.
+- **Record:** a normal Inbox triage run record (IT Run ID) with `Coverage: quick look (newest <n> threads since <time>; the rest of the last 24 hours not reviewed)`, a Handled list as usual, and **no Completed through** (the line reads `Completed through: not moved (quick look)`). Result: Partial, because the look was intentionally limited; say so plainly, not as a failure.
+- **The bookmark:** a quick look never moves it, and is never "comprehensive", so the next full triage starts as a first run (section 1) and covers the whole period. Messages the quick look already handled are skipped there by their IDs.
+- **Say it accurately:** "I looked at your 50 newest emails (since 7:40 AM). 3 people are waiting on you; replies are drafted. I haven't gone through the rest of the last 24 hours yet." Never say all email was reviewed. Then offer the full review once: "Want the full review of the last 24 hours now, or let your first inbox check do it?"
+
+## 7. Saying it precisely
 
 - "No customer emails visible in Gmail" is not "nothing to do", and neither is "inbox clear". Report what was found in every bucket.
 - If customer email lives somewhere the team can't reach, say "Customer support: none visible in Gmail. Not checked: <place>", never "no customer emails".

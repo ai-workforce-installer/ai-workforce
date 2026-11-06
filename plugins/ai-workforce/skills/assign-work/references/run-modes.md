@@ -3,7 +3,10 @@
 Every skill in this plugin runs in one of two modes. Decide the mode at the start.
 
 ## Finding the Business Brain (both modes)
-Use the Notion page titled exactly "Business Brain". Ignore pages with "Template" or "archive" in the title, and their databases. If more than one page is titled exactly "Business Brain", use the one that has a Workforce Settings page, and mention the duplicate in the report. Look up databases (Approvals, Briefings...) only among that page's children.
+Use the Notion page titled exactly "Business Brain". Ignore pages with "Template" or "archive" in the title, and their databases. If more than one page is titled exactly "Business Brain", use the one that has a Workforce Settings page, and mention the duplicate in the report. If **more than one** has a Workforce Settings page, don't guess:
+- **Attended:** ask once which to use, listing each with its link and when it was set up or last used, and offer to rename the other "Business Brain (archive <date>)" (only on a yes).
+- **Scheduled:** read and write neither. Don't create a run record in either one; end with a notification (or, without a notification tool, the session's final message) saying "Two Business Brains found in Notion, so I didn't touch either. Open Claude and say which one your team should use." Result: Failed.
+Once a Business Brain is chosen, every read and write in the run stays inside it: look up databases (Approvals, Briefings...) only among that page's children, and never copy, compare or move records between candidates.
 
 ## Workspace version (both modes)
 Read the `Business Brain version` line at the end of Workforce Settings. If it says "setup in progress", is missing, or is older than the latest in `references/brain-upgrades.md`, follow that file: offer once when attended, mention once in the briefing when scheduled. Never block the run on it; work with what exists (for example, no Your Team page means no member notes yet).

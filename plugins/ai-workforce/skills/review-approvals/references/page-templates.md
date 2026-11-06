@@ -68,6 +68,7 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 
 ## About this workspace
 
+- Set up on: _not set_
 - Business Brain version: setup in progress
 ````
 
@@ -119,6 +120,14 @@ _not set_
 ## Work I'd like to hand off
 
 - _not set_
+
+## Always worth my attention
+
+- _none yet_
+
+## Not my responsibility anymore
+
+- _none yet_
 ````
 
 ## Policies

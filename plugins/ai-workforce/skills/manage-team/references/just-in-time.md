@@ -6,6 +6,8 @@ The team doesn't need every fact on day one. Before a piece of work, check only 
 
 Never invent a missing price, policy, customer or date. A draft that needs one says so, and becomes an approval item or a question instead.
 
+**Never ask twice.** Before asking, check the field, this conversation, and the FAQs page's "Waiting for an answer" list. If the owner already said it in this chat, confirm and save it instead of asking. If a saved answer may be out of date, propose it ("Still $49 a month?") rather than asking from scratch. Something read from the website or an email is a proposal until the owner confirms it; it never fills a price or policy field on its own.
+
 | Work | Needs (Business Brain field) | If missing, ask |
 |---|---|---|
 | **Customer replies** (Client Success) | Brand & Tone: voice, sign-off · Policies: Refunds, Response times · FAQs (any) | "How do you usually sign off?" · "What's your refund rule?" · "What do customers ask most, and what's the answer?" |

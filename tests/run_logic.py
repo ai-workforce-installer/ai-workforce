@@ -386,3 +386,43 @@ def send_with_recovery(current, older, code, now, notifier, sends_own=True):
         r.attempts.append(note)
         r.notified = state
     return outcome
+
+
+# ---- inbox-coverage.md section 6: quick look (first assignment during setup) ----
+QUICK_LOOK_THREADS = 50
+QUICK_LOOK_DRAFTS = 3
+
+
+def quick_look(records, mailbox, now, actions=None):
+    """Newest 50 threads of the last 24 hours, at most 3 drafts. A normal IT record that never sets
+    Completed through and is never 'comprehensive', so the bookmark doesn't move."""
+    actions = [] if actions is None else actions
+    rec = Record(make_run_id("IT", now, records), "Inbox triage", now, window=(now - FIRST_RUN_WINDOW, now))
+    records.append(rec)
+    newest, page = [], 0
+    while len(newest) < QUICK_LOOK_THREADS:
+        chunk, more = mailbox.search(now - FIRST_RUN_WINDOW, now, page)
+        newest += chunk
+        if not more:
+            break
+        page += 1
+    newest = newest[:QUICK_LOOK_THREADS]
+    rec.coverage = f"quick look (newest {len(newest)} threads)"
+    rec.reviewed = len(newest)
+    for m in [m for m in newest if m.important][:QUICK_LOOK_DRAFTS]:
+        key = f"gmail:{m.id}"
+        actions.append(("draft", key))
+        rec.handled.add(key)
+    rec.finished = now
+    rec.completed_through = None             # "Completed through: not moved (quick look)"
+    rec.search_complete = False              # intentionally limited: never comprehensive
+    rec.result = "Partial"
+    return rec
+
+
+def owner_summary(rec, total_in_window):
+    """What the owner is told: never 'all email' unless the whole window was searched."""
+    if getattr(rec, "coverage", "").startswith("quick look"):
+        return (f"I looked at your {rec.reviewed} newest emails. "
+                f"I haven't gone through the rest of the last 24 hours yet.")
+    return f"Reviewed all {total_in_window} emails in the window."

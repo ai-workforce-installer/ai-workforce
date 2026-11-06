@@ -413,13 +413,20 @@ STANDARD_VIEWS = {
     "Customers & Leads": ("All contacts", 'SORT BY "Last contact" DESC'),
 }
 REQUIRED_DBS = tuple(STANDARD_VIEWS)
-LATEST_BRAIN = "0.5.2"
+# Headings the upgrade sections add to existing pages (Priorities), checked and added by the repair too.
+REQUIRED_HEADINGS = ("Work I'd like to hand off", "Always worth my attention", "Not my responsibility anymore")
+LATEST_BRAIN = "0.6.0"
 
 
 def check_and_repair(workspace, fail_on=()):
     """Structure check and repair: add only what's missing, never touch what exists, set the
     version only when everything required is verified. Returns (complete, report)."""
     report = {"added": [], "kept_owner_view": [], "missing": []}
+    headings = workspace.setdefault("headings", set(REQUIRED_HEADINGS))   # a fresh setup has them all
+    for h in REQUIRED_HEADINGS:
+        if h not in headings and ("heading", h) not in fail_on:
+            headings.add(h)                                        # appended from the template, add-only
+            report["added"].append(f"Priorities/{h}")
     for db in REQUIRED_DBS:
         if db not in workspace["dbs"]:
             if ("db", db) in fail_on:
@@ -438,6 +445,7 @@ def check_and_repair(workspace, fail_on=()):
             continue
         views[name] = config
         report["added"].append(f"{db}/{name}")
+    report["missing"] += [f"Priorities/{h}" for h in REQUIRED_HEADINGS if h not in headings]
     for db, (name, _) in STANDARD_VIEWS.items():                  # re-fetch to confirm
         if db not in workspace["dbs"]:
             report["missing"].append(db)
@@ -464,7 +472,7 @@ def update_my_team_workspace(workspace, fail_on=(), sections_run=None):
     line is missing or "setup in progress"), then the structure check, whatever the version says."""
     sections_run = [] if sections_run is None else sections_run
     v = workspace.get("version")
-    for section in ("0.4.0", "0.5.0", "0.5.1", "0.5.2"):
+    for section in ("0.4.0", "0.5.0", "0.5.1", "0.5.2", "0.6.0"):
         if v in (None, "setup in progress") or vkey(v) < vkey(section):
             sections_run.append(section)              # each is check-then-add; version moves only below
     return check_and_repair(workspace, fail_on)

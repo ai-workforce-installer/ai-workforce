@@ -12,7 +12,7 @@ Workforce Settings ends with an **About this workspace** section holding `- Busi
 
 ## Rules
 - **Check, then add.** Every step first checks whether its change is already there and skips it if so. Running the steps twice changes nothing.
-- **Add only.** Never delete, rename, reorder or rewrite anything the owner or the team wrote. Never change an existing select option; only add new ones. (The only renames anywhere in the plugin: the two v0.1 archive pages in `references/notion-schema.md`, and naming a copied template "Business Brain" during setup, each with the owner's yes.)
+- **Add only.** Never delete, rename, reorder or rewrite anything the owner or the team wrote. Never change an existing select option; only add new ones. (The only renames anywhere in the plugin: the two v0.1 archive pages in `references/notion-schema.md`, naming a copied template "Business Brain" during setup, and, when the owner chooses a fresh start over an existing Business Brain during setup, renaming the old one "Business Brain (archive <date>)"; each only with the owner's yes.)
 - **Select options:** fetch the database schema first and send **every existing option** (including any the owner added) plus the new one, because a select update removes any option it doesn't list.
 - **Version line last.** Update it only after every step succeeded, so a half-finished upgrade runs again next time.
 - If a step fails, stop, keep the old version line, and tell the owner which step didn't finish.
@@ -21,7 +21,7 @@ Workforce Settings ends with an **About this workspace** section holding `- Busi
 ## Structure check and repair (setup, and every "update my team workspace")
 Runs after any upgrade sections that are due (the version line reaches the latest version only here, at the end), and runs whatever the version line says, so a workspace that was only partly created, or lost a piece, gets repaired. Add-only and safe to repeat.
 1. Fetch the Business Brain root page and each database once.
-2. Compare with `references/notion-schema.md`: the eight pages, the five databases, each database's properties and select options, and the views it lists. Add only what's missing, with the rules above (select options: send every existing option). Never create a second copy of anything that exists by that name.
+2. Compare with `references/notion-schema.md`: the eight pages, the five databases, each database's properties and select options, and the views it lists; and the headings the upgrade sections add to existing pages (Priorities: "Work I'd like to hand off", "Always worth my attention", "Not my responsibility anymore", each appended from the Priorities template at the end of the page if missing). Add only what's missing, with the rules above (select options: send every existing option). Never create a second copy of anything that exists by that name.
 3. **Views:** create a missing view by its name. If a view with that name exists but its filter or sort differs from the schema, leave it exactly as it is, tell the owner once ("Your 'Active offers' view has its own filter, so I left it alone; the team will read that list another way"), and don't count it as missing. Runs already check a view's filter before using it (`references/notion-access.md`).
 4. Fetch again and confirm everything added is there.
 5. **Version line:** only when nothing required is missing and every upgrade section that was due finished, set it to the latest version in this file (`- Business Brain version: <latest>`). If anything is still missing, keep the old line (or "setup in progress"), say exactly what's missing, and the owner can run it again.
@@ -57,5 +57,10 @@ Adds saved views, which keep working on Notion's free plan after its query allow
    - Customers & Leads → "All contacts": `SORT BY "Last contact" DESC`.
 2. **Schedule setting.** Under Workforce Settings → Schedule, add `- Recurring tasks update themselves: yes` if there's no such line. Without the line, the team treats it as yes.
 3. **Version line.** Only when every view above exists (created now or already there) and the setting line is present, replace the `Business Brain version` line with `- Business Brain version: 0.5.2`. If any step failed (a view couldn't be created, the database couldn't be read), leave the version line as it was, say which step failed, and the upgrade can simply be run again.
+
+## Upgrade to 0.6.0
+Gives the team a place to keep the owner's corrections about what matters, so they apply to every later run (`references/owner-corrections.md`). Nothing existing changes and no records are edited; runs work without it (corrections go under "Things to ignore for now" until then). Safe to repeat: each step only adds what's missing.
+1. **Priorities sections.** Fetch Priorities. If it has no "Always worth my attention" heading, append that section from the Priorities template at the end of the page. Then, if it has no "Not my responsibility anymore" heading, append that section the same way.
+2. **Version line.** Only when both headings are there, replace the `Business Brain version` line with `- Business Brain version: 0.6.0`. If Priorities couldn't be read or written, leave the version line as it was and say which step didn't finish.
 
 Later versions add their own section here, below this one, and run in order.

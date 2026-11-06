@@ -1,8 +1,8 @@
 ---
 name: team-report
-description: This skill should be used when the owner asks "what's my team been working on?", "what did the team do this week?", "did the morning briefing run?", "what's scheduled?", "is the team working?", "any problems?", or wants a truthful summary of the team's actual activity, results, failures and pending decisions.
+description: This skill should be used when the owner asks "what's my team been working on?", "what did the team do this week?", "did the morning briefing run?", "what's scheduled?", "is the team working?", "any problems?", "how's my first week going?", or wants a truthful summary of the team's actual activity, results, failures and pending decisions.
 metadata:
-  version: "0.5.4"
+  version: "0.6.0"
 ---
 
 # Team Report
@@ -37,5 +37,15 @@ A truthful account of what the team actually did. Every line rests on a record i
    4. **Recurring responsibilities:** each one's state (scheduled, next run, last result; or paused, proposed, not available).
    5. **Questions the team is waiting on**, if any briefings listed some.
 5. If nothing ran in the period, say exactly that and why, if the records show it. Offer the most useful next step (for example "Want me to run this morning's briefing now?").
+
+## First-week recap ("how's my first week going?")
+Optional, on request (the daily briefing mentions it once, between day 5 and 10). Same records as above, from "Set up on" in Workforce Settings to today, answered in at most six short lines, each resting on a record:
+1. **First assignment:** did it produce something useful? Its Briefings row and Result, and what came out of it (with the link). If it was a quick look, say whether the full inbox review has happened since.
+2. **First recurring run:** for each recurring responsibility, did a run actually land (a Briefings row from the recurring task) and how did it end? "Scheduled but no run recorded yet" is said as that.
+3. **Your first decisions:** how many approvals are waiting and the oldest; offer to go through them now (`review-approvals`).
+4. **What the team has learned:** the owner preferences and corrections saved so far (Brand & Tone, Your Team notes, Priorities). If none, ask the one question that would help most, for example "How do you usually sign off?" or "Is there anything in your inbox the team should stop flagging?"
+5. **One thing to hand off next:** one suggestion grounded in what the team saw (a request that came up more than once in Assignments, or the owner's own answer under "Work I'd like to hand off"), and offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled).
+6. **In one line:** what the team did this week (counts, from the records).
+Nothing here creates tasks, approvals or notifications; anything the owner agrees to is done by the skill named.
 
 Read-only: this skill changes nothing.
