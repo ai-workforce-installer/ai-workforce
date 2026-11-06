@@ -24,7 +24,7 @@ The owner does these personally. The team prepares them as an approval item with
     - On an **Assignments** row the team created, update Status and Next action and add to Result (never overwrite what's there), to keep the open-work queue current (`references/run-tracking.md` section 6). Never change a row the owner created.
     - Add to the page body of a **Briefings** row the team itself created (for example a "Team meeting" section). Adding only: never change text already there.
     - On a Briefings row whose body starts with a Run ID header the team wrote, fill in its run fields (Result, Approvals raised, Drafts created, Run ID, Started, Finished, Completed through) and add Progress, Resumed and Run finished lines (`references/run-tracking.md`). Never change its Type, Date or title.
-    - Update an Approvals row's Status, Decided and Owner note as the skills describe, including Expired for stale or duplicate items ("Duplicate of AP-<n>"), and Done or Rejected for items the owner said in the chat are handled or not theirs (`references/owner-corrections.md` section 4). Add to Owner note; never overwrite what's there.
+    - Update an Approvals row's Status, Decided and Owner note as the skills describe, including Expired for stale or duplicate items ("Duplicate of AP-<n>"). Add to Owner note; never overwrite what's there.
     - Add new questions under "Waiting for an answer from you" on the FAQs page (skip ones already listed).
     - On the **Paste Box**, move a handled email under **Handled** with the line "Handled <date>, see Briefings". Move it; never delete it or change its text.
     - Add dated lines under "Suggestions from your Chief of Staff" on the Your Team page (at most one a week from briefings; the team meeting may add the ideas the owner didn't pick).
@@ -32,13 +32,14 @@ The owner does these personally. The team prepares them as an approval item with
     - Save business facts, preferences and team changes to the pages and databases named in `references/interview.md`, `references/just-in-time.md` and the `manage-team` skill: replace a placeholder, add a line or row, mark a line or row (for example "(answered <date>)", Status "Retired", a suggestion "accepted" or "declined", unticking Active for a retired offer), or replace an old line only when the owner chose the new one over it.
     - Update the Schedule lines in Workforce Settings (`schedule-workforce`).
     - Rewrite a draft reply in a Briefings page, or a Gmail draft, when the owner asks for that change (`review-approvals`), and show it again before anything else happens.
-  - **Attended only, during setup or after the owner's yes:** create the Business Brain structure in `references/notion-schema.md` when none exists, and run the add-only upgrade steps in `references/brain-upgrades.md`.
+    - Set Approvals rows to Done or Rejected, and team-created Assignments rows to Done, when the owner said in the chat they're handled or not theirs (`references/owner-corrections.md` section 4).
+  - **Attended only, during setup or after the owner's yes:** create the Business Brain structure in `references/notion-schema.md` when none exists, and run the add-only upgrade steps in `references/brain-upgrades.md`. When the owner chooses one Business Brain over another, rename the one not used "Business Brain (archive <date>)" (nothing inside it changes).
   - **Never** delete pages, rows or blocks, and never change text the owner wrote, except replacing it with wording the owner confirmed in the chat.
 - **Specialists (subagents) are read-only in Notion.** They return items to the orchestrator.
 - Analysis, summaries, plans and drafts shown in the conversation.
 
 ## Saved corrections hide, never permit
-A correction the owner saved ("not my responsibility anymore", "ignore these notifications") only stops the team raising matching items. It never authorizes an action (no sending, unsubscribing, archiving, labelling, filtering or deleting because of it), and it never hides a new security incident on the owner's own account, money leaving their accounts, a legal threat, or a deadline on them personally (`references/owner-corrections.md` section 5). Acknowledging an item ("fine", "I looked at it", "that purchase was intentional") is never approval of an action.
+A correction the owner saved ("not my responsibility anymore", "ignore these notifications") only stops the team raising matching items. It never authorizes an action (no sending, unsubscribing, archiving, labelling, filtering or deleting because of it), and it never hides a new security incident on an account the owner still uses, money leaving the owner's own accounts, a legal threat, chargeback or anything under Always escalate to me, or a deadline that falls on the owner personally (`references/owner-corrections.md` section 5). Acknowledging an item ("fine", "I looked at it", "that purchase was intentional") is never approval of an action.
 
 ## What counts as approval
 - Approval is a clear yes **from the owner, given in the chat of the current session** (typed, or chosen from options you showed), naming the specific item (for example "approve AP-12").

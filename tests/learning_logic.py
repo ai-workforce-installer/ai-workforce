@@ -157,7 +157,7 @@ def sort_item(item, rules, closed_threads):
     """Returns (bucket, note). Buckets: 'your rules', 'already handled', 'attention', or 'raise'."""
     hit = next((r for r in rules if r["section"] in ("not_mine", "ignore") and matches(item, r)), None)
     if hit:
-        if item["kind"] in NEVER_HIDDEN and item.get("new", True):
+        if item["kind"] in NEVER_HIDDEN and item.get("new", False):
             return "raise", f"matches your note '{hit['covers']}', raised because it's a new {item['kind']}"
         return "your rules", hit["covers"]
     if item.get("thread") in closed_threads and not item.get("materially_new"):
@@ -171,7 +171,8 @@ def run(brain, items, today):
     """One run of inbox triage or a briefing, as far as these rules go. Queues an approval only for
     raised items, never twice for one problem, never for anything ruled out."""
     rules = load_rules(brain, today)
-    closed = {a["thread"] for a in brain.approvals if a["status"] in ("Done", "Rejected") and a.get("thread")}
+    closed = {a["thread"] for a in brain.approvals if a["status"] in ("Done", "Rejected") and a.get("thread")
+              and (today - a.get("decided", today)).days <= 14}     # longer quiet needs a saved rule
     report = {"raised": [], "your rules": 0, "already handled": 0, "attention": [], "notes": []}
     problems = {}
     for it in items:
@@ -188,6 +189,7 @@ def run(brain, items, today):
         if any(a["problem"] == problem and a["status"] in ACTIVE for a in brain.approvals):
             continue                                              # reuse the open item
         if any(a["problem"] == problem and a["status"] in ("Done", "Rejected")
+               and (today - a.get("decided", today)).days <= 14             # approval-queue reads 14 days
                and not any(i.get("materially_new") or i["kind"] in NEVER_HIDDEN for i in its)
                for a in brain.approvals):
             continue                                              # repeating alert isn't new
@@ -251,7 +253,9 @@ def interpret_reply(text, shown, numbering="position"):
             elif re.search(r"\b(reject|don't|no)\b", low):
                 meaning = "reject"
             elif re.search(r"\b(approve|go ahead|send it|yes)\b", low) or low.startswith("decline"):
-                meaning = "approve"
+                # described rather than numbered, or a different action than Exact action: confirm once
+                described = not re.search(r"\b(\d+|" + "|".join(NUMBERS) + r")\b", low)
+                meaning = "confirm_first" if described or low.startswith("decline") else "approve"
             elif re.search(r"\b(fine|ok|okay|looks good)\b", low):
                 meaning = "confirm_first" if item["action_type"] in CONSEQUENTIAL else "acknowledged"
             else:

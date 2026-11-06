@@ -77,7 +77,9 @@ def next_window(records, now):
     """Return (start, end, gap) where gap is (gap_start, gap_end) or None."""
     cp = last_checkpoint(records)
     if cp is None:
-        return now - FIRST_RUN_WINDOW, now, None
+        # first run of the bookmark; reach back to an earlier quick look's window so nothing is skipped
+        looks = [r.window[0] for r in records if getattr(r, "coverage", "").startswith("quick look")]
+        return min([now - FIRST_RUN_WINDOW] + looks), now, None
     start = cp - WINDOW_OVERLAP
     if now - start > MAX_WINDOW:
         return now - MAX_WINDOW, now, (start, now - MAX_WINDOW)

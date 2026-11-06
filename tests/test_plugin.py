@@ -417,7 +417,7 @@ class LearningRules(unittest.TestCase):
         self.assertIn("Has the owner already ruled it out?", read(REFS / "team-roles.md"))
         self.assertIn("your rules", read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md"))
         self.assertIn("Saved corrections hide, never permit", read(REFS / "approval-policy.md"))
-        self.assertIn("Another email repeating the same alert is not new", read(REFS / "approval-queue.md"))
+        self.assertIn("Another automated email repeating the same alert is not new", read(REFS / "approval-queue.md"))
         for a in (PLUGIN / "agents").glob("*-manager.md"):
             self.assertIn("**Owner's corrections:**", read(a), a)
 
@@ -460,7 +460,7 @@ class LearningRules(unittest.TestCase):
         ra = read(SKILLS / "review-approvals" / "SKILL.md")
         for must in ["## Understanding replies", "Looking is not permission", "Never act on an ambiguous approval",
                      "Clarify only when needed", "**Investigate**", "**Acknowledgement / already handled**",
-                     "If a number could mean both a position and a different AP number on screen, ask"]:
+                     "If the list showed both positions and AP numbers and a number could mean either, pointing to different items, ask"]:
             self.assertIn(must, ra)
         self.assertIn("from its step 0", read(SKILLS / "daily-executive-briefing" / "SKILL.md"))
 

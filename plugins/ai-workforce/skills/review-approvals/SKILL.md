@@ -20,13 +20,14 @@ This skill only runs with the owner present. It is the one place where queued ac
 ## Understanding replies
 Owners answer in their own words, often for several items in one message. Map every part of the reply to an item and a meaning before doing anything.
 
-**Which item.** Read numbers the way the owner was just shown them: if the last list in this chat numbered items 1, 2, 3, "two" is the second item; if it showed AP numbers, "12" is AP-12. If a number could mean both a position and a different AP number on screen, ask. "Those invitations", "the Stripe one", "the last two" count only when exactly the items you'd act on fit the description; otherwise ask. Items the reply doesn't mention stay as they are.
+**Which item.** Read numbers the way the owner was just shown them: if the last list in this chat numbered items 1, 2, 3, "two" is the second item; if it showed AP numbers, "12" is AP-12. If the list showed both positions and AP numbers and a number could mean either, pointing to different items, ask. "Those invitations", "the Stripe one", "the last two" count only when exactly the items you'd act on fit the description; otherwise ask. Items the reply doesn't mention stay as they are.
 
 **What it means.** Each answer is exactly one of these:
 
 | The owner says | Meaning | What happens |
 |---|---|---|
-| "approve 3", "yes, send it", "go ahead with two", "decline those invitations" | **Permission** for that item's Exact action, or for an action they named on items that clearly fit it | Step 4, exactly that action, nothing more. A named action that needs the owner's own hands (spend, publish, financial, delete) still becomes steps for them |
+| "approve 3", "yes, send it", "go ahead with two" | **Permission** for that numbered item's Exact action | Step 4, exactly that action, nothing more. An action that needs the owner's own hands (spend, publish, financial, delete) still becomes steps for them |
+| "decline those invitations", "send the Stripe one" | **Permission described, not numbered**, or an action different from the item's Exact action | Confirm once, listing exactly what you'd do: "Decline: Tue 2 PM webinar (AP-24), Thu demo call (AP-26)?" Act only after that yes |
 | "two is fine", "looks good", "ok" | Permission **only** if the item is a draft or action that's unmistakably what "fine" approves and there's one item in question. Otherwise an acknowledgement | If it would send, commit, book or spend, confirm in a few words first ("Send it as written?"). On an information item (a charge to check, a notice), close it as acknowledged |
 | "I already checked five", "I looked at it", "I already handled that", "I sent it" | **Acknowledgement / already handled** | Done, Owner note with their words. **Never** permission for the item's action or any other |
 | "that purchase was intentional", "that's expected" | **Acknowledgement** | Done, with their words. Offer to stop flagging it only if it's likely to recur (`references/owner-corrections.md`) |

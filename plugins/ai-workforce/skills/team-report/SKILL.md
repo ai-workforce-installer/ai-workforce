@@ -32,7 +32,7 @@ A truthful account of what the team actually did. Every line rests on a record i
    - Runs whose row says the plugin or an app wasn't available → say so plainly, with the fix (reconnect the app, or keep AI Workforce turned on under Customize → Plugins).
 4. **Report in this order**, short and plain:
    1. **Done:** what the team finished, grouped by team member, each with a count and link ("Client Success: 12 reply drafts across 3 runs").
-   2. **Needs you:** pending approvals (count, oldest AP number and age) and things handed to you that only you can do.
+   2. **Needs your decision:** pending approvals (count, oldest AP number and age) and things handed to you that only you can do.
    3. **Problems:** failed or partial runs, missing runs, connections that were down, each with one line on what to do.
    4. **Recurring responsibilities:** each one's state (scheduled, next run, last result; or paused, proposed, not available).
    5. **Questions the team is waiting on**, if any briefings listed some.

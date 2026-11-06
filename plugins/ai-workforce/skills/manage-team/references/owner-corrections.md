@@ -10,7 +10,7 @@ No new storage: lasting corrections live on existing Business Brain pages, and t
 |---|---|---|
 | "I already handled that." "I sent it." "I checked five." | **This item only** | Close this item (section 4). No rule. |
 | "That purchase was intentional." "Two is fine." | **This item only** (an acknowledgement) | Close this item. Not permission for any other action (`review-approvals`, "Understanding replies"). |
-| "Ignore this thread." "Stop telling me about this one." | **This item from now on** | Close it and record its source key (thread or sender + subject) so later emails in that same thread aren't raised. No page rule. |
+| "Ignore this thread." "Stop telling me about this one." | **Narrow lasting rule** (this one thing) | Close it, confirm one line naming just that thread or sender and subject ("Things to ignore: the 'Weekly sync failed' emails from Make"), and save it under Things to ignore for now, so it holds however long it goes on. |
 | "That isn't my responsibility anymore." "That company isn't one of my businesses." "Don't keep bringing this up." | **Lasting rule** | Confirm once, then save it (sections 2-3) and close related open work (section 4). |
 | "This kind of notification isn't important to me." "GitHub notifications from other repos don't matter." | **Lasting rule** (what to ignore) | Same. |
 | "Family and school emails deserve my attention." | **Lasting rule** (what matters) | Same, saved under Always worth my attention. |
@@ -55,18 +55,18 @@ Saving follows `manage-team` part A: fetch the page first, replace a placeholder
 - Only rows the team created, and only the ones the owner named or confirmed in the same yes (section 2). Never touch rows the owner created.
 - Add to Owner note and Result; never overwrite them. Never delete a row: closed rows leave the active queue and the Open work view but stay in the database as history.
 - Gmail drafts the team made for a closed item stay where they are; mention them once ("The draft reply is still in your Gmail drafts if you want it") and never delete them.
-- For an inbox item, also list its source key in this run's Handled list, so retries and overlapping windows don't raise it again.
+- When this happens during an inbox run, also list the item's source key in that run's Handled list, so retries and overlapping windows don't raise it again.
 
 ## 5. Applying corrections on every run
 
 Every run that sorts or raises anything (inbox triage, customer support triage, briefings, assignments, the team meeting) reads Priorities and Extra rules once (it already does) and checks each candidate item against the saved rules **before** drafting, queuing an approval, creating an Assignments row or putting it in a report:
 - **Matches "Not my responsibility anymore" or "Things to ignore for now"** (and the rule isn't past its "until" date or marked "no longer applies"): don't raise it, draft it, queue it or assign it. Count it in the report under "Already handled or not yours" with the rule it matched ("3 emails about the old Northwind automations, per your note of Nov 6"). In inbox coverage it's Routine, type "your rules" (`references/inbox-coverage.md` section 3).
 - **Matches "Always worth my attention":** read it in full and show it under Worth knowing at least (higher if it's urgent), even if it looks routine.
-- **Matches a closed item's source key or thread:** a later email in the same thread about the same thing isn't new work. Count it as already handled.
+- **Same thread as an item the owner closed in the last 14 days:** another automated email repeating the same alert or notice, with nothing materially new, counts as already handled. A person writing something new in that thread is new work. (Anything meant to stay quiet longer than that is a saved rule, above.)
 - **A rule only hides; it never adds an action.** Nothing is sent, unsubscribed, archived, labelled, filtered or deleted because of a rule.
 
 **What a rule never hides** (raise it, once, whatever the rules say):
-1. A **new security incident** on an account the owner still uses or can sign in to: a new sign-in, password reset, two-factor change, leaked key or password, or an "account compromised" notice.
+1. A **new security incident** on an account the owner still uses: a new sign-in, password reset, two-factor change, leaked key or password, or an "account compromised" notice.
 2. **Money leaving the owner's own accounts**: a charge, payment, payout change or failed payment on the owner's card, bank or payment account.
 3. A **legal threat**, chargeback, or anything under "Always escalate to me" in Policies.
 4. A **deadline that falls on the owner personally** (a contract, a tax or account deadline in their name).

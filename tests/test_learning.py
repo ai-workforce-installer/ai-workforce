@@ -151,13 +151,33 @@ def brain_with(items):
     return Brain(approvals=[dict(i, status="Pending", item=f"AP-{i['ap']}") for i in items])
 
 
+class ThreadQuiet(unittest.TestCase):
+    def test_closed_item_quiets_repeats_for_14_days_then_needs_a_rule(self):
+        b = first_run_brain()
+        apply_reply(b, interpret_reply("I already handled that one", [b.approvals[0]]), DAY1)
+        self.assertEqual(run(b, [make_alert(5)], DAY1 + timedelta(days=10))["already handled"], 1)
+        self.assertEqual(run(b, [make_alert(6)], DAY1 + timedelta(days=15))["raised"],
+                         ["Northwind Make sync failing"])                 # "this item only" wears off
+
+    def test_a_person_writing_something_new_is_new_work(self):
+        b = first_run_brain()
+        apply_reply(b, interpret_reply("I already handled that one", [b.approvals[0]]), DAY1)
+        reply = make_alert(7, kind="person", materially_new=True, problem="Client asks a new question")
+        self.assertEqual(run(b, [reply], DAY2)["raised"], ["Client asks a new question"])
+
+
 class ConversationalApprovals(unittest.TestCase):
     def test_the_six_replies_from_the_live_test(self):
         shown = shown_items()
         d = dict(interpret_reply("One isn't my problem. Two is fine. Look into three. Decline those invitations. "
                                  "I already checked five", shown))
         self.assertEqual(d, {21: "not_mine", 22: "confirm_first", 23: "investigate",
-                             24: "approve", 26: "approve", 25: "handled"})
+                             24: "confirm_first", 26: "confirm_first", 25: "handled"})
+        b = brain_with(shown)
+        self.assertEqual(apply_reply(b, list(d.items()), DAY1), [])      # nothing declined or sent yet
+        # after the one-line confirmation ("Decline: … (AP-24), … (AP-26)?" → "yes"), exactly those two
+        self.assertEqual(apply_reply(b, [(24, "approve"), (26, "approve")], DAY1),
+                         [("do", 24, "Calendar with others"), ("do", 26, "Calendar with others")])
 
     def test_acknowledgement_is_never_permission(self):
         b = brain_with(shown_items())
@@ -178,7 +198,7 @@ class ConversationalApprovals(unittest.TestCase):
     def test_number_that_could_mean_two_items_is_asked(self):
         shown = [{"ap": 2, "kind": "reply", "action_type": "Send message", "source": "x"},
                  {"ap": 7, "kind": "reply", "action_type": "Send message", "source": "y"}]
-        self.assertEqual(interpret_reply("approve 2", shown, numbering="unclear"), [(None, "clarify")])
+        self.assertEqual(interpret_reply("approve 2", shown, numbering="both"), [(None, "clarify")])
         self.assertEqual(interpret_reply("approve 2", shown, numbering="ap"), [(2, "approve")])
         self.assertEqual(interpret_reply("approve 2", shown, numbering="position"), [(7, "approve")])
 
@@ -240,7 +260,8 @@ class FirstAssignmentQuickLook(unittest.TestCase):
         self.assertIsNone(rec.completed_through)
         self.assertEqual(rec.result, "Partial")
         self.assertIsNone(last_checkpoint(records))
-        self.assertEqual(next_window(records, now + timedelta(hours=1))[0], now + timedelta(hours=1) - timedelta(hours=24))
+        # the next full run starts as a first run, reaching back to the quick look's own window start
+        self.assertEqual(next_window(records, now + timedelta(hours=1))[0], now - timedelta(hours=24))
         self.assertIn("haven't gone through the rest", owner_summary(rec, 140))
         self.assertNotIn("all", owner_summary(rec, 140).lower())
 
@@ -254,6 +275,7 @@ class FirstAssignmentQuickLook(unittest.TestCase):
         self.assertEqual(len(keys), len(set(keys)))                       # no draft twice
         self.assertTrue(drafted_first)
         self.assertEqual(full.completed_through, now + timedelta(minutes=30))
+        self.assertEqual(full.window[0], now - timedelta(hours=24))       # reaches back: no mail skipped
 
 
 class LearningTheBusiness(unittest.TestCase):
