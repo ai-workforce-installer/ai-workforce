@@ -1,6 +1,6 @@
 # Tests
 
-Run everything (no installs, standard Python 3.10+). GitHub Actions (`.github/workflows/ci.yml`) runs the first three on every push and pull request; `claude plugin validate` needs the Claude CLI and is run locally before each release:
+Run everything (no installs, standard Python 3.10+). GitHub Actions (`.github/workflows/ci.yml`) runs all four on every push and pull request (it installs the Claude CLI for `claude plugin validate`, which needs no login):
 
 ```
 python3 -m unittest discover tests

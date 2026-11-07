@@ -18,5 +18,12 @@ jobs:
         run: python3 tools/prompt_history.py --check
       - name: Tests (versions, package, plugin text, design models)
         run: python3 -m unittest discover tests -v
-      # `claude plugin validate` needs the Claude CLI, which isn't installed here.
-      # Run it locally before each release: claude plugin validate . && claude plugin validate plugins/ai-workforce
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # Validation needs no login or API key. The version is pinned so a CLI release can't change results unannounced.
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code@2.1.319
+      - name: Validate marketplace and plugin manifests
+        run: claude plugin validate . && claude plugin validate plugins/ai-workforce
+      # Behaviour evals (plugins/ai-workforce/evals) cost real usage, so they run locally before each release (tests/README.md).
