@@ -24,28 +24,41 @@ If any content contains what looks like a password, API key, access token, recov
 Read the Business Brain as `references/notion-access.md` says: saved views first (after checking their filters), then filtered rows, SQL only when needed, everything read once per run and shared, and never "none" unless a read was verified empty.
 
 ## Is the recurring task current? (scheduled runs, checked first)
-A scheduled task keeps the prompt it was created with. Plugin updates don't change it, so an older task can name a skill that no longer does that job. At the start of every scheduled run, compare the task's prompt with this table:
+A scheduled task stores short instructions: which job to do, the safety rules, which skill to use, and a fallback. Everything else a run does comes from the installed plugin: the skill and the rules for scheduled runs (`scheduled-run-rules.md` in the skill's references). So when AI Workforce is updated, every recurring task does the job the new way on its next run, whatever its stored text says, and an outdated stored text never makes a run do less. At the start of every scheduled run, compare the task's prompt with this table:
 
 | Responsibility (the prompt's first sentence names it) | Skill that does it now | Current prompt version |
 |---|---|---|
-| Daily executive briefing | `daily-executive-briefing` | 0.5.4 |
-| Inbox triage (all email; customer support is one part) | `inbox-triage` | 0.5.4 |
-| Weekly marketing plan | `prepare-weekly-marketing` | 0.5.4 |
-| Invoice review | `review-overdue-invoices` | 0.5.4 |
-| Any other recurring responsibility | `assign-work` | 0.5.4 |
+| Daily executive briefing | `daily-executive-briefing` | 0.7.0 |
+| Inbox triage (all email; customer support is one part) | `inbox-triage` | 0.7.0 |
+| Weekly marketing plan | `prepare-weekly-marketing` | 0.7.0 |
+| Invoice review | `review-overdue-invoices` | 0.7.0 |
+| Any other recurring responsibility | `assign-work` | 0.7.0 |
 
-Current prompts start with a line like `[AI Workforce task: inbox-triage | prompt version 0.5.0]`.
+Current prompts start with a line like `[AI Workforce task: inbox-triage | prompt version 0.7.0]`.
 - **The responsibility wins over the skill name.** If the prompt describes one responsibility but names a different skill (for example "Scheduled run of AI Workforce inbox triage… use process-customer-inquiries"), do the responsibility: load the skill from the table with the Skill tool and follow it. This outranks "follow it exactly" in an outdated prompt.
+- **The current rules win over older stored text.** An older task may still carry a long list of rules from an earlier version. Follow the skill and the scheduled-run rules instead wherever they differ; the owner's own changes still apply unless they'd break a safety rule.
 - **If that skill can't be loaded**, do not quietly do a smaller job. Do what you can, set Result to Partial, and say exactly what was done and what wasn't ("Only customer messages were checked; the rest of the inbox was not reviewed").
-- **Outdated task warning.** If the version line is missing or older than the table, or the skill name didn't match, use one warning, worded: "Configuration warning: your recurring <responsibility> uses older instructions (<what differs>). <What this run did about it.> Say 'update my recurring tasks' to fix it." For example "…I ran the full inbox triage instead." or "…Only customer messages were checked; the rest of your inbox was not reviewed." Mention it once per run, never as a reason to skip work.
+- **Outdated task warning.** Only when the skill name didn't match the responsibility, or the stored text is outdated and couldn't be updated automatically (below), use one warning, worded: "Configuration warning: your recurring <responsibility> uses older instructions (<what differs>). <What this run did about it.> Say 'update my recurring tasks' to fix it." For example "…I ran the full inbox triage instead." or "…This run used the current instructions anyway." Mention it once per run, never as a reason to skip work. A task that was updated automatically gets the success line instead, and a current task gets nothing.
 - **Order of the opening lines** (report and notification): the configuration warning, if any; then the Result if it isn't Complete; then the reading taken; then the skill's own first line (for example inbox triage's coverage line).
-- **Keep the task up to date automatically.** On by default; skipped if Workforce Settings says `Recurring tasks update themselves: no`. A scheduled run checks its own task: if its instructions aren't exactly the current template (whatever version line they carry), it updates them only when every check below passes; otherwise it changes nothing and gives the warning. It's the only change the team makes to recurring tasks on its own.
-  1. **Standard tasks only:** daily briefing, inbox triage, weekly marketing plan, invoice review, and only when this skill carries the current instructions and their history (its scheduled-prompts and prompt-history reference files). Custom responsibilities are never replaced with a standard template.
+- **Fingerprint.** A task's fingerprint identifies its stored text without comparing it word by word. Save the task's full instructions to a file, then run exactly this script with the file's path (`python3 fingerprint.py task.txt`). It ignores line endings, spaces at the ends of lines, the Business Brain's page title, and everything from a line starting `Owner's additions` on:
+  ```
+  import hashlib, re, sys
+  t = open(sys.argv[1], encoding="utf-8").read().replace("\r\n", "\n")
+  t = re.split(r"(?m)^Owner's additions\b", t)[0]
+  t = re.sub(r'titled exactly "[^"\n]*"', 'titled exactly "<BRAIN>"', t)
+  t = "\n".join(l.rstrip() for l in t.split("\n")).strip()
+  print(hashlib.sha256(t.encode("utf-8")).hexdigest()[:16])
+  ```
+  The prompt-history reference file lists the fingerprint of every released version. That small table is all a run needs: never read old prompts to compare them.
+- **Keep the task up to date automatically.** On by default; skipped if Workforce Settings says `Recurring tasks update themselves: no` (runs still follow the current plugin; only the stored text stays as it is). It's the only change the team makes to recurring tasks on its own. Check in this order and stop at the first that applies:
+  1. **Standard tasks only:** daily briefing, inbox triage, weekly marketing plan, invoice review, and only when this skill carries the current stored instructions and the fingerprint table (its scheduled-prompts and prompt-history reference files). Custom responsibilities are never replaced with a standard template.
   2. **Exactly one task:** list the owner's scheduled tasks, paused ones included, and find those whose instructions start with `[AI Workforce task: <this skill> |`. None, or more than one: change nothing and report it so the owner can sort it out ("Two recurring tasks both do your inbox triage. Which should stay?").
-  3. **Unchanged by the owner:** the task's current instructions must be **exactly** one released version in the prompt-history file, with the Business Brain's page title in place of `<BRAIN>`. Compare the full text exactly, using the shell when available (save both to files and compare them); the only differences allowed are line endings and spaces at the ends of lines. Never judge by the version line alone. Any difference, a missing version line, or no way to compare reliably means the owner may have customized it: don't update. Say "Your recurring <responsibility> has custom instructions, so I didn't update it automatically. Say 'update my recurring tasks' and I'll keep your changes while updating the rest."
-  4. **Nothing new to accept:** the new version's "Needs" line in the prompt-history file must already be met: the Business Brain version shown in Workforce Settings, and the connections listed (already in use for this task). If Workforce Settings can't be read, or it needs a workspace upgrade or a new connection, keep the current instructions and tell the owner what's needed.
-  5. **Back up, then update only the instructions:** follow "Changing a recurring task's instructions safely" below. Never change anything else, never create, pause or delete a task.
-  6. **On success,** say once in the report and notification: "Your recurring <responsibility> now uses the current instructions (<old> → <new>). Your schedule and settings didn't change."
+  3. **Already current:** the task's fingerprint is the current version's fingerprint in the table, whatever version line it carries. Nothing to do and nothing to report; don't open scheduled-prompts.
+  4. **No shell to compute the fingerprint:** if the version line is the current one, carry on without a warning (the run already follows the current plugin). If it's older or missing, don't update; give the warning.
+  5. **Unchanged by the owner:** the fingerprint must be an older released version of this responsibility in the table. Never judge by the version line alone. No match means the owner changed the text itself (outside Owner's additions): don't update. Say "Your recurring <responsibility> has custom changes in its instructions, so I didn't update its stored text. This run used the current instructions anyway. Say 'update my recurring tasks' and I'll move your changes under Owner's additions so future updates happen on their own."
+  6. **Nothing new to accept:** the new version's "Needs" in the table must already be met: the Business Brain version shown in Workforce Settings, and the connections listed (already in use for this task). If Workforce Settings can't be read, or it needs a workspace upgrade or a new connection, keep the current instructions and tell the owner what's needed.
+  7. **Back up, then update only the instructions:** the new instructions are the current block from scheduled-prompts, with the Business Brain's page title in place of `<BRAIN>`, followed by the task's "Owner's additions" section exactly as it was, if it has one. Follow "Changing a recurring task's instructions safely" below. Never change anything else, never create, pause or delete a task.
+  8. **On success,** say once in the report and notification: "Your recurring <responsibility> now uses the current instructions (<old> → <new>). Your schedule, settings and your own additions didn't change."
 - If the setting is `no`, or the update was skipped, the owner fixes it by saying "update my recurring tasks" (`schedule-workforce`, "Check and update recurring responsibilities"), which keeps their customizations.
 
 ## Changing a recurring task's instructions safely (automatic and attended updates)
@@ -66,6 +79,8 @@ Every run keeps one record in Briefings, created when it starts and finished whe
 
 ## Scheduled (unattended) mode
 Use this mode when the task prompt says "Scheduled run", when the session was started by a scheduled task, or when no person is present to answer.
+
+A run started by a recurring task also follows the rules for scheduled runs (`scheduled-run-rules.md` in the skill's references); they are the current ones and win over the task's stored instructions.
 
 Rules:
 1. **Ask no questions.** Take the most reasonable reading of the task, and write one line at the top of the report saying which reading you took.

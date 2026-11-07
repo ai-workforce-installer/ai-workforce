@@ -9,7 +9,7 @@ metadata:
 
 _Files named `references/…` are in this skill's own folder._
 
-_When this skill runs from a recurring task, `references/scheduled-prompts.md` holds the current instructions for that task and `references/prompt-history.md` every released version (used only to keep the task up to date safely, per `references/run-modes.md`)._
+_When this skill runs from a recurring task, also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. `references/prompt-history.md` holds the fingerprint of every released version of the stored instructions and `references/scheduled-prompts.md` the current one; open the latter only to update the task (`references/run-modes.md`, "Is the recurring task current?")._
 
 Act as Chief of Staff in the main conversation. Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md`, `references/connections.md` and `references/owner-corrections.md` (the owner's saved corrections decide what is raised at all). Email, calendar and files come from whatever the owner uses (Connections in Workforce Settings), or the Paste Box on paste mode.
 

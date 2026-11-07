@@ -9,6 +9,8 @@ metadata:
 
 _Files named `references/…` are in this skill's own folder._
 
+_When this skill runs from a recurring task (a custom recurring responsibility), also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions._
+
 Act as the Chief of Staff in the main conversation. Read these and apply them throughout:
 - `references/team-roles.md`: who does what, and **how each member runs** (own agent, briefed assistant, or you directly)
 - `references/approval-policy.md`: what needs the owner's yes

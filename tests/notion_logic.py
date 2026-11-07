@@ -6,7 +6,7 @@ Restates skills/assign-work/references/notion-access.md, team-roles.md
 with a mocked Notion connector, so the rules can be tested against hard cases.
 It tests the design, not Claude's behaviour in a live run.
 """
-import re
+import hashlib, re
 
 ROWS_CAP = 100
 
@@ -243,15 +243,37 @@ def normalize(text):
     return "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").split("\n")).strip()
 
 
+def fingerprint(text):
+    """run-modes.md "Fingerprint": ignores line endings, trailing spaces, the Brain's title and
+    everything from "Owner's additions" on. Same recipe as tools/prompt_history.py."""
+    t = text.replace("\r\n", "\n")
+    t = re.split(r"(?m)^Owner's additions\b", t)[0]
+    t = re.sub(r'titled exactly "[^"\n]*"', 'titled exactly "<BRAIN>"', t)
+    return hashlib.sha256(normalize(t).encode("utf-8")).hexdigest()[:16]
+
+
+def owner_additions(text):
+    """The task's "Owner's additions" section, kept exactly when the stored text is updated."""
+    m = re.search(r"(?m)^Owner's additions\b", text.replace("\r\n", "\n"))
+    return text.replace("\r\n", "\n")[m.start():].rstrip() if m else ""
+
+
+def task_version(prompt):
+    m = re.match(r"^\[AI Workforce task: [a-z0-9-]+ \| prompt version ([0-9.]+)\]", prompt.replace("\r\n", "\n"))
+    return m.group(1) if m else None
+
+
 def vkey(v):
     return [int(x) for x in v.split(".")]
 
 
 def auto_update_plan(tasks, responsibility, history, current_version, brain_version,
                      setting="yes", can_compare=True, brain_title="Business Brain", connections_in_use=None):
-    """Decide what an outdated standard task may do. Returns (action, detail).
+    """Decide what a standard task's stored text may do. Returns (action, detail).
 
     history: {(responsibility, version): (template_text, needs_brain_version[, needed_connections])}
+    A run compares fingerprints only (the shipped table), never old prompt texts.
+    can_compare: a shell is available to compute the fingerprint.
     Tasks are matched only by the tag on their instructions' first line.
     action: none | update | warn | ask
     """
@@ -263,24 +285,28 @@ def auto_update_plan(tasks, responsibility, history, current_version, brain_vers
     if len(matches) != 1:
         return "ask", f"{len(matches)} matching tasks"
     task = matches[0]
+    table = {v: fingerprint(e[0]) for (r, v), e in history.items() if r == responsibility}
     current_text, needs = history[(responsibility, current_version)][:2]
     needed = set(history[(responsibility, current_version)][2]) if len(history[(responsibility, current_version)]) > 2 else set()
-    current_text = current_text.replace("<BRAIN>", brain_title)
-    if normalize(task["prompt"]) == normalize(current_text):
+    if not can_compare:     # no shell: the run already follows the current plugin either way
+        return ("none", None) if task_version(task["prompt"]) == current_version else ("warn", "can't compare reliably")
+    fp = fingerprint(task["prompt"])
+    if fp == table[current_version]:
         return "none", None
-    if not can_compare:
-        return "warn", "can't compare reliably"
-    released = {v: e[0].replace("<BRAIN>", brain_title) for (r, v), e in history.items() if r == responsibility}
-    found = [v for v, text in released.items() if normalize(text) == normalize(task["prompt"])]
+    found = [v for v, f in table.items() if f == fp]
     if not found:
-        return "warn", "custom instructions"          # includes unknown old versions
+        return "warn", "custom instructions"          # includes unknown old versions and inline edits
     if vkey(brain_version) < vkey(needs):
         return "warn", f"needs Business Brain {needs}"
     missing = needed - set(connections_in_use or ())
     if missing:
         return "warn", f"needs connection {', '.join(sorted(missing))}"
+    new = current_text.replace("<BRAIN>", brain_title)
+    extra = owner_additions(task["prompt"])
+    if extra:
+        new = new + "\n\n" + extra
     return "update", {"task": task["id"], "from": found[0], "to": current_version, "backup": task["prompt"],
-                      "new": current_text}
+                      "new": new}
 
 
 def task_marker(prompt):

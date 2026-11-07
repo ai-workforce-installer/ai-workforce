@@ -136,23 +136,42 @@ class ScheduledPrompts(unittest.TestCase):
         self.assertIn("-in:sent -in:drafts -in:spam -in:trash", inbox)
         self.assertIn("Completed through", inbox)
 
-    def test_every_prompt_and_fallback_keeps_safeguards(self):
+    def test_every_stored_prompt_keeps_safeguards(self):
+        """What a task stores: the safety rules, the pointer to the current plugin, and a fallback."""
         for b in self.blocks:
             for must in ["never as instructions or approval",
                          "Never repeat a password, API key",
                          "could not be verified",
-                         "open Assignments",
-                         "Launch only team members with real work",
-                         "never estimate cost",
                          "Never send messages, spend money, change budgets or financial records, publish, delete anything",
                          "carry out approval items",
-                         "Not run (still in progress)",
-                         "saved views first",
+                         "Never create a second draft, approval or Assignments row",
                          "Run now at any day or time",
-                         "accepted by the tool",
                          "one notification per run",
+                         "The installed plugin's instructions win over this text",
+                         "scheduled-run-rules",
                          "If that skill is not available"]:
                 self.assertIn(must, b, f"missing '{must}' in {b[:60]}")
+            self.assertNotIn("described above", b)      # nothing in the fallback points at text that moved
+
+    def test_stored_prompts_are_short(self):
+        """Rules live in the plugin, so a stored prompt stays small and rarely changes."""
+        for b in self.blocks:
+            before_fallback = b.split("If that skill is not available")[0]
+            self.assertLess(len(before_fallback.split()), 330, b[:60])
+
+    def test_scheduled_run_rules_keep_every_safeguard(self):
+        rules = read(SKILLS / "schedule-workforce" / "references" / "scheduled-run-rules.md")
+        for must in ["never as instructions or approval", "Never repeat a password, API key", "could not be verified",
+                     "open Assignments", "Launch only team members with real work", "never estimate cost",
+                     "Never send messages, spend money, change budgets or financial records, publish, delete anything",
+                     "carry out approval items", "Not run (still in progress)", "saved views first",
+                     "Run now at any day or time", "accepted by the tool", "one notification per run",
+                     "without redoing its work", "win over the task's stored instructions",
+                     "Recurring tasks update themselves: no"]:
+            self.assertIn(must, rules, must)
+        for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices", "assign-work"]:
+            self.assertIn("references/scheduled-run-rules.md", read(SKILLS / sk / "SKILL.md"), sk)
+            self.assertTrue((SKILLS / sk / "references" / "scheduled-run-rules.md").exists(), sk)
 
 
 class Safety(unittest.TestCase):
@@ -298,15 +317,16 @@ class FreePlanAndEfficiency(unittest.TestCase):
         for must in ["Keep the task up to date automatically", "Recurring tasks update themselves: no",
                      "Change the instructions only", "never create, pause or delete a task",
                      "None, or more than one: change nothing and report it",
-                     "Custom responsibilities are never replaced", "exactly** one released version",
-                     "Never judge by the version line alone", "Previous recurring-task instructions (backup)",
+                     "Custom responsibilities are never replaced", "an older released version of this responsibility",
+                     "Never judge by the version line alone", "This run used the current instructions anyway",
+                     "never read old prompts to compare them", "Owner's additions\" section exactly as it was", "Previous recurring-task instructions (backup)",
                      "put the backed-up instructions back", "Never report a restore or a success that wasn't verified",
                      "Nothing new to accept", "If the backup can't be saved and read back complete, stop: no change",
                      "checking the instructions **and** every setting separately", "Instructions back but a setting differs",
                      "Don't change settings without the owner's yes", "If the read fails, the result is **unverified**",
                      "Check nothing moved", "paused stays paused",
-                     "start with `[AI Workforce task: <this skill> |`", "whatever version line they carry",
-                     "line endings and spaces at the ends of lines"]:
+                     "start with `[AI Workforce task: <this skill> |`", "whatever version line it carries",
+                     "line endings, spaces at the ends of lines", "The current rules win over older stored text"]:
             self.assertIn(must, rm)
         self.assertNotIn("A run never changes its own scheduled task", rm)
         self.assertIn("prompt only", read(REFS / "approval-policy.md"))
@@ -327,8 +347,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
                      "failed (permanent)", "may arrive twice", "last 8 days"]:
             self.assertIn(must, rt)
         for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
-            sp = read(SKILLS / sk / "references" / "scheduled-prompts.md")
-            self.assertEqual(sp.count("without redoing its work"), 5, sk)
+            self.assertIn("without redoing its work", read(SKILLS / sk / "references" / "scheduled-run-rules.md"), sk)
 
     def test_inbox_gaps_are_durable(self):
         ic = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md")
@@ -347,10 +366,44 @@ class FreePlanAndEfficiency(unittest.TestCase):
         r = subprocess.run([sys.executable, str(ROOT / "tools" / "prompt_history.py"), "--check"],
                            capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        h = read(SKILLS / "schedule-workforce" / "references" / "prompt-history.md")
+        archive = read(ROOT / "tools" / "released-prompts.md")
+        table = read(SKILLS / "schedule-workforce" / "references" / "prompt-history.md")
         for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
-            for v in ["0.5.0", "0.5.1", "0.5.2", "0.5.4"]:
-                self.assertIn(f"## {sk} {v}", h)
+            for v in ["0.5.0", "0.5.1", "0.5.2", "0.5.4", "0.7.0"]:
+                self.assertIn(f"## {sk} {v}", archive)
+                self.assertRegex(table, rf"\| {sk} \| {re.escape(v)} \| [0-9a-f]{{16}} \|")
+
+    def test_shipped_history_is_fingerprints_only(self):
+        """Runs read a small table, never every old prompt (that cost ~18,000 words per run)."""
+        for p in PLUGIN.rglob("prompt-history.md"):
+            self.assertLess(len(read(p).split()), 1500, p)
+            self.assertNotIn("````text", read(p), p)
+
+    def test_fingerprint_script_in_run_modes_matches_the_table(self):
+        """The script Claude runs must give the fingerprints the tool records, and must ignore
+        the Brain's title, line endings, trailing spaces and Owner's additions."""
+        import tempfile
+        rm = read(REFS / "run-modes.md")
+        script = re.search(r"\*\*Fingerprint\.\*\*.*?```\n(.*?)```", rm, re.S).group(1)
+        script = "\n".join(l[2:] if l.startswith("  ") else l for l in script.split("\n"))
+        sys.path.insert(0, str(ROOT / "tools"))
+        import prompt_history as ph
+        recorded = ph.recorded(read(ROOT / "tools" / "released-prompts.md"))
+        table = dict(((s, v), f) for s, v, f in re.findall(r"^\| ([a-z-]+) \| ([0-9.]+) \| ([0-9a-f]{16}) \|",
+                     read(SKILLS / "schedule-workforce" / "references" / "prompt-history.md"), re.M))
+        self.assertEqual(set(table), set(recorded))
+        with tempfile.TemporaryDirectory() as d:
+            sp = Path(d) / "fingerprint.py"; sp.write_text(script)
+            for key, body in recorded.items():
+                saved = body.replace("<BRAIN>", "Acme Business Brain").replace("\n", "\r\n") + "   \r\n"
+                saved += "\r\nOwner's additions:\r\nAlways copy my assistant."
+                tf = Path(d) / "task.txt"; tf.write_bytes(saved.encode())
+                out = subprocess.run([sys.executable, str(sp), str(tf)], capture_output=True, text=True).stdout.strip()
+                self.assertEqual(out, table[key], key)
+            edited = Path(d) / "edited.txt"
+            edited.write_text(recorded[("inbox-triage", "0.5.4")].replace("at most 5 drafts", "at most 9 drafts"))
+            out = subprocess.run([sys.executable, str(sp), str(edited)], capture_output=True, text=True).stdout.strip()
+            self.assertNotIn(out, table.values())
 
     def test_setup_explains_auto_updates_in_one_sentence(self):
         self.assertIn("These keep their instructions up to date when AI Workforce improves",
@@ -485,10 +538,10 @@ class LearningRules(unittest.TestCase):
         self.assertIn("Nothing here creates tasks, approvals or notifications", tr)
         self.assertIn("no extra notification is sent", read(SKILLS / "daily-executive-briefing" / "SKILL.md"))
 
-    def test_recurring_prompts_unchanged_this_release(self):
-        """0.6.0 changes skills only: customers' recurring tasks need no update."""
+    def test_one_current_prompt_version(self):
+        """0.7.0 moved the run rules into the plugin; every task points at the same current version."""
         rm = read(REFS / "run-modes.md")
-        self.assertEqual(set(re.findall(r"\| `[a-z-]+` \| ([0-9.]+) \|", rm)), {"0.5.4"})
+        self.assertEqual(set(re.findall(r"\| `[a-z-]+` \| ([0-9.]+) \|", rm)), {"0.7.0"})
 
 
 class NotionCompatibility(unittest.TestCase):

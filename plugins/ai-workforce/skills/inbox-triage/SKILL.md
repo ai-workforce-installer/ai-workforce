@@ -9,7 +9,7 @@ metadata:
 
 _Files named `references/…` are in this skill's own folder._
 
-_When this skill runs from a recurring task, `references/scheduled-prompts.md` holds the current instructions for that task and `references/prompt-history.md` every released version (used only to keep the task up to date safely, per `references/run-modes.md`)._
+_When this skill runs from a recurring task, also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. `references/prompt-history.md` holds the fingerprint of every released version of the stored instructions and `references/scheduled-prompts.md` the current one; open the latter only to update the task (`references/run-modes.md`, "Is the recurring task current?")._
 
 General inbox triage reviews everything that arrived, catches what matters (deadlines, people waiting, opportunities, money and account notices, meeting context, customer questions), does the follow-up work, and proves how much was reviewed. Customer support is one part of it, handled with the `process-customer-inquiries` steps.
 

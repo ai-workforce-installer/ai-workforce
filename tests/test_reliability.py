@@ -122,9 +122,9 @@ class StatusesAndSchedules(unittest.TestCase):
 
 
 class AutoUpdate(unittest.TestCase):
-    H = {("inbox-triage", "0.5.1"): ("[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold <BRAIN>", "0.5.0"),
-         ("inbox-triage", "0.5.2"): ("[AI Workforce task: inbox-triage | prompt version 0.5.2]\nnew <BRAIN>", "0.5.0"),
-         ("inbox-triage", "0.6.0"): ("[AI Workforce task: inbox-triage | prompt version 0.6.0]\nnewer <BRAIN>", "0.6.0")}
+    H = {("inbox-triage", "0.5.1"): ('[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold: read the page titled exactly "<BRAIN>"', "0.5.0"),
+         ("inbox-triage", "0.5.2"): ('[AI Workforce task: inbox-triage | prompt version 0.5.2]\nnew: read the page titled exactly "<BRAIN>"', "0.5.0"),
+         ("inbox-triage", "0.6.0"): ('[AI Workforce task: inbox-triage | prompt version 0.6.0]\nnewer: read the page titled exactly "<BRAIN>"', "0.6.0")}
 
     def task(self, prompt, **kw):
         t = {"id": "t1", "responsibility": "inbox-triage", "prompt": prompt, "cron": "45 11 * * 1-5",
@@ -133,8 +133,8 @@ class AutoUpdate(unittest.TestCase):
         t.update(kw)
         return t
 
-    OLD = "[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold Business Brain"
-    NEW = "[AI Workforce task: inbox-triage | prompt version 0.5.2]\nnew Business Brain"
+    OLD = '[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold: read the page titled exactly "Business Brain"'
+    NEW = '[AI Workforce task: inbox-triage | prompt version 0.5.2]\nnew: read the page titled exactly "Business Brain"'
 
     def test_standard_outdated_prompt_updates(self):
         action, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
@@ -160,7 +160,7 @@ class AutoUpdate(unittest.TestCase):
                          ("warn", "custom instructions"))
 
     def test_old_version_line_alone_is_not_enough(self):
-        edited = "[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold Business Brain, but shorter"
+        edited = self.OLD.replace("old:", "old, but shorter:")
         self.assertEqual(auto_update_plan([self.task(edited)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "warn")
 
     def test_unknown_previous_version_not_overwritten(self):
@@ -181,6 +181,28 @@ class AutoUpdate(unittest.TestCase):
     def test_no_reliable_comparison_means_no_update(self):
         self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2",
                                           can_compare=False)[0], "warn")
+
+    def test_no_shell_with_current_version_line_is_quiet(self):
+        """Without a shell the stored text can't be checked, but the run follows the current plugin anyway."""
+        self.assertEqual(auto_update_plan([self.task(self.NEW)], "inbox-triage", self.H, "0.5.2", "0.5.2",
+                                          can_compare=False), ("none", None))
+
+    def test_owner_additions_never_block_an_update_and_are_kept(self):
+        mine = self.OLD + "\n\nOwner's additions:\nAlways cc my assistant."
+        action, plan = auto_update_plan([self.task(mine)], "inbox-triage", self.H, "0.5.2", "0.5.2")
+        self.assertEqual(action, "update")
+        self.assertEqual(plan["new"], self.NEW + "\n\nOwner's additions:\nAlways cc my assistant.")
+        status, after = apply_update(FakeScheduler([self.task(mine)]), plan)
+        self.assertEqual(status, "updated")
+        self.assertTrue(after["prompt"].endswith("Always cc my assistant."))
+        # and once current, the additions don't make it look customized
+        self.assertEqual(auto_update_plan([after], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "none")
+
+    def test_any_brain_title_is_recognised(self):
+        renamed = self.OLD.replace('"Business Brain"', '"Acme HQ"')
+        action, plan = auto_update_plan([self.task(renamed)], "inbox-triage", self.H, "0.5.2", "0.5.2",
+                                        brain_title="Acme HQ")
+        self.assertEqual((action, plan["new"]), ("update", self.NEW.replace('"Business Brain"', '"Acme HQ"')))
 
     def test_settings_unchanged_after_update(self):
         sched = FakeScheduler([self.task(self.OLD)])
