@@ -42,7 +42,8 @@ class Versions(unittest.TestCase):
         z = zipfile.ZipFile(ROOT / "download" / "ai-workforce.plugin")
         packed = json.loads(z.read(".claude-plugin/plugin.json"))
         self.assertEqual(packed["version"], self.version)
-        repo_files = {str(p.relative_to(PLUGIN)) for p in PLUGIN.rglob("*") if p.is_file()}
+        repo_files = {str(p.relative_to(PLUGIN)) for p in PLUGIN.rglob("*")
+                      if p.is_file() and p.relative_to(PLUGIN).parts[0] != "evals"}   # evals are for the maintainer
         zip_files = {n for n in z.namelist() if not n.endswith("/")}
         self.assertEqual(repo_files, zip_files)
         for n in zip_files:
@@ -120,6 +121,20 @@ class BundledConnections(unittest.TestCase):
         self.assertEqual(list(cfg["mcpServers"]), ["Notion"])
         self.assertEqual(set(cfg["recommendedCategories"]), {"wiki-knowledge-base", "email", "calendar", "documents"})
         self.assertIn("connector registry", read(SKILLS / "setup-workforce" / "SKILL.md"))
+
+
+class Evals(unittest.TestCase):
+    def test_every_case_has_a_prompt_and_a_judged_grader(self):
+        cases = sorted(p.parent for p in (PLUGIN / "evals").glob("*/prompt.md"))
+        self.assertGreaterEqual(len(cases), 8)
+        for c in cases:
+            graders = list((c / "graders").glob("*.md"))
+            self.assertTrue(any("type: llm" in read(g) for g in graders), c.name)
+            self.assertIn("allowed_tools: [Skill, Read, Glob, Grep]", read(c / "prompt.md"), c.name)
+
+    def test_evals_are_not_shipped(self):
+        z = zipfile.ZipFile(ROOT / "download" / "ai-workforce.plugin")
+        self.assertFalse([n for n in z.namelist() if n.startswith("evals/")])
 
 
 class ScheduledPrompts(unittest.TestCase):

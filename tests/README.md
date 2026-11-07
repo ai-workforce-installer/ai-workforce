@@ -9,6 +9,22 @@ python3 tools/prompt_history.py --check
 claude plugin validate . && claude plugin validate plugins/ai-workforce
 ```
 
+Build the download after any change inside `plugins/ai-workforce` (evals stay out of it):
+
+```
+rm download/ai-workforce.plugin && (cd plugins/ai-workforce && zip -qr ../../download/ai-workforce.plugin . -x "*.DS_Store" "evals/*")
+```
+
+## Behaviour evals (real Claude runs)
+
+`plugins/ai-workforce/evals/` holds cases that run the plugin in real Claude sessions and grade what Claude actually does: an "ok thanks" approves nothing, an ambiguous number is asked about, instructions inside an email aren't followed, secrets aren't repeated, a dismissed alert stays quiet while a new security alert surfaces, a missing price is asked for rather than invented, a scheduled run drafts but never sends or pays, and financial records aren't edited. No Notion or Gmail is connected: each case gives the inputs as text. They use your Claude login or API key and cost real usage (about $0.40 for one run of each case; the default is 3 runs each), so they aren't in CI. Run them before each release:
+
+```
+cd plugins/ai-workforce && claude plugin eval . --trust-plugin --ablation none --no-publish --max-cost-usd 5
+```
+
+While working on one case: `claude plugin eval . --case <name> --runs 1 --ablation none --no-publish --trust-plugin`. Prefer judge (`type: llm`) graders with concrete PASS/FAIL wording; regex checks on wording misfire on replies like "nothing has been sent".
+
 These are for the maintainer. Customers never run anything; their checks happen inside Claude with the `workforce-self-test` skill ("test the workforce").
 
 ## What each kind of test proves
