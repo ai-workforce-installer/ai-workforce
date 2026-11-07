@@ -3,18 +3,6 @@
     "Notion": {
       "type": "http",
       "url": "https://mcp.notion.com/mcp"
-    },
-    "Gmail": {
-      "type": "http",
-      "url": "https://gmail.mcp.claude.com/mcp"
-    },
-    "Google Calendar": {
-      "type": "http",
-      "url": "https://gcal.mcp.claude.com/mcp"
-    },
-    "Google Drive": {
-      "type": "http",
-      "url": "https://drivemcp.googleapis.com/mcp/v1"
     }
   },
   "recommendedCategories": ["wiki-knowledge-base", "email", "calendar", "documents"]

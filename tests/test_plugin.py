@@ -111,6 +111,17 @@ class RunTrackingRules(unittest.TestCase):
         self.assertNotIn('"triage my inbox", "handle customer emails"', t)
 
 
+class BundledConnections(unittest.TestCase):
+    def test_only_notion_is_bundled(self):
+        """Email, calendar and files come from the owner's own connectors (setup suggests them).
+        Bundled copies duplicated those tools and failed to connect where Claude's hosted
+        Gmail and Calendar servers can't be reached directly."""
+        cfg = json.loads(read(PLUGIN / ".mcp.json"))
+        self.assertEqual(list(cfg["mcpServers"]), ["Notion"])
+        self.assertEqual(set(cfg["recommendedCategories"]), {"wiki-knowledge-base", "email", "calendar", "documents"})
+        self.assertIn("connector registry", read(SKILLS / "setup-workforce" / "SKILL.md"))
+
+
 class ScheduledPrompts(unittest.TestCase):
     def setUp(self):
         self.text = read(SKILLS / "schedule-workforce" / "references" / "scheduled-prompts.md")
