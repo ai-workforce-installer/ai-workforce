@@ -123,6 +123,21 @@ class BundledConnections(unittest.TestCase):
         self.assertIn("connector registry", read(SKILLS / "setup-workforce" / "SKILL.md"))
 
 
+class ScheduleDefaults(unittest.TestCase):
+    def test_daily_by_default_and_the_owner_is_asked(self):
+        sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
+        for must in ["How often should the team check in: every day (recommended), weekdays only, or another rhythm?",
+                     "If they don't mind, use every day", "- Check-in frequency: every day",
+                     "Daily briefing: every day (or the chosen rhythm)",
+                     "once a day at the same rhythm", "Weekly marketing plan: Mondays", "Invoice review: Fridays"]:
+            self.assertIn(must, sw)
+        self.assertNotIn("Daily briefing: weekdays", sw)
+        self.assertNotIn("mid-morning and mid-afternoon", sw)
+        fm = read(SKILLS / "first-team-meeting" / "SKILL.md")
+        self.assertIn("Every day is the default for daily work", fm)
+        self.assertNotIn("every weekday morning", fm)
+
+
 class InstallLinks(unittest.TestCase):
     REPO = "ai-workforce-installer/ai-workforce"
 

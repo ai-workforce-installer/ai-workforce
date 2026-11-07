@@ -38,7 +38,7 @@ Never put upgrade suggestions, plan comparisons or links to buy software in a re
 |---|---|
 | agent, subagent, specialist agent | team member, or the name: Sales, Marketing… |
 | run, invoke, orchestrate | ask, have Sales work on it |
-| scheduled task, trigger, cron | recurring responsibility ("Client Success handles this every weekday at 10") |
+| scheduled task, trigger, cron | recurring responsibility ("Client Success handles this every day at 10") |
 | skill, plugin, MCP, connector, tool | (leave out), or "connection" for an app |
 | system prompt, instructions | how you want the job done |
 | context, memory, knowledge base | what your team knows about your business (the Business Brain) |
