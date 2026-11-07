@@ -123,6 +123,20 @@ class BundledConnections(unittest.TestCase):
         self.assertIn("connector registry", read(SKILLS / "setup-workforce" / "SKILL.md"))
 
 
+class InstallLinks(unittest.TestCase):
+    REPO = "ai-workforce-installer/ai-workforce"
+
+    def test_every_repository_link_points_at_the_org_repo(self):
+        for p in [ROOT / "README.md", PLUGIN / "README.md"]:
+            t = read(p)
+            for link in re.findall(r"github\.com/([\w.-]+/[\w.-]+)", t):
+                self.assertEqual(link, self.REPO, f"{p}: github.com/{link}")
+            for ref in re.findall(r"--marketplace (\S+?)`", t):
+                self.assertEqual(ref, self.REPO, p)
+            self.assertIn(f"https://github.com/{self.REPO}/raw/main/download/ai-workforce.plugin", t, p)
+            self.assertIn("**Access:** the repository is private.", t, p)
+
+
 class Evals(unittest.TestCase):
     def test_every_case_has_a_prompt_and_a_judged_grader(self):
         cases = sorted(p.parent for p in (PLUGIN / "evals").glob("*/prompt.md"))
@@ -225,8 +239,8 @@ class Safety(unittest.TestCase):
                   "completemarketingsystems", "Mankato", "GoHighLevel", "GHL", "Larry"]
         for p in PLUGIN.rglob("*"):
             if p.is_file() and p.suffix in {".md", ".json"}:
-                # The author credit and the repository address are allowed.
-                text = read(p).replace("reedfloren/ai-workforce", "")
+                # The author credit is allowed; the repository now lives under ai-workforce-installer.
+                text = read(p)
                 if p.name == "plugin.json":
                     text = re.sub(r'"author": \{[^}]*\}', "", text)
                 for b in banned:
