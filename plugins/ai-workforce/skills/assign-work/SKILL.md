@@ -2,7 +2,7 @@
 name: assign-work
 description: This skill should be used when the owner hands the team work, such as "have Marketing work on that", "ask Sales what happened with those leads", "get the team on this", "delegate this", "can someone handle this", "assign work to the team", "act as Chief of Staff", or gives a business request that should go to one or more of Operations, Marketing, Sales, Client Success, Finance or a custom team member.
 metadata:
-  version: "0.6.0"
+  version: "0.7.0"
 ---
 
 # Assign Work (Chief of Staff protocol)
