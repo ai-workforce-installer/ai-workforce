@@ -138,6 +138,28 @@ class ScheduleDefaults(unittest.TestCase):
         self.assertNotIn("every weekday morning", fm)
 
 
+class SetupKeepsWorking(unittest.TestCase):
+    def test_connections_are_noticed_without_a_magic_word(self):
+        s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        for must in ["Any reply counts.", "Never ask for a particular word", "send me any message (even just 'ok')",
+                     "Check at every reply.", "whatever the message was about", "Check before asking."]:
+            self.assertIn(must, s)
+        self.assertNotIn("reply **done**", s)
+
+    def test_team_works_while_the_owner_connects(self):
+        s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        for must in ["Setup jobs (the team works while the owner connects the next app)",
+                     "Never sit idle waiting for a connection", "**In the background:**", "**In the same message:**",
+                     "only once the Notion job's structure check has passed", "one run record per job, never twice",
+                     "never moves the inbox bookmark", "They ask the owner nothing",
+                     "Notion first (everything is saved there), then email (its job takes longest, so it starts earliest)",
+                     "A job that fails never holds setup up"]:
+            self.assertIn(must, s)
+        fm = read(SKILLS / "first-team-meeting" / "SKILL.md")
+        self.assertIn("**Already done during setup?**", fm)
+        self.assertIn("Never run the same job a second time", fm)
+
+
 class InstallLinks(unittest.TestCase):
     REPO = "ai-workforce-installer/ai-workforce"
 

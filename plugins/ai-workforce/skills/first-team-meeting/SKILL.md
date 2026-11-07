@@ -13,6 +13,7 @@ The owner should leave with real work done, not a plan. Recommend a few responsi
 
 ## Setup path (the first meeting, straight after setup)
 A brand-new owner should see a real result quickly, without choosing from a menu or waiting for a full inbox sweep. When this runs from `setup-workforce`:
+0. **Already done during setup?** If a setup job (email quick look or calendar look) has already finished while the owner connected apps, that is the first job: skip step 1 and go straight to checking and showing it (step 3), with its run record. If one is still running, say so in one line and wait for it. Never run the same job a second time.
 1. **Pick the first job yourself**, in this order, and say it in one line ("First job: I'll have the team check your newest email for anyone waiting on you."). Don't ask which to start with; the owner can redirect in reply.
    - The owner's answer to "what do you spend too much time on?", if it maps to something the team can do right now with what's connected.
    - Otherwise, **email connected:** a **quick look** at the inbox (`inbox-triage`, quick look in its `references/inbox-coverage.md` section 6): the newest 50 threads, people waiting on the owner and anything time-sensitive, up to 3 reply drafts.
