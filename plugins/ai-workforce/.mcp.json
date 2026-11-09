@@ -3,6 +3,10 @@
     "Notion": {
       "type": "http",
       "url": "https://mcp.notion.com/mcp"
+    },
+    "HighLevel": {
+      "type": "http",
+      "url": "https://services.leadconnectorhq.com/mcp/anthropic/v2"
     }
   },
   "recommendedCategories": ["wiki-knowledge-base", "email", "calendar", "documents"]

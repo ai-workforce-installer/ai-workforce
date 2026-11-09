@@ -2,7 +2,7 @@
 name: manage-team
 description: This skill should be used when the owner changes how the team works or who is on it, or corrects what the team thinks matters, such as "from now on…", "always…", "never…", "make those replies shorter and friendlier", "our refund policy changed", "we raised our prices", "that isn't my responsibility anymore", "stop bringing this up", "that company isn't one of my businesses anymore", "this kind of email doesn't matter to me", "family and school emails matter", "add a team member", "I'd like someone handling my podcast", "do we need another person for this?", "turn off Finance", or "remove the Podcast Producer".
 metadata:
-  version: "0.7.0"
+  version: "0.7.1"
 ---
 
 # Manage the Team

@@ -39,6 +39,7 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 - Email: _not set_
 - Calendar: _not set_
 - Files: _not set_
+- Customer messages: _not set_
 
 ## Active departments
 

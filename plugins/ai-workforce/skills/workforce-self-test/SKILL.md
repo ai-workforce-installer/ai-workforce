@@ -2,7 +2,7 @@
 name: workforce-self-test
 description: This skill should be used when the user asks to "test the workforce", "verify the subagents run", "run the self-test", "check that the AI team works", or wants proof of how the team members and connections actually run.
 metadata:
-  version: "0.7.0"
+  version: "0.7.1"
 ---
 
 # Workforce Self-Test
@@ -26,7 +26,7 @@ Never label a member "separate agent" unless that launch returned the code.
 3. **Test the five members** (Operations, Marketing, Sales, Client Success, Finance), all at once where possible. For each, use the first option that is available:
    - The named agent (`operations-manager`, `marketing-manager`, `sales-manager`, `client-success-manager`, `finance-manager`), or, if the named agents aren't available,
    - a general-purpose agent briefed as that member.
-   Brief: "Self-test. Reply with exactly: (1) your role name, (2) the code <code>, (3) for Notion and for each app the owner chose (<list from Connections, e.g. Gmail, Google Calendar, Google Drive, or Microsoft 365>), whether you can actually use it right now, marked available or unavailable after trying one harmless read-only call (skip anything on paste mode or None), (4) one sentence confirming you will not send, spend, modify financial records or make irreversible changes. Do nothing else."
+   Brief: "Self-test. Reply with exactly: (1) your role name, (2) the code <code>, (3) for Notion and for each app the owner chose (<list from Connections, e.g. Gmail, Google Calendar, Google Drive, or Microsoft 365, plus HighLevel if chosen>), whether you can actually use it right now, marked available or unavailable after trying one harmless read-only call (skip anything on paste mode or None), (4) one sentence confirming you will not send, spend, modify financial records or make irreversible changes. Do nothing else."
    If no agents can be launched at all, don't launch anything: the session is in single-assistant mode. Test Notion and each chosen app yourself with one harmless read each.
 4. **Check each reply:** correct role, exact code echoed, connections honestly reported, hard-limit sentence present. Missing code or role = Failed for that member. If one launch fails, retry that member once before marking it Failed.
 5. **Check the Business Brain.** If none exists yet (a clean install), say so plainly ("Your team's workspace isn't set up yet. Say 'set up my AI team' to start."), mark the checks that need it as skipped, and still test the team members and connections. Otherwise search Notion for "Business Brain" and confirm these exist: pages Workforce Settings (with a Connections section and a Business Brain version line), Company Profile, Priorities, Policies, Brand & Tone, FAQs, Paste Box, Your Team (missing pieces from older versions: offer the upgrade in `references/brain-upgrades.md`); databases Approvals, Assignments, Briefings, Pricing & Offers, Customers & Leads. Count "not set" markers (they read back as `<i>not set</i>`) on each page as a completeness score. Count active rows in Pricing & Offers.

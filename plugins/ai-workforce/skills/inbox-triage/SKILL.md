@@ -2,7 +2,7 @@
 name: inbox-triage
 description: This skill should be used when the owner asks to "triage my inbox", "go through my email", "check my email", "what's in my inbox", "anything important in my email?", "what did I miss?", or wants all their email reviewed, sorted and followed up, not only customer messages. Also used by the scheduled inbox triage task.
 metadata:
-  version: "0.7.0"
+  version: "0.7.1"
 ---
 
 # Inbox Triage (all email, not just customers)
@@ -22,6 +22,7 @@ Follow `references/inbox-coverage.md` (how to search, sort and count), `referenc
 1. **Pick the run mode and start the run record** (`references/run-modes.md`, `references/run-tracking.md`): Run ID, Source, and whether this is a new run, an interrupted one to finish, or an overlap to skip. Set the window from the checkpoint (`references/inbox-coverage.md` section 1).
 2. **Load context once** (`references/notion-access.md`: saved views first, filters checked, then filtered rows; each read once, outcome recorded; never "none" unless verified empty), then the open-work queue (`references/run-tracking.md` section 6). Workforce Settings (Connections, Where things live, Schedule, Extra rules, Active departments), Priorities, Company Profile, Brand & Tone, Pricing & Offers, Customers & Leads, open Approvals and Assignments, the Your Team page, and the next 7 days of calendar events. This is what tells important mail from noise.
 3. **Find everything in the window** exactly as `references/inbox-coverage.md` sections 1-2 say: All Mail, every page, exact searches recorded. List what can't be reached under Not checked.
+   If Customer messages in Connections is HighLevel, also collect its unanswered customer conversations for the same window, read only, as `references/connections.md` says. They go to Client Success with the customer items and are reported under Customer support ("2 HighLevel conversations, replies ready to copy"). They are not email: they never count toward the email coverage numbers and never move the inbox bookmark. If HighLevel is unavailable, say so under Not checked and the run is Partial.
 4. **Sort and read** (section 3): the owner's corrections first, then a quick pass on every thread, then open every message that might matter. Skip messages already in an earlier run's Handled list (`references/inbox-coverage.md` section 1); a new message in the same thread is new work, unless the owner closed that thread as handled or not theirs and the new message says nothing materially new. Group threads about the same underlying problem into one item.
 5. **Hand out the follow-up work** (section 4), after the judgment check in `references/team-roles.md` (skip what the owner is already handling, consolidate duplicates). Launch only members with items; a handful of simple items can be done by the Chief of Staff directly. Group items by member and launch them together, using the run rule in `references/team-roles.md`:
    - **Client Success:** customer support items, following `process-customer-inquiries` steps 3-9 (FAQ-grounded drafts, escalations, FAQ questions).

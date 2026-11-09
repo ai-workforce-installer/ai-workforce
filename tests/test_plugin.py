@@ -113,12 +113,15 @@ class RunTrackingRules(unittest.TestCase):
 
 
 class BundledConnections(unittest.TestCase):
-    def test_only_notion_is_bundled(self):
+    def test_only_notion_and_highlevel_are_bundled(self):
         """Email, calendar and files come from the owner's own connectors (setup suggests them).
         Bundled copies duplicated those tools and failed to connect where Claude's hosted
-        Gmail and Calendar servers can't be reached directly."""
+        Gmail and Calendar servers can't be reached directly. Notion and HighLevel are the
+        vendors' own hosted servers with OAuth sign-in, so bundling them carries no keys."""
         cfg = json.loads(read(PLUGIN / ".mcp.json"))
-        self.assertEqual(list(cfg["mcpServers"]), ["Notion"])
+        self.assertEqual(list(cfg["mcpServers"]), ["Notion", "HighLevel"])
+        self.assertEqual(cfg["mcpServers"]["HighLevel"],
+                         {"type": "http", "url": "https://services.leadconnectorhq.com/mcp/anthropic/v2"})
         self.assertEqual(set(cfg["recommendedCategories"]), {"wiki-knowledge-base", "email", "calendar", "documents"})
         self.assertIn("connector registry", read(SKILLS / "setup-workforce" / "SKILL.md"))
 
@@ -282,6 +285,19 @@ class Safety(unittest.TestCase):
                     text = re.sub(r'"author": \{[^}]*\}', "", text)
                 for b in banned:
                     self.assertNotIn(b, text, f"{p}: contains '{b}'")
+
+
+class HighLevelIsReadOnly(unittest.TestCase):
+    def test_highlevel_rules(self):
+        c = read(REFS / "connections.md")
+        for must in ["- Customer messages: HighLevel | None", "**Read only.**", "Never run an operation that sends",
+                     "Replies ready to copy", "HighLevel unavailable"]:
+            self.assertIn(must, c)
+        self.assertIn("Customer messages: _not set_", read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
+        self.assertIn("HighLevel", read(SKILLS / "setup-workforce" / "SKILL.md"))
+        triage = read(SKILLS / "inbox-triage" / "SKILL.md")
+        self.assertIn("never move the inbox bookmark", triage)
+        self.assertIn("never send or change anything in HighLevel", read(SKILLS / "process-customer-inquiries" / "SKILL.md"))
 
 
 class FreePlanAndEfficiency(unittest.TestCase):
