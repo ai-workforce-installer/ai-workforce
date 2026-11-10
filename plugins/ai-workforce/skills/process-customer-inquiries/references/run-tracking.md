@@ -18,7 +18,7 @@ Status: Running
 Window: <start> – <end>            (inbox triage only)
 ```
 
-**The owner's report goes above it.** Create the page with the run record inside a collapsed section (a toggle titled "Run record"; `references/notion-access.md` section 4). When the run ends, put the report at the top of the page, above that toggle, and add the finishing lines inside it. Whoever opens the page sees what was handled first, never Run IDs or "Status: Running". This holds even when an older recurring task's stored text says the body starts with the Run ID. Records from before 0.9.0 begin with the run record instead; both are read the same way.
+**The owner's report goes above it.** Create the page with the run record inside a collapsed section (a toggle titled "Run record"; `references/notion-access.md` section 4). When the run ends, put the report at the top of the page, above that toggle, and add the finishing lines inside it (or just below it, if the tool can't add inside a toggle). Whoever opens the page sees what was handled first, never Run IDs or "Status: Running". This holds even when an older recurring task's stored text says the body starts with the Run ID. Records from before 0.9.0 begin with the run record instead; both are read the same way.
 
 If the Briefings database has the newer properties (`Run ID`, `Started`, `Finished`, `Completed through`; added by the 0.5.0 upgrade in `references/brain-upgrades.md`), fill them too. If it doesn't, the run record alone is enough; never fail a run over a missing property.
 

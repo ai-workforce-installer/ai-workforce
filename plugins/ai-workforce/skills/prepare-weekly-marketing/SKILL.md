@@ -7,7 +7,7 @@ metadata:
 
 # Prepare Weekly Marketing
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
 
 _When this skill runs from a recurring task, also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. A run never changes the task itself._
 
@@ -27,6 +27,6 @@ Follow `references/approval-policy.md`, `references/approval-queue.md` and `refe
 3. **Delegate** to `marketing-manager` (Agent tool): analyze last week, name winners and losers with numbers, then draft next week's plan: content calendar, 3-5 creative or copy variants to test with a hypothesis each, and budget change proposals with exact values. End with Approvals Needed and a Run receipt.
 4. **Collaborate only when it adds something.** If the Chief of Staff already has recent findings from Sales or Client Success (open work, recent run records), pass them to Marketing in its brief instead of launching them. Launch `sales-manager` or `client-success-manager` only for a specific question Marketing can't answer from what it was given, and at most one round.
 5. **Verify.** Check every metric against the source data and recompute rates (CTR, CPC, conversion rate, CPA) yourself. Mark anything unsourced as Unavailable or Unverified. Check dated promotions (date, link, terms, timing) per `references/team-roles.md`.
-6. **Queue approvals.** Every publish, send or budget change becomes an Approvals row with exact values (Action type = Publish, Send message or Spend money).
+6. **Queue decisions.** Every publish or budget change becomes an Approvals row with exact values (Action type = Publish or Spend money). An email draft waits for the owner to send.
 7. **Save** the full plan in this run's record (`references/run-tracking.md`) (Type = Weekly marketing), plus Assignments rows. Never overwrite earlier plans.
 8. **Report:** last week in 5 lines, next week's plan (content, tests, drafts), budget proposals, Approvals Needed by AP number, Run receipt. Notify in scheduled runs.

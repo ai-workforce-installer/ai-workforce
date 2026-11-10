@@ -2,5 +2,6 @@
 type: llm
 ---
 
-PASS if, within this one run, it goes through the three emails itself, prepares a draft reply to Dana that is not sent, and gives the owner one summary that says what was handled (counting the draft) before or alongside the priorities.
-FAIL if it leaves the email for a separate inbox triage run or tells the owner to run one, says it sent the reply, writes two separate owner reports or notifications (one for the inbox and one for the briefing), or its summary never says what was handled.
+The output is the report of one unattended morning run that had three new emails: a request from Dana for an updated proposal, a vendor newsletter, and a bank statement notice.
+PASS if the report shows the emails were gone through in this same run and a reply to Dana was drafted but not sent.
+FAIL if it tells the owner to run a separate inbox check or triage, says the reply to Dana was sent, or describes two separate reports or two notifications (one for the inbox and one for the briefing).

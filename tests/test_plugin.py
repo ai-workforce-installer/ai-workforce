@@ -187,6 +187,17 @@ class Evals(unittest.TestCase):
             self.assertTrue(any("type: llm" in read(g) for g in graders), c.name)
             self.assertIn("allowed_tools: [Skill, Read, Glob, Grep]", read(c / "prompt.md"), c.name)
 
+    def test_every_case_proves_the_teams_rules_were_loaded(self):
+        """A reply can look right with no skill loaded: then the case measured Claude, not this plugin
+        (three cases did exactly that until 0.9.0). So every case also checks a team skill was opened."""
+        for c in sorted(p.parent for p in (PLUGIN / "evals").glob("*/prompt.md")):
+            loaded = [g for g in (c / "graders").glob("*.md") if "type: tool_used" in read(g) and "tool: Skill" in read(g)]
+            self.assertTrue(loaded, f"{c.name}: no grader checks that a team skill was loaded")
+            for g in loaded:
+                names = re.search(r"input_match: '([^']+)'", read(g)).group(1).split("|")
+                for n in names:
+                    self.assertTrue((SKILLS / n / "SKILL.md").exists(), f"{c.name}: {n} is not a skill")
+
     def test_evals_are_not_shipped(self):
         z = zipfile.ZipFile(ROOT / "download" / "ai-workforce.plugin")
         self.assertFalse([n for n in z.namelist() if n.startswith("evals/")])
@@ -516,6 +527,7 @@ class OwnerFirstReports(unittest.TestCase):
         for must in ["Outside the toggles the whole briefing stays under about 200 words", "Never the whole list again",
                      "With nothing to decide, leave this section and that line out", "at most one question",
                      "is said here the first time and when it changes", "the first screen has to be enough",
+                     "never signed with the owner's own sign-off",       # a briefing to Maya signed "Talk soon, Maya" (seen in evals)
                      "Save** the briefing at the top of this run's record, above its run record"]:
             self.assertIn(must, b)
         for gone in ["**Your team handled:**", "**Spotted:**", "5. **Spotted", "Reading taken"]:
