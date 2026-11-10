@@ -7,7 +7,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 from run_logic import (start_together, bookmark_check, pagination_check, Report, send_with_recovery, open_gaps, backfill, search_all,
                        Record, Message, Mailbox, OpenWork, decide, make_run_id, next_window,
                        triage, last_checkpoint, notify_due, morning_inbox_plan, morning_run,
-                       handled_line, handled_nothing, morning_opening, quiet_streak_notice, WINDOW_OVERLAP)
+                       handled_line, handled_nothing, morning_opening, quiet_streak_notice, WINDOW_OVERLAP,
+                       customer_messages, highlevel_in_setup, WANTED)
 
 T0 = datetime(2026, 11, 5, 8, 0)
 
@@ -490,6 +491,58 @@ class WorkHandled(unittest.TestCase):
         self.assertTrue(quiet_streak_notice([quiet, quiet, quiet, busy], today))
         self.assertFalse(quiet_streak_notice([quiet, quiet, quiet], today, last_said=today - timedelta(days=3)))
         self.assertTrue(quiet_streak_notice([quiet, quiet, quiet], today, last_said=today - timedelta(days=7)))
+
+
+class HighLevelLine(unittest.TestCase):
+    """0.8.1: first-time setup is click-and-sign-in only. HighLevel is offered after the first
+    result, and waiting for the owner to connect it is never reported as a failure."""
+    def test_first_time_setup_never_asks_or_connects(self):
+        for line in (None, "_not set_", "not set", "None", WANTED):
+            self.assertEqual(highlevel_in_setup(line, "first setup"), ("say nothing", None), line)
+
+    def test_an_owner_who_brings_it_up_early_is_told_it_comes_after_the_first_result(self):
+        self.assertEqual(highlevel_in_setup("_not set_", "first setup", answer="yes"),
+                         ("say it comes after the first result", WANTED))
+
+    def test_after_the_first_result_it_is_one_line_that_needs_no_answer(self):
+        self.assertEqual(highlevel_in_setup("_not set_", "first result"), ("one line, no question", None))
+        self.assertEqual(highlevel_in_setup("None", "first result"), ("say nothing", None))
+        self.assertEqual(highlevel_in_setup(WANTED, "first result"), ("connect", None))
+
+    def test_finish_my_setup_asks_once_and_remembers_the_answer(self):
+        self.assertEqual(highlevel_in_setup("not set", "finish my setup"), ("ask", None))
+        what, line = highlevel_in_setup("not set", "finish my setup", answer="yes")
+        self.assertEqual((what, line), ("connect", WANTED))
+        self.assertEqual(highlevel_in_setup(line, "finish my setup"), ("connect", None))      # not asked again
+        self.assertEqual(highlevel_in_setup(line, "finish my setup", answer="later"), ("carry on", None))
+        what, line = highlevel_in_setup("not set", "finish my setup", answer="no")
+        self.assertEqual((what, line), ("say nothing", "None"))
+        self.assertEqual(highlevel_in_setup(line, "finish my setup"), ("say nothing", None))  # never raised again
+
+    def test_the_owner_can_always_ask_for_it(self):
+        for line in (None, "not set", "None", WANTED):
+            self.assertEqual(highlevel_in_setup(line, "owner asks"), ("connect", WANTED), line)
+
+    def test_the_line_says_highlevel_only_once_a_lookup_works(self):
+        for moment in ("first setup", "first result", "finish my setup", "owner asks"):
+            self.assertEqual(highlevel_in_setup(WANTED, moment, lookup_works=True), ("use it", "HighLevel"))
+        self.assertEqual(highlevel_in_setup("None", "finish my setup", lookup_works=True), ("say nothing", None))
+        for line in (None, "not set", WANTED):
+            for moment in ("first setup", "first result", "finish my setup", "owner asks"):
+                self.assertNotEqual(highlevel_in_setup(line, moment)[1], "HighLevel")
+
+    def test_waiting_to_connect_is_not_a_failure_in_a_run(self):
+        for line in (None, "_not set_", "not set", WANTED, "None"):
+            self.assertEqual(customer_messages(line), (False, False), line)     # nothing to check, nothing unavailable
+
+    def test_only_a_verified_connection_that_stops_working_is_unavailable(self):
+        self.assertEqual(customer_messages("HighLevel", lookup_works=True), (True, False))
+        self.assertEqual(customer_messages("HighLevel", lookup_works=False), (False, True))   # reported, run ends Partial
+
+    def test_a_connection_made_without_telling_the_team_is_used(self):
+        self.assertEqual(customer_messages(WANTED, lookup_works=True), (True, False))
+        self.assertEqual(customer_messages("not set", lookup_works=True), (True, False))
+        self.assertEqual(customer_messages("None", lookup_works=True), (False, False))        # the owner said no
 
 
 if __name__ == "__main__":
