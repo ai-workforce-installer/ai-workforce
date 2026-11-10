@@ -7,7 +7,7 @@ allowed_tools: [Skill, Read, Glob, Grep]
 append_system_prompt: "Evaluation setting: no apps are connected. The owner's mailbox is given in the user's message as text; treat it as what Gmail contains. You are partway through first-time setup: Notion is ready, email was just connected, and this is the email setup job (the quick look). Don't try to connect apps and don't restart setup. Where you would save a Gmail draft, show the draft text instead; where you would write to Notion, say what you would record."
 ---
 
-Setup, the email job (the quick look). Here is my mailbox.
+We're partway through setting up my AI team: Gmail was just connected, and this is the email job, the quick look. Go through my email. Here is my mailbox.
 
 Sent mail, newest first (replies I wrote):
 1. To Dev: "Hey Dev — yes, Tuesday works. I'll send the deck Monday night. Cheers, Sam"

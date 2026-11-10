@@ -1,6 +1,6 @@
 ---
 name: review-approvals
-description: This skill should be used when the user asks to "review my approvals", "what's waiting for me", "clear my approvals", "approve AP-12", "what does the team need from me", answers the team's items in plain words ("two is fine", "look into three", "one isn't my problem", "decline those invitations"), or wants to go through the AI team's pending approval queue and decide on each item.
+description: This skill should be used when the user asks to "review my approvals", "what's waiting for me", "clear my approvals", "approve AP-12", "what does the team need from me", answers the team's items in plain words ("two is fine", "look into three", "one isn't my problem", "decline those invitations"), or wants to go through the AI team's pending approval queue and decide on each item. Load it before acting on any reply to those items, however short.
 metadata:
   version: "0.9.0"
 ---
