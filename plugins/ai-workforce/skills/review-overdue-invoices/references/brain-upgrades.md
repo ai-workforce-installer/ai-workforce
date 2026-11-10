@@ -8,7 +8,7 @@ Workforce Settings ends with an **About this workspace** section holding `- Busi
 - **Newer than this file knows** (the workspace was upgraded by a newer copy of the plugin, for example on another device): change nothing and carry on. In attended mode, mention once that their AI Workforce may be out of date and they can update it from Customize → Plugins.
 - **Scheduled:** never upgrade. Add one line to the briefing: "Workspace improvements are ready. Say 'update my team workspace' when you have a minute."
 - `setup-workforce` offers it the same way when it finds an existing Business Brain.
-- **After an attended upgrade** (or whenever the owner mentions updating the plugin), also offer to check their recurring tasks: "Your recurring tasks may still use older instructions. Want me to check them?" (`schedule-workforce`, "Check and update recurring responsibilities"). Change nothing without a yes.
+- **After a plugin update,** recurring tasks need nothing: each one follows the installed plugin on its next run. If the owner has both a daily briefing task and a separate inbox triage task, offer once to combine them (`schedule-workforce`, "One morning run"). Change nothing without a yes.
 
 ## Rules
 - **Check, then add.** Every step first checks whether its change is already there and skips it if so. Running the steps twice changes nothing.
@@ -55,8 +55,7 @@ Adds saved views, which keep working on Notion's free plan after its query allow
    - Briefings → "Newest first": `SORT BY "Date" DESC` (only if missing).
    - Pricing & Offers → "Active offers": `FILTER "Active" = TRUE; SORT BY "Offer" ASC`.
    - Customers & Leads → "All contacts": `SORT BY "Last contact" DESC`.
-2. **Schedule setting.** Under Workforce Settings → Schedule, add `- Recurring tasks update themselves: yes` if there's no such line. Without the line, the team treats it as yes.
-3. **Version line.** Only when every view above exists (created now or already there) and the setting line is present, replace the `Business Brain version` line with `- Business Brain version: 0.5.2`. If any step failed (a view couldn't be created, the database couldn't be read), leave the version line as it was, say which step failed, and the upgrade can simply be run again.
+2. **Version line.** Only when every view above exists (created now or already there), replace the `Business Brain version` line with `- Business Brain version: 0.5.2`. If any step failed (a view couldn't be created, the database couldn't be read), leave the version line as it was, say which step failed, and the upgrade can simply be run again.
 
 ## Upgrade to 0.6.0
 Gives the team a place to keep the owner's corrections about what matters, so they apply to every later run (`references/owner-corrections.md`). Nothing existing changes and no records are edited; runs work without it (corrections go under "Things to ignore for now" until then). Safe to repeat: each step only adds what's missing.
@@ -64,3 +63,5 @@ Gives the team a place to keep the owner's corrections about what matters, so th
 2. **Version line.** Only when both headings are there, replace the `Business Brain version` line with `- Business Brain version: 0.6.0`. If Priorities couldn't be read or written, leave the version line as it was and say which step didn't finish.
 
 Later versions add their own section here, below this one, and run in order.
+
+**No longer used.** Workspaces set up before 0.8.0 may have a `Recurring tasks update themselves` line under Schedule. Recurring tasks no longer change their own instructions, so the line means nothing now: leave it where it is, never add it, and ignore what it says.

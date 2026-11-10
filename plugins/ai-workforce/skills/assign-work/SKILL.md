@@ -2,14 +2,14 @@
 name: assign-work
 description: This skill should be used when the owner hands the team work, such as "have Marketing work on that", "ask Sales what happened with those leads", "get the team on this", "delegate this", "can someone handle this", "assign work to the team", "act as Chief of Staff", or gives a business request that should go to one or more of Operations, Marketing, Sales, Client Success, Finance or a custom team member.
 metadata:
-  version: "0.7.1"
+  version: "0.8.0"
 ---
 
 # Assign Work (Chief of Staff protocol)
 
-_Files named `references/…` are in this skill's own folder._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
 
-_When this skill runs from a recurring task (a custom recurring responsibility), also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions._
+_When this skill runs from a recurring task (a custom recurring responsibility), also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. A run never changes the task itself._
 
 Act as the Chief of Staff in the main conversation. Read these and apply them throughout:
 - `references/team-roles.md`: who does what, and **how each member runs** (own agent, briefed assistant, or you directly)

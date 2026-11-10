@@ -18,7 +18,6 @@ CANONICAL_HOME = {  # file -> skill folder that owns the original
        "connections.md", "just-in-time.md", "notion-access.md", "owner-corrections.md", "run-modes.md", "run-tracking.md", "talking-to-the-owner.md", "team-roles.md"]},
     **{f: "setup-workforce" for f in ["interview.md", "notion-schema.md", "page-templates.md"]},
     "scheduled-prompts.md": "schedule-workforce",
-    "prompt-history.md": "schedule-workforce",
     "scheduled-run-rules.md": "schedule-workforce",
     "inbox-coverage.md": "inbox-triage",
 }

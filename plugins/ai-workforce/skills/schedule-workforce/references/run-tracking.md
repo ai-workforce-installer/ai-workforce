@@ -38,6 +38,7 @@ Run finished: 2026-11-05 11:58 CT
 Status: Finished
 Result: Complete | Partial | Failed
 Completed through: <time>          (inbox triage only, see references/inbox-coverage.md)
+Handled: <n> reply drafts, <n> approvals raised, <n> items closed, <n> prepared | nothing: <the plain reason>
 Usage: <n> tool calls, <n> team members launched, <n> emails or records processed, <n> minutes
 Notified: pending
 ```
@@ -45,6 +46,13 @@ Notified: pending
 and set the Result, Approvals raised, Drafts created (and Finished, if present) properties. Then send the notification (section 5) and replace `Notified: pending` with what the tool reported.
 
 Count tool calls and launches yourself; add model or token usage only if the platform shows it. Never estimate credits or cost. A run that can't finish properly still writes these lines with Result Partial or Failed and says what was left undone.
+
+**Work handled** is how a run is judged by the owner, so it is counted honestly and said first.
+- **What counts:** only things that exist and were checked in this run: reply drafts saved (or reply text ready to copy), approvals raised, open items closed (set Done because the work is finished or the owner said so), and prepared pieces the owner can use as they are (a meeting prep, a plan, a reconciliation, a research note). One line each in the count; a record counts only its own work.
+- **What never counts:** reading, searching, sorting, counting, re-checking and "nothing needed". Those are how the work gets done. A run that reviewed 148 emails and prepared nothing handled nothing.
+- **Nothing handled** is written as `Handled: nothing`, with the plain reason: nobody is waiting on a reply, or the place the work lives can't be reached (name it, from Where things live and Not checked). Never pad the line, and never create work to fill it (`references/team-roles.md`).
+- **Said first:** the owner's summary and the notification open with this line in plain words, then what needs them: "Handled: 3 reply drafts, 1 meeting prep, 2 items closed. Needs you: 2 decisions." For the morning run, that opening line adds the inbox check's work to the briefing's.
+- Result and Handled are separate: a run can be Complete and have handled nothing. Never present a Complete run as an accomplishment by itself.
 
 **Result means the same everywhere:** Complete = the whole job was done, every source it needed was read, and the checks above passed. Work saved in the open-work queue because it was past a per-run limit counts as done for this purpose (it's tracked, not dropped); work that couldn't be saved anywhere does not. Partial = useful work was done but something was skipped, unreadable, incomplete or unchecked (name it). Failed = nothing useful was produced. Never claim nothing was missed when a source, a page of results or a check could not be verified.
 
@@ -101,6 +109,8 @@ Send one notification per run, after the record is finished and fetched back for
 - `Notified: unknown` (the tool gave no clear answer)
 
 A resumed run sends a notification only if the record still says `Notified: pending`, `failed` or `unknown`. A Not run or Abandoned record sends none.
+
+**A run inside another run sends none.** When the daily briefing does the inbox check itself (the morning run), the inbox record ends `Notified: not requested (included in <the briefing's Run ID>)` and the briefing's one notification covers both. "Not requested" is never a missed notification, so nothing catches it up later.
 
 **Catching up on missed notifications** (finished work whose notification never went out, for example the run stopped right after finishing, or the tool failed). At the start of every run, look at finished records of the **same responsibility** from the last 8 days (long enough to reach the previous weekly run) whose last Notified line is `pending`, `failed` (not permanent) or `unknown`:
 - Don't redo their work. Add one line to this run's notification: "Also ready: your <type> report from <time>: <link>". That counts as a new attempt for the older record.

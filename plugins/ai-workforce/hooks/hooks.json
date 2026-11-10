@@ -1,0 +1,20 @@
+{
+  "description": "AI Workforce send lock: runs started by a recurring task, and team members working as agents, cannot send, delete, share, book or change money records.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/send-lock.sh\"", "timeout": 10 }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/send-lock.sh\"", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}

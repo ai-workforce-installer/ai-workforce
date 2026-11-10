@@ -5,9 +5,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from notion_logic import (MockNotion, read_database, describe, run_result, reconcile,
                           view_usable, handed_to_you_status, duplicate_schedule_warning,
-                          notification_line, metric_label, auto_update_plan, apply_update,
-                          FakeScheduler, upgrade_views, BackupStore, safe_change, merged_prompt,
-                          task_marker, matching_tasks, check_and_repair, version_looks_current, update_my_team_workspace,
+                          notification_line, metric_label, upgrade_views,
+                          task_marker, matching_tasks, run_may_change_task, separate_inbox_task_to_pause,
+                          add_owner_instruction, check_and_repair, version_looks_current, update_my_team_workspace,
                           self_test_views, STANDARD_VIEWS, REQUIRED_DBS, LATEST_BRAIN,
                           find_secrets, redact, security_flag, actions_from_content,
                           members_to_launch, should_prepare)
@@ -121,208 +121,49 @@ class StatusesAndSchedules(unittest.TestCase):
         self.assertEqual(metric_label(0), "Verified")
 
 
-class AutoUpdate(unittest.TestCase):
-    H = {("inbox-triage", "0.5.1"): ('[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold: read the page titled exactly "<BRAIN>"', "0.5.0"),
-         ("inbox-triage", "0.5.2"): ('[AI Workforce task: inbox-triage | prompt version 0.5.2]\nnew: read the page titled exactly "<BRAIN>"', "0.5.0"),
-         ("inbox-triage", "0.6.0"): ('[AI Workforce task: inbox-triage | prompt version 0.6.0]\nnewer: read the page titled exactly "<BRAIN>"', "0.6.0")}
+class RecurringTasks(unittest.TestCase):
+    """0.8.0: tasks always follow the installed plugin, so nothing rewrites their stored text."""
+    OLD = '[AI Workforce task: inbox-triage | prompt version 0.5.4]\nScheduled run of AI Workforce inbox triage.'
 
-    def task(self, prompt, **kw):
-        t = {"id": "t1", "responsibility": "inbox-triage", "prompt": prompt, "cron": "45 11 * * 1-5",
-             "timezone": "America/Chicago", "enabled": True, "notifications": "push", "model": "m",
-             "approval": "auto"}
+    def task(self, skill, tid, rhythm="daily", enabled=True, hour=8.0, **kw):
+        t = {"id": tid, "prompt": f"[AI Workforce task: {skill} | prompt version 0.5.4]\nScheduled run.",
+             "rhythm": rhythm, "enabled": enabled, "hour": hour}
         t.update(kw)
         return t
 
-    OLD = '[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold: read the page titled exactly "Business Brain"'
-    NEW = '[AI Workforce task: inbox-triage | prompt version 0.5.2]\nnew: read the page titled exactly "Business Brain"'
-
-    def test_standard_outdated_prompt_updates(self):
-        action, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        self.assertEqual(action, "update")
-        status, after = apply_update(FakeScheduler([self.task(self.OLD)]), plan)
-        self.assertEqual((status, after["prompt"]), ("updated", self.NEW))
-
-    def test_current_prompt_untouched(self):
-        self.assertEqual(auto_update_plan([self.task(self.NEW)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "none")
-
-    def test_reformatted_whitespace_still_counts_as_unmodified(self):
-        reformatted = self.OLD.replace("\n", "\r\n") + "   "
-        self.assertEqual(auto_update_plan([self.task(reformatted)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "update")
-
-    def test_current_version_line_but_different_text_is_not_current(self):
-        stamped = "[AI Workforce task: inbox-triage | prompt version 0.5.2]\nsomething else"
-        self.assertEqual(auto_update_plan([self.task(stamped)], "inbox-triage", self.H, "0.5.2", "0.5.2"),
-                         ("warn", "custom instructions"))
-
-    def test_customized_prompt_preserved(self):
-        custom = self.OLD + "\nAlso always cc my assistant."
-        self.assertEqual(auto_update_plan([self.task(custom)], "inbox-triage", self.H, "0.5.2", "0.5.2"),
-                         ("warn", "custom instructions"))
-
-    def test_old_version_line_alone_is_not_enough(self):
-        edited = self.OLD.replace("old:", "old, but shorter:")
-        self.assertEqual(auto_update_plan([self.task(edited)], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "warn")
-
-    def test_unknown_previous_version_not_overwritten(self):
-        legacy = "Scheduled run of AI Workforce inbox triage... (no version line)"
-        action, detail = auto_update_plan([self.task(legacy)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        self.assertEqual((action, detail), ("ask", "0 matching tasks"))   # no tag: never updated automatically
-
-    def test_multiple_matching_tasks_stop(self):
-        tasks = [self.task(self.OLD), self.task(self.OLD, id="t2")]
-        self.assertEqual(auto_update_plan(tasks, "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "ask")
-
-    def test_disabled_and_custom_responsibilities_respected(self):
-        self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2",
-                                          setting="no")[0], "warn")
-        self.assertEqual(auto_update_plan([self.task(self.OLD, responsibility="podcast")], "podcast",
-                                          self.H, "0.5.2", "0.5.2")[0], "warn")
-
-    def test_no_reliable_comparison_means_no_update(self):
-        self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2",
-                                          can_compare=False)[0], "warn")
-
-    def test_no_shell_with_current_version_line_is_quiet(self):
-        """Without a shell the stored text can't be checked, but the run follows the current plugin anyway."""
-        self.assertEqual(auto_update_plan([self.task(self.NEW)], "inbox-triage", self.H, "0.5.2", "0.5.2",
-                                          can_compare=False), ("none", None))
-
-    def test_owner_additions_never_block_an_update_and_are_kept(self):
-        mine = self.OLD + "\n\nOwner's additions:\nAlways cc my assistant."
-        action, plan = auto_update_plan([self.task(mine)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        self.assertEqual(action, "update")
-        self.assertEqual(plan["new"], self.NEW + "\n\nOwner's additions:\nAlways cc my assistant.")
-        status, after = apply_update(FakeScheduler([self.task(mine)]), plan)
-        self.assertEqual(status, "updated")
-        self.assertTrue(after["prompt"].endswith("Always cc my assistant."))
-        # and once current, the additions don't make it look customized
-        self.assertEqual(auto_update_plan([after], "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "none")
-
-    def test_any_brain_title_is_recognised(self):
-        renamed = self.OLD.replace('"Business Brain"', '"Acme HQ"')
-        action, plan = auto_update_plan([self.task(renamed)], "inbox-triage", self.H, "0.5.2", "0.5.2",
-                                        brain_title="Acme HQ")
-        self.assertEqual((action, plan["new"]), ("update", self.NEW.replace('"Business Brain"', '"Acme HQ"')))
-
-    def test_settings_unchanged_after_update(self):
-        sched = FakeScheduler([self.task(self.OLD)])
-        before = sched.get("t1")
-        _, plan = auto_update_plan([before], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        status, after = apply_update(sched, plan)
-        self.assertEqual(status, "updated")
-        self.assertEqual({k for k in before if before[k] != after[k]}, {"prompt"})
-
-    def test_failed_update_is_rolled_back(self):
-        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        status, after = apply_update(FakeScheduler([self.task(self.OLD)], fail_update=True), plan)
-        self.assertEqual((status, after["prompt"]), ("restored", self.OLD))
-
-    def test_corrupted_setting_is_never_reported_as_restored(self):
-        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        sched = FakeScheduler([self.task(self.OLD)], corrupt_setting="cron")
-        status, changed = apply_update(sched, plan)
-        self.assertEqual((status, changed), ("restored_settings_changed", ["cron"]))
-        self.assertEqual(sched.tasks["t1"]["prompt"], self.OLD)
-        self.assertEqual(sched.tasks["t1"]["cron"], "changed")   # not silently fixed: the owner decides
-
-    def test_failed_rollback_reported_honestly(self):
-        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        status, _ = apply_update(FakeScheduler([self.task(self.OLD)], corrupt_setting="cron", fail_restore=True), plan)
-        self.assertEqual(status, "unconfirmed")
-
-    def test_failed_verification_read_is_not_success(self):
-        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        status, _ = apply_update(FakeScheduler([self.task(self.OLD)], fail_reads={3}), plan)
-        self.assertEqual(status, "restored")              # unverified -> restore, never "updated"
-        status, _ = apply_update(FakeScheduler([self.task(self.OLD)], fail_reads={3, 4}), plan)
-        self.assertEqual(status, "unconfirmed")
-
-    def test_backup_failures_block_the_change(self):
-        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        for store in (BackupStore(fail_write=True), BackupStore(fail_read=True), BackupStore(truncate=10)):
-            sched = FakeScheduler([self.task(self.OLD)])
-            status, _ = apply_update(sched, plan, store)
-            self.assertEqual(status, "stopped")
-            self.assertEqual(sched.calls, 0)
-
-    def test_owner_edit_between_inspection_and_change_stops(self):
-        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.5.2", "0.5.2")
-        sched = FakeScheduler([self.task(self.OLD)], owner_edit_before_change="\nmy new line")
-        self.assertEqual(apply_update(sched, plan), ("stopped", "task changed since inspection"))
-        self.assertEqual(sched.calls, 0)
-
-    def test_missing_connection_means_no_update(self):
-        h = dict(self.H)
-        h[("inbox-triage", "0.6.0")] = (self.H[("inbox-triage", "0.6.0")][0], "0.5.0", ["Notion", "Calendar"])
-        self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", h, "0.6.0", "0.6.0",
-                                          connections_in_use=["Notion", "Gmail"]),
-                         ("warn", "needs connection Calendar"))
-        self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", h, "0.6.0", "0.6.0",
-                                          connections_in_use=["Notion", "Gmail", "Calendar"])[0], "update")
-
-    def test_marker_matched_only_from_the_first_line(self):
-        tasks = [self.task(self.OLD),
-                 self.task("Weekly notes. Mentions [AI Workforce task: inbox-triage | prompt version 0.5.1]", id="t2"),
-                 self.task("[AI Workforce task: inbox-triage-extra | prompt version 0.5.1]\nx", id="t3")]
-        self.assertEqual([t["id"] for t in matching_tasks(tasks, "inbox-triage")], ["t1"])
+    def test_marker_matched_only_from_the_first_line_whatever_the_version(self):
+        tasks = [{"id": "t1", "prompt": self.OLD},
+                 {"id": "t2", "prompt": "Weekly notes. Mentions [AI Workforce task: inbox-triage | prompt version 0.5.1]"},
+                 {"id": "t3", "prompt": "[AI Workforce task: inbox-triage-extra | prompt version 0.5.1]\nx"},
+                 {"id": "t4", "prompt": self.OLD.replace("0.5.4", "0.8.0")}]
+        self.assertEqual([t["id"] for t in matching_tasks(tasks, "inbox-triage")], ["t1", "t4"])
         self.assertIsNone(task_marker("Scheduled run of AI Workforce inbox triage"))
-        # the plan uses the same matching: the look-alikes don't make it "several tasks"
-        self.assertEqual(auto_update_plan(tasks, "inbox-triage", self.H, "0.5.2", "0.5.2")[0], "update")
 
+    def test_a_run_never_changes_a_task(self):
+        self.assertFalse(run_may_change_task(scheduled_run=True))
+        self.assertTrue(run_may_change_task(scheduled_run=False))     # in chat, on the owner's say-so
 
-    def test_incompatible_upgrade_not_accepted(self):
-        self.assertEqual(auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.6.0", "0.5.2"),
-                         ("warn", "needs Business Brain 0.6.0"))
+    def test_separate_inbox_task_at_the_same_rhythm_is_offered_for_pausing(self):
+        tasks = [self.task("daily-executive-briefing", "b"), self.task("inbox-triage", "i", hour=7.8)]
+        self.assertEqual(separate_inbox_task_to_pause(tasks), "i")
+        later = [self.task("daily-executive-briefing", "b", hour=8.5), self.task("inbox-triage", "i", hour=10.4)]
+        self.assertEqual(separate_inbox_task_to_pause(later), "i")           # the old mid-morning default
 
-    def test_skips_several_versions_when_unmodified(self):
-        _, plan = auto_update_plan([self.task(self.OLD)], "inbox-triage", self.H, "0.6.0", "0.6.0")
-        self.assertEqual((plan["from"], plan["to"]), ("0.5.1", "0.6.0"))
+    def test_extra_checks_paused_tasks_and_other_rhythms_are_left_alone(self):
+        b = self.task("daily-executive-briefing", "b")
+        self.assertIsNone(separate_inbox_task_to_pause([b, self.task("inbox-triage", "i", enabled=False)]))
+        self.assertIsNone(separate_inbox_task_to_pause([b, self.task("inbox-triage", "i", rhythm="weekdays")]))
+        self.assertIsNone(separate_inbox_task_to_pause([b, self.task("inbox-triage", "i", hour=14.5)]))   # an afternoon check
+        self.assertIsNone(separate_inbox_task_to_pause([self.task("inbox-triage", "i")]))     # inbox only: nothing to combine
+        self.assertIsNone(separate_inbox_task_to_pause([b, self.task("assign-work", "ops", rhythm="daily")]))
 
-
-class AttendedUpdate(unittest.TestCase):
-    """schedule-workforce "Check and update": same protections, owner's additions kept, paused stays paused."""
-    TEMPLATE = "[AI Workforce task: inbox-triage | prompt version 0.5.4]\nnew Business Brain"
-
-    def task(self, **kw):
-        t = {"id": "t1", "responsibility": "inbox-triage", "cron": "45 11 * * 1-5", "timezone": "America/Chicago",
-             "enabled": False, "notifications": "push", "model": "m", "approval": "auto",
-             "prompt": "[AI Workforce task: inbox-triage | prompt version 0.5.1]\nold\nAlways cc my assistant."}
-        t.update(kw)
-        return t
-
-    def test_custom_additions_kept_and_verified(self):
-        new = merged_prompt(self.TEMPLATE, "Always cc my assistant.")
-        status, after = safe_change(FakeScheduler([self.task()]), "t1", new)
-        self.assertEqual(status, "updated")
-        self.assertTrue(after["prompt"].endswith("Owner's additions:\nAlways cc my assistant."))
-
-    def test_truncated_save_fails_verification(self):
-        new = merged_prompt(self.TEMPLATE, "Always cc my assistant.")
-        sched = FakeScheduler([self.task()], truncate=len(self.TEMPLATE))   # additions cut off
-        status, _ = safe_change(sched, "t1", new)
-        self.assertEqual(status, "restored")
-        self.assertIn("Always cc my assistant.", sched.tasks["t1"]["prompt"])
-
-    def test_paused_task_stays_paused(self):
-        status, after = safe_change(FakeScheduler([self.task()]), "t1", self.TEMPLATE)
-        self.assertEqual((status, after["enabled"]), ("updated", False))
-        sched = FakeScheduler([self.task()], resumes_on_update=True)   # the tool switches it back on
-        status, changed = safe_change(sched, "t1", self.TEMPLATE)
-        self.assertEqual((status, changed), ("restored_settings_changed", ["enabled"]))   # never "updated"
-
-    def test_every_setting_preserved(self):
-        sched = FakeScheduler([self.task()])
-        before = sched.get("t1")
-        _, after = safe_change(sched, "t1", self.TEMPLATE)
-        self.assertEqual({k for k in before if before[k] != after[k]}, {"prompt"})
-
-    def test_next_run_must_fit_the_cadence_and_time_zone(self):
-        t = self.task(next_run="2026-11-06 11:45 America/Chicago")
-        status, after = safe_change(FakeScheduler([t]), "t1", self.TEMPLATE)
-        self.assertEqual((status, after["next_run"]), ("updated", t["next_run"]))
-        for setting in ("next_run", "timezone", "cron"):
-            status, changed = safe_change(FakeScheduler([t], corrupt_setting=setting), "t1", self.TEMPLATE)
-            self.assertEqual((status, changed), ("restored_settings_changed", [setting]))
+    def test_owner_instruction_is_added_at_the_end_and_nothing_else_moves(self):
+        once = add_owner_instruction(self.OLD, "Always copy my assistant.")
+        self.assertTrue(once.startswith(self.OLD))
+        self.assertTrue(once.endswith("Owner's additions:\nAlways copy my assistant."))
+        twice = add_owner_instruction(once, "Skip webinar invitations.")
+        self.assertEqual(twice.count("Owner's additions:"), 1)
+        self.assertTrue(twice.startswith(once))
 
 
 class ViewUpgrade(unittest.TestCase):

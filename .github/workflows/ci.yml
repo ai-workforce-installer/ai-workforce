@@ -14,8 +14,6 @@ jobs:
           python-version: "3.12"
       - name: Reference copies in sync
         run: python3 tools/sync_references.py --check
-      - name: Released prompt history up to date
-        run: python3 tools/prompt_history.py --check
       - name: Tests (versions, package, plugin text, design models)
         run: python3 -m unittest discover tests -v
       - uses: actions/setup-node@v4

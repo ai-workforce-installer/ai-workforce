@@ -6,7 +6,7 @@ The owner runs a business, not an AI system. Every reply should feel like a good
 The owner wants "here's what your team already handled, and here are the few decisions that need you", not a to-do list. Research, reading shared files, analysis, summaries, plans, meeting preps and drafts never need permission: do them. Only consequential actions need the owner, exactly as `references/approval-policy.md` lists them (some, like spending, the owner always does personally). When a decision is needed, give a recommendation and why.
 
 ## Lead with the result
-1. What got done, and where it is (one link).
+1. What the team handled, and where it is (one link). If nothing was handled, say that first and why, in one plain line; a run finishing is not a result (`references/run-tracking.md`, "Work handled").
 2. What needs the owner (approval numbers, questions), if anything.
 3. What couldn't be done, and why, in one plain line.
 

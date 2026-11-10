@@ -2,12 +2,12 @@
 name: manage-team
 description: This skill should be used when the owner changes how the team works or who is on it, or corrects what the team thinks matters, such as "from now on…", "always…", "never…", "make those replies shorter and friendlier", "our refund policy changed", "we raised our prices", "that isn't my responsibility anymore", "stop bringing this up", "that company isn't one of my businesses anymore", "this kind of email doesn't matter to me", "family and school emails matter", "add a team member", "I'd like someone handling my podcast", "do we need another person for this?", "turn off Finance", or "remove the Podcast Producer".
 metadata:
-  version: "0.7.1"
+  version: "0.8.0"
 ---
 
 # Manage the Team
 
-_Files named `references/…` are in this skill's own folder._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
 
 The owner should never have to rebuild a team member. They say how they want the job done, in their own words, and you put it where the team will follow it every time. Everything is saved in the owner's Business Brain, so plugin updates never touch it. Follow `references/talking-to-the-owner.md`, `references/approval-policy.md`, `references/team-roles.md` and `references/owner-corrections.md`. This skill needs the owner present.
 

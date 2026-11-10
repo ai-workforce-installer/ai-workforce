@@ -2,12 +2,12 @@
 name: setup-workforce
 description: This skill should be used when the user asks to "set up my AI team", "set up the workforce", "get started with the AI Workforce", "onboard me", "build my Business Brain", "setup-workforce", "finish my setup", "continue the setup interview", "update my Business Brain answers", "update my team workspace", or is using the AI Workforce plugin for the first time and has no Business Brain yet.
 metadata:
-  version: "0.7.1"
+  version: "0.8.0"
 ---
 
 # Set Up the AI Workforce
 
-_Files named `references/…` are in this skill's own folder._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
 
 Take a business owner who has never used Claude to their team's **first real assignment** in one sitting. Installing isn't the result; a useful piece of work done is. Learn what you can by yourself, propose instead of asking, and save the remaining questions for when the work needs them.
 

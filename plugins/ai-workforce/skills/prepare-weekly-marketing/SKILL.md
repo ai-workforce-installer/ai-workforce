@@ -2,14 +2,14 @@
 name: prepare-weekly-marketing
 description: This skill should be used when the user asks to "prepare weekly marketing", "plan next week's marketing", "weekly marketing review", "marketing plan for the week", or wants last week's results reviewed and next week's content, tests and budget proposals prepared. Also used by the scheduled weekly marketing task.
 metadata:
-  version: "0.7.1"
+  version: "0.8.0"
 ---
 
 # Prepare Weekly Marketing
 
-_Files named `references/…` are in this skill's own folder._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
 
-_When this skill runs from a recurring task, also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. `references/prompt-history.md` holds the fingerprint of every released version of the stored instructions and `references/scheduled-prompts.md` the current one; open the latter only to update the task (`references/run-modes.md`, "Is the recurring task current?")._
+_When this skill runs from a recurring task, also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. A run never changes the task itself._
 
 Follow `references/approval-policy.md`, `references/approval-queue.md` and `references/run-modes.md`. Nothing is published, sent or spent; budget changes are proposals.
 
