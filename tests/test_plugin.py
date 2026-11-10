@@ -466,6 +466,74 @@ class HighLevelIsReadOnly(unittest.TestCase):
         self.assertIn("never send or change anything in HighLevel", read(SKILLS / "process-customer-inquiries" / "SKILL.md"))
 
 
+class HighLevelComesAfterTheFirstResult(unittest.TestCase):
+    """0.8.1: first-time setup is click-and-sign-in only. HighLevel isn't in Claude's one-click
+    list, so it is offered after the first result, in four short steps written to match Claude's
+    own published instructions."""
+    WANTED = "not set (HighLevel wanted, not connected yet)"
+
+    def setUp(self):
+        self.s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.before, self.later = self.s.split("## Connecting HighLevel", 1)
+        self.later = self.later.split("## If something goes wrong", 1)[0]
+
+    def test_first_time_setup_asks_three_questions_and_none_about_highlevel(self):
+        stage0 = self.s.split("## Stage 0", 1)[1].split("## Stage 1", 1)[0]
+        self.assertEqual(len(re.findall(r'^- "', stage0, re.M)), 3)
+        self.assertIn("ask these three questions together", stage0)
+        self.assertIn("**HighLevel is not part of first-time setup.**", stage0)
+        self.assertIn("Don't ask about it or mention it here", stage0)
+        self.assertIn("right after their first result", stage0)
+        for banned in ["Do customers message you through HighLevel?", "leadconnectorhq", "Add custom connector"]:
+            self.assertNotIn(banned, self.before, "first-time setup must stay click-and-sign-in")
+        self.assertNotIn("HighLevel", self.s.split("**Order:**", 1)[1].split("\n", 1)[0])
+        self.assertIn("HighLevel is never asked about or connected in this stage", self.s)
+
+    def test_it_is_mentioned_once_after_the_first_result_without_a_question(self):
+        finish = self.s.split("## Finish", 1)[1]
+        self.assertIn("say 'connect HighLevel'", finish)
+        self.assertIn("Never ask it as a question here", finish)
+        self.assertIn('"connect HighLevel"', self.s.split("---", 2)[1])          # the skill's description
+        self.assertIn('**"Connect HighLevel":**', self.before)
+
+    def test_the_settings_line_says_where_things_stand(self):
+        for must in [f"`Customer messages: {self.WANTED}`", "`Customer messages: None`",
+                     "don't ask again, go straight to connecting", "leave the line as it is and carry on",
+                     "plain `Customer messages: HighLevel` only after a lookup works"]:
+            self.assertIn(must, self.later)
+        c = read(REFS / "connections.md")
+        for must in [f"`{self.WANTED}` included", "no run is Partial because of it", "plain `HighLevel`"]:
+            self.assertIn(must, c)
+        sys.path.insert(0, str(ROOT / "tests"))
+        import run_logic
+        self.assertEqual(run_logic.WANTED, self.WANTED)
+
+    def test_one_click_comes_first_then_four_short_steps(self):
+        later = self.later
+        self.assertLess(later.index("**Already there.**"), later.index("**A card.**"))
+        self.assertLess(later.index("**A card.**"), later.index("**By hand,**"))
+        self.assertIn("connector registry", later)
+        steps = re.findall(r"^   \d\. .+$", later, re.M)
+        self.assertEqual(len(steps), 4)
+        joined = "\n".join(steps)
+        for must in ["https://claude.ai/customize/connectors", "**Customize**, then **Connectors**",
+                     "**Add custom connector**", "**+ Add**", "**Continue** or **Add**",
+                     "Name it **HighLevel**", "pick this business's sub-account"]:
+            self.assertIn(must, joined)
+        self.assertLessEqual(sum(len(s.split()) for s in steps), 85, "the steps must stay short enough to follow on a phone")
+        self.assertIn("\n   `https://services.leadconnectorhq.com/mcp/anthropic/v2`\n", later)  # on its own line, easy to copy
+        self.assertNotIn("Settings → Connectors", self.s)                                         # the old, wrong menu path
+        for must in ["support.claude.com/en/articles/11175166", "instead of guessing", "Organization settings",
+                     "anything that sends, edits or deletes can stay off", "Send me any message when that's done."]:
+            self.assertIn(must, later)
+
+    def test_the_owner_is_told(self):
+        r = read(PLUGIN / "README.md")
+        for must in ["connect HighLevel", "four short steps", "after your first result"]:
+            self.assertIn(must, r)
+        self.assertIn("allow only viewing", read(REFS / "approval-policy.md"))
+
+
 class FreePlanAndEfficiency(unittest.TestCase):
     def test_notion_access_rules(self):
         t = read(REFS / "notion-access.md")

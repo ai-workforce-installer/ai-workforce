@@ -499,3 +499,52 @@ def quiet_streak_notice(recent_briefings, today, last_said=None):
     if len(recent_briefings) < 3 or not all(handled_nothing(w) for w in recent_briefings[:3]):
         return False
     return last_said is None or (today - last_said).days >= 7
+
+
+# ---- connections.md and setup-workforce "Connecting HighLevel": the Customer messages line ----
+WANTED = "not set (HighLevel wanted, not connected yet)"
+
+
+def _line(line):
+    return (line or "not set").strip().strip("_").strip()
+
+
+def customer_messages(line, lookup_works=False):
+    """What a run does about HighLevel, from the Customer messages line in Workforce Settings
+    (None when the line is missing) and whether a HighLevel lookup works right now.
+    Returns (check HighLevel?, report "HighLevel unavailable" and end Partial?).
+    Waiting for the owner to connect it is not a failure: only a line that says plainly
+    HighLevel (connected and verified before) with no working lookup is."""
+    value = _line(line)
+    if value == "HighLevel":
+        return (True, False) if lookup_works else (False, True)
+    if value.lower().startswith("not set"):
+        return (lookup_works, False)           # connected without telling us: use it; otherwise nothing to check
+    return (False, False)                      # None: the owner said no
+
+
+def highlevel_in_setup(line, moment, answer=None, lookup_works=False):
+    """What setup does about HighLevel. moment: 'first setup' (before the first result),
+    'first result' (the close of first-time setup), 'finish my setup' or 'owner asks'.
+    answer: the owner's 'yes', 'no' or 'later' when one was just given.
+    Returns (what to do, the line to save, or None to leave it as it is)."""
+    value = _line(line)
+    if lookup_works and (value != "None" or moment == "owner asks"):
+        return "use it", "HighLevel"
+    if moment == "first setup":                # click-and-sign-in apps only
+        return ("say it comes after the first result", WANTED) if answer == "yes" else ("say nothing", None)
+    if answer == "no":
+        return "say nothing", "None"
+    if answer == "later":
+        return "carry on", None
+    if moment == "owner asks" or answer == "yes":
+        return "connect", WANTED
+    if value == "None":
+        return "say nothing", None
+    if value == WANTED:
+        return "connect", None                 # they already said yes: never ask again
+    if value == "HighLevel":
+        return "connect", None                 # was working, isn't now: sign in again
+    if moment == "first result":
+        return "one line, no question", None
+    return "ask", None                         # 'finish my setup' with a plain not set
