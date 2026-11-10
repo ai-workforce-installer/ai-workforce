@@ -2,12 +2,12 @@
 name: inbox-triage
 description: This skill should be used when the owner asks to "triage my inbox", "go through my email", "check my email", "what's in my inbox", "anything important in my email?", "what did I miss?", or wants all their email reviewed, sorted and followed up, not only customer messages. Also used by the daily briefing as its inbox check, and by a scheduled extra inbox check.
 metadata:
-  version: "0.8.1"
+  version: "0.9.0"
 ---
 
 # Inbox Triage (all email, not just customers)
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
 
 _When this skill runs from a recurring task, also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. A run never changes the task itself._
 
@@ -17,7 +17,7 @@ Follow `references/inbox-coverage.md` (how to search, sort and count), `referenc
 
 **Inside the morning run:** when `daily-executive-briefing` runs this skill as its inbox check, do every step below exactly as written (its own run record with an IT Run ID, window, bookmark, Handled list, coverage counts, open-work rows and approvals), with three differences. Reuse the context the briefing already loaded instead of reading it again. Send no notification and write no chat report: the step 9 report goes in the record only, which ends `Notified: not requested (included in <the briefing's Run ID>)`. And hand the briefing a short summary to build on: the coverage line, urgent and needs-you items, what was prepared (with links), worth-knowing items, anything not checked, and the Result.
 
-**Quick look:** when `first-team-meeting` runs during setup and asks for a quick look, follow `references/inbox-coverage.md` section 6 instead of the full window (newest 50 threads, labelled as a quick look, bookmark not moved). Every other run, attended or scheduled, is the full triage below.
+**Quick look:** when `first-team-meeting` runs during setup and asks for a quick look, follow `references/if-quick-look.md` instead of the full window (newest 50 threads, labelled as a quick look, bookmark not moved). Every other run, attended or scheduled, is the full triage below.
 
 ## Steps
 
@@ -34,15 +34,13 @@ Follow `references/inbox-coverage.md` (how to search, sort and count), `referenc
    - **Marketing** only for a clear content or campaign idea tied to Priorities.
    Each brief carries the messages (sender, date, subject, link, key text), the Business Brain context, the safe-links rule and limits from section 4, and the deliverables format. Nobody gets an empty brief: skip members with nothing to do and say so.
 6. **Verify** as Chief of Staff: every claim traces to a message; drafts exist (get_draft) and say nothing outside the Business Brain; money figures match the email; nothing was sent, clicked through a sign-in or payment link, or changed.
-7. **Queue approvals** for every decision or consequential next step (`references/approval-queue.md`), each with a recommendation, Reversible, and the email or draft link.
-8. **Log** one Assignments row per member task (with its source key) and finish the run record with the report below, its work-handled line, the Handled list, unfinished follow-ups saved in the open-work queue, and Completed through (moved forward only if the search was complete). Result: Complete when every page was fetched, the coverage counts add up, every prioritized message was handled or queued in open work, every source was read, and every member's work was checked; Partial otherwise. Items queued past the per-run limit are normal and don't make it Partial. A mailbox the team has never been connected to doesn't make the run Partial, but it is always named under Not checked (`references/inbox-coverage.md` section 5).
-9. **Report** in this order, short, every item with its link (email `viewUrl`, checked Gmail draft link, AP number, Notion page):
-   1. **One line on coverage:** "Reviewed 247 threads from Wed 8:49 AM to Thu 8:49 AM (all of Gmail). 9 need you, 6 prepared, 228 routine."
-   2. **Urgent, then new items needing you:** anything urgent first; then what this run found that needs a decision or reply, each with what the team recommends (the full list of waiting decisions is item 6). Several emails about one problem are one item.
-   3. **Prepared by the team:** drafts (Saved in Gmail, with link), research notes, reconciliations.
-   4. **Worth knowing:** money and account notices, deadlines, meeting context, with dates, and anything matching Always worth my attention.
-   4a. **Already handled or not yours:** one line with the count and the rules matched ("Not raised: 3 emails about the old Northwind automations, per your note"); details in Notion.
-   5. **Customer support:** results, worded per section 7 of `references/inbox-coverage.md`.
-   6. **Waiting for your decision:** every Pending approval (oldest first, AP number, one line, link), then: "Reply in one message, for example: approve 3, 5; reject 4; change 6: <instructions>."
-   7. **Coverage** (section 5 block), then how each part ran and the Run receipt. In chat, show items 1-6 and the Notion link; the full Coverage block and receipt live in the Briefings page unless the owner asks.
-   Open the chat reply or notification with the work-handled line (`references/run-tracking.md`, "Work handled"), then the coverage line. A scheduled inbox check running on its own (not inside the morning run) notifies per `references/run-modes.md` with those two lines, the top 3 items and the Briefings URL.
+7. **Queue decisions** (`references/approval-queue.md`), each with a recommendation, Reversible, and the email or draft link. A reply draft by itself is never one: the owner pressing Send is the approval.
+8. **Log** one Assignments row per member task (with its source key), each reply draft and prepared piece as a Prepared row (`references/run-tracking.md` section 6), and finish the run record with the report below, its work-handled line, the Handled list, unfinished follow-ups saved in the open-work queue, and Completed through (moved forward only if the search was complete). Result: Complete when every page was fetched, the coverage counts add up, every prioritized message was handled or queued in open work, every source was read, and every member's work was checked; Partial otherwise. Items queued past the per-run limit are normal and don't make it Partial. A mailbox the team has never been connected to doesn't make the run Partial, but it is always named under Not checked (`references/inbox-coverage.md` section 5).
+9. **Report** for a phone: short, every item with its link (email `viewUrl`, checked Gmail draft link, AP number, Notion page), and everything past the first screen inside a collapsed section (a toggle; `references/notion-access.md` section 4). In this order:
+   1. **The work-handled line** (`references/run-tracking.md`, "Work handled"), then **one line on coverage:** "Reviewed 247 threads from Wed 8:49 AM to Thu 8:49 AM (all of Gmail). 9 need you, 6 prepared, 228 routine."
+   2. **Urgent, then what needs you:** anything urgent first; then each decision this run raised, with what the team recommends. Several emails about one problem are one item.
+   3. **Ready for you:** reply drafts (Saved in Gmail, with link) and, each in a toggle named for it, Replies ready to copy, research notes and reconciliations. Customer support results are worded per section 6 of `references/inbox-coverage.md`.
+   4. **Worth knowing:** at most 5 one-line items: money and account notices, deadlines, meeting context, with dates, and anything matching Always worth my attention.
+   5. **Details** (one toggle): what wasn't raised and why ("Not raised: 3 emails about the old Northwind automations, per your note"), the Coverage block (section 5), how each part ran and the Run receipt.
+   A run on its own (not inside the morning run) also says in one line how many earlier decisions are still waiting ("5 decisions waiting, oldest AP-12. Reply in one message, for example: approve 3, 5; reject 4; change 6: <instructions>.").
+   Open the chat reply or notification with the work-handled line, then the coverage line. A scheduled inbox check running on its own notifies with those two lines, the top 3 items and the Briefings URL.

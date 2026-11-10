@@ -44,3 +44,5 @@ In the run record, list each source read and its outcome in one line ("Notion: S
 
 ## 4. Write sparingly
 Create the run record once at the start and finish it once at the end; add a Progress line only when 30 minutes have passed since the run started or since the last Progress line, so another session never mistakes a working run for a stuck one; no other mid-run writes. Batch new rows into one call when the tool allows. After a write, trust the tool's answer; fetch a page back only when you need its link or the tool reported a problem.
+
+**Collapsed sections (toggles).** Reports keep the owner's first screen short by folding the rest away. In Notion's own Markdown a toggle is written as a block: a line with `<toggle>`, the title on the next line, a blank line, the content, then `</toggle>`. Never use `<details>` (Notion saves it as plain text). If the connection's own guide says otherwise, follow the guide; if a toggle can't be created, use a plain heading in the same place.

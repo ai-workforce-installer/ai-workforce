@@ -2,12 +2,12 @@
 name: assign-work
 description: This skill should be used when the owner hands the team work, such as "have Marketing work on that", "ask Sales what happened with those leads", "get the team on this", "delegate this", "can someone handle this", "assign work to the team", "act as Chief of Staff", or gives a business request that should go to one or more of Operations, Marketing, Sales, Client Success, Finance or a custom team member.
 metadata:
-  version: "0.8.1"
+  version: "0.9.0"
 ---
 
 # Assign Work (Chief of Staff protocol)
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
 
 _When this skill runs from a recurring task (a custom recurring responsibility), also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. A run never changes the task itself._
 
@@ -37,7 +37,7 @@ Act as the Chief of Staff in the main conversation. Read these and apply them th
 9. **Queue approvals** (`references/approval-queue.md`) and use their AP numbers.
 10. **Log.** One Assignments row per task (Result says which way it ran: own agent, briefed assistant, or handled directly) and the run's record in Briefings (Type = Assignment, `references/run-tracking.md`) holding the full report: results, verification, approvals, questions, run receipt.
 11. **Report to the owner** per `references/talking-to-the-owner.md`: what got done and the link, what needs them, what couldn't be done, and anything "ready except…" (a missing link, an unconfirmed price). Offer the details on request.
-   **Feedback on the result** ("too formal", "I wouldn't sign it with my name", "that claim isn't accurate", "stronger opening"): apply it to the same drafts now and show them again, then offer once to save it as a lasting preference (`references/owner-corrections.md` section 6). No new approval or second draft for a wording change.
+   **Feedback on the result** ("too formal", "I wouldn't sign it with my name", "that claim isn't accurate", "stronger opening"): apply it to the same drafts now and show them again, then offer once to save it as a lasting preference (`references/if-owner-corrects.md` section 6). No new approval or second draft for a wording change.
 12. **Repeat work?** If this kind of request has come up before (check recent Assignments) or the owner says "every week", offer once: "Want <member> to handle this every <cadence>?" On yes, use `schedule-workforce` for just that responsibility.
 
 If a connection or a member's run failed, say so plainly. Never present work as done that wasn't done.
