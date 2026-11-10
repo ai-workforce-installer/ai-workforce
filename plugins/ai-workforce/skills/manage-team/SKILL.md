@@ -7,7 +7,7 @@ metadata:
 
 # Manage the Team
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
 
 The owner should never have to rebuild a team member. They say how they want the job done, in their own words, and you put it where the team will follow it every time. Everything is saved in the owner's Business Brain, so plugin updates never touch it. Follow `references/talking-to-the-owner.md`, `references/approval-policy.md`, `references/team-roles.md` and `references/owner-corrections.md`. This skill needs the owner present.
 

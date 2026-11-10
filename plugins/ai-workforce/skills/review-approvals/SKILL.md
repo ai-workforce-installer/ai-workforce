@@ -7,7 +7,7 @@ metadata:
 
 # Review Approvals (the owner's few minutes a day)
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
 
 This skill only runs with the owner present. It is the one place where queued actions get carried out, and only after the owner says yes in this chat. Follow `references/approval-policy.md` and `references/owner-corrections.md`.
 

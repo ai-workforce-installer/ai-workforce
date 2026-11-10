@@ -7,7 +7,7 @@ metadata:
 
 # Workforce Self-Test
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
 
 Prove what actually works, and never claim more. Do not simulate anything. Follow `references/approval-policy.md`, `references/connections.md`, `references/run-tracking.md` and the run rule in `references/team-roles.md`. The test never sends anything, never changes real business records, and never deletes; every test record it creates is marked "Self-test" and left as history.
 

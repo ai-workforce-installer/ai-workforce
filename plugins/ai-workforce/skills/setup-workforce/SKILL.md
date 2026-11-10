@@ -7,7 +7,7 @@ metadata:
 
 # Set Up the AI Workforce
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
 
 Take a business owner who has never used Claude to their team's **first real assignment** in one sitting. Installing isn't the result; a useful piece of work done is. Learn what you can by yourself, propose instead of asking, and save the remaining questions for when the work needs them.
 
