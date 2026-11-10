@@ -7,7 +7,7 @@ A ready-made AI team: a Chief of Staff and five team members (Operations, Market
 **What you need**
 - **Required:** a paid Claude plan that includes plugins and scheduled tasks, and a Notion account. Notion's free plan works: the team reads your workspace through saved views, which keep working when the free plan's query allowance runs out (existing workspaces: say "update my team workspace" once to add them).
 - **Optional:** email, calendar and files (Gmail and Google, or Outlook and Microsoft 365). Without them the team works from what you paste in.
-- **Usage:** how much of your Claude plan the team uses depends on how many recurring tasks you turn on. We haven't measured yet whether the Pro plan covers daily use, so start with one recurring task (the daily briefing) and add more once you've seen the usage.
+- **Usage:** how much of your Claude plan the team uses depends on how many recurring tasks you turn on. We haven't measured yet whether the Pro plan covers daily use, so start with one recurring task (the daily briefing, which also checks your inbox) and add more once you've seen the usage.
 
 ## Install
 
@@ -26,6 +26,6 @@ Claude Code: `/plugin install ai-workforce --marketplace ai-workforce-installer/
 
 In one sitting, your Chief of Staff connects your apps, learns your business from your website, and has the team do its first real job with you. After that, just talk to your team: "Have Marketing work on this", "What's waiting for my approval?", "What's my team been working on?", "Can someone handle this every Friday?"
 
-AI Workforce is in beta. When you update the plugin, your recurring tasks pick up the improvements on their next run, without changing your schedule or anything you've added to them (this is new and still being proven live); say "don't update my recurring tasks automatically" to keep their saved text as it is. For what's enforced, what's been tested live and what hasn't yet, see [What you can rely on](plugins/ai-workforce/README.md#what-you-can-rely-on-and-how-we-know).
+AI Workforce is in beta. Your recurring tasks always follow the version of AI Workforce you have installed, so after you update the plugin they work the new way on their next run; the tasks themselves never change. When your team runs on its own, a built-in lock refuses the tools that send, delete, share or book (new, and still being proven live in scheduled runs). For what's enforced, what's been tested live and what hasn't yet, see [What you can rely on](plugins/ai-workforce/README.md#what-you-can-rely-on-and-how-we-know).
 
 Full details: [plugins/ai-workforce/README.md](plugins/ai-workforce/README.md)

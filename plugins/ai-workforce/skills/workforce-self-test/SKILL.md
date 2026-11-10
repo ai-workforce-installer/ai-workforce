@@ -2,12 +2,12 @@
 name: workforce-self-test
 description: This skill should be used when the user asks to "test the workforce", "verify the subagents run", "run the self-test", "check that the AI team works", or wants proof of how the team members and connections actually run.
 metadata:
-  version: "0.7.1"
+  version: "0.8.0"
 ---
 
 # Workforce Self-Test
 
-_Files named `references/…` are in this skill's own folder._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
 
 Prove what actually works, and never claim more. Do not simulate anything. Follow `references/approval-policy.md`, `references/connections.md`, `references/run-tracking.md` and the run rule in `references/team-roles.md`. The test never sends anything, never changes real business records, and never deletes; every test record it creates is marked "Self-test" and left as history.
 
@@ -42,7 +42,7 @@ Never label a member "separate agent" unless that launch returned the code.
    - **Many pages:** run the same search for the last 7 days with 50 per page, following next-page tokens up to 5 pages. PASS if the results ended within those pages; if a next page still remained at the cap, report it as **incomplete (stopped at 5 pages)**, not passed. Report pages and threads, and Gmail's own estimate next to the real count.
    - **Bookmark:** read the newest finished Inbox triage records. PASS if each run moved Completed through only when its report says the search was complete ("Search: complete"), kept it when the search was incomplete (whatever the overall Result), and no finished run left a gap between one window's end and the next start that isn't recorded as an open "Inbox not scanned" item. Older records without these lines: "not checked: from before this check existed".
 6d. **Check Gmail draft links** (attended, Gmail owners, only after the owner says yes, since it leaves one draft in their Drafts folder): create a draft to the owner's own address, subject "AI Workforce self-test <code>: safe to delete", body one line. Check it with get_draft and confirm the `viewUrl` opens that draft. Never send it. Tell the owner it's there to delete whenever they like.
-6e. **Check recurring tasks** (read-only): follow `schedule-workforce` "Check and update recurring responsibilities" steps 1-3 only. Report each task as current or using older instructions. Change nothing.
+6e. **Check recurring tasks** (read-only): follow `schedule-workforce` "Check recurring responsibilities" steps 1-2 only. Report each task's state and any real problem it lists. Change nothing.
 6f. **Check the notification text:** write the summary a scheduled run would send for this test record. PASS if it contains the record's full Notion link as plain text on its own line and that link matches the fetched record.
 6g. **Check the saved views** (read-only): fetch each Business Brain database once. For each standard view in `references/notion-schema.md`, report: present with the expected filter and sort (PASS), present with a different filter ("kept as the owner set it; the team reads that list another way"), or missing (FAIL, fixable with "update my team workspace"). Don't create or change views here.
 7. **Report two tables and one verdict:**

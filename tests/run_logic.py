@@ -428,3 +428,74 @@ def owner_summary(rec, total_in_window):
         return (f"I looked at your {rec.reviewed} newest emails. "
                 f"I haven't gone through the rest of the last 24 hours yet.")
     return f"Reviewed all {total_in_window} emails in the window."
+
+
+# ---- daily-executive-briefing step 3 and run-tracking.md section 5: one morning run ----
+RECENT_INBOX_CHECK = timedelta(hours=3)
+
+
+def morning_inbox_plan(records, now, has_inbox=True):
+    """What the briefing does about email: 'none' (no inbox at all), 'running' (another inbox
+    check is working right now: don't start a second one, don't wait), 'reuse' (a finished check
+    moved the bookmark less than 3 hours ago), or 'run' (do the inbox check inside this run)."""
+    if not has_inbox:
+        return "none"
+    kind, _ = decide(records, "Inbox triage", now)
+    if kind == "overlap":
+        return "running"
+    cp = last_checkpoint(records)
+    if cp is not None and now - cp < RECENT_INBOX_CHECK:
+        return "reuse"
+    return "run"
+
+
+def morning_run(records, mailbox, now, has_inbox=True, actions=None, queue=None):
+    """The daily briefing with its inbox check inside. Returns (briefing, inbox record or None,
+    notifications sent). The inbox check keeps its own record, window and bookmark; only the
+    briefing notifies."""
+    plan = morning_inbox_plan(records, now, has_inbox)
+    inbox = None
+    if plan == "run":
+        inbox = triage(records, mailbox, now, actions=actions, queue=queue)
+        inbox.notified = False                 # "Notified: not requested (included in <briefing>)"
+    briefing = Record(make_run_id("DB", now, records), "Daily briefing", now, code="DB")
+    records.append(briefing)
+    if inbox is not None:
+        inbox.included_in = briefing.run_id
+    briefing.inbox_plan = plan
+    email_covered = plan in ("none", "reuse") or (inbox is not None and inbox.result == "Complete")
+    briefing.finished, briefing.result = now, ("Complete" if email_covered else "Partial")
+    briefing.notified = True
+    sent = sum(1 for r in (briefing, inbox) if r is not None and r.notified)
+    return briefing, inbox, sent
+
+
+# ---- run-tracking.md "Work handled": what counts, what never does, and saying it first ----
+COUNTS_AS_HANDLED = ("reply drafts", "approvals raised", "items closed", "prepared")
+
+
+def handled_nothing(work):
+    return not any(work.get(k) for k in COUNTS_AS_HANDLED)
+
+
+def handled_line(work, reason=None):
+    """work: counts of what a run did. Only the four kinds above count; reading, sorting and
+    checking (whatever else is in the dict) never do."""
+    if handled_nothing(work):
+        return "Handled: nothing" + (f": {reason}" if reason else "")
+    return "Handled: " + ", ".join(f"{work[k]} {k}" for k in COUNTS_AS_HANDLED if work.get(k))
+
+
+def morning_opening(briefing_work, inbox_work=None, needs_you=0, reason=None):
+    """The owner's opening line adds the inbox check's work to the briefing's. Each record still
+    keeps only its own counts, so adding up records never counts anything twice."""
+    total = {k: briefing_work.get(k, 0) + (inbox_work or {}).get(k, 0) for k in COUNTS_AS_HANDLED}
+    return handled_line(total, reason) + (f". Needs you: {needs_you} decisions" if needs_you else "")
+
+
+def quiet_streak_notice(recent_briefings, today, last_said=None):
+    """recent_briefings: the work of finished Daily briefings, newest first, this one included.
+    Blocked leads with the one fix only after three in a row handled nothing, at most once in 7 days."""
+    if len(recent_briefings) < 3 or not all(handled_nothing(w) for w in recent_briefings[:3]):
+        return False
+    return last_said is None or (today - last_said).days >= 7

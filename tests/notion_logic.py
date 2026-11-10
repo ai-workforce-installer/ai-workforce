@@ -6,7 +6,7 @@ Restates skills/assign-work/references/notion-access.md, team-roles.md
 with a mocked Notion connector, so the rules can be tested against hard cases.
 It tests the design, not Claude's behaviour in a live run.
 """
-import hashlib, re
+import re
 
 ROWS_CAP = 100
 
@@ -233,84 +233,10 @@ def metric_label(value_from_source):
     return "Verified" if value_from_source is not None else "Unavailable"
 
 
-# ---- run-modes.md: recurring tasks keep themselves up to date ----
-STANDARD = {"daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"}
-SETTINGS = ("cron", "timezone", "enabled", "notifications", "model", "approval", "next_run")
-
-
-def normalize(text):
-    """The only differences allowed when comparing prompts: line endings and trailing spaces."""
-    return "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").split("\n")).strip()
-
-
-def fingerprint(text):
-    """run-modes.md "Fingerprint": ignores line endings, trailing spaces, the Brain's title and
-    everything from "Owner's additions" on. Same recipe as tools/prompt_history.py."""
-    t = text.replace("\r\n", "\n")
-    t = re.split(r"(?m)^Owner's additions\b", t)[0]
-    t = re.sub(r'titled exactly "[^"\n]*"', 'titled exactly "<BRAIN>"', t)
-    return hashlib.sha256(normalize(t).encode("utf-8")).hexdigest()[:16]
-
-
-def owner_additions(text):
-    """The task's "Owner's additions" section, kept exactly when the stored text is updated."""
-    m = re.search(r"(?m)^Owner's additions\b", text.replace("\r\n", "\n"))
-    return text.replace("\r\n", "\n")[m.start():].rstrip() if m else ""
-
-
-def task_version(prompt):
-    m = re.match(r"^\[AI Workforce task: [a-z0-9-]+ \| prompt version ([0-9.]+)\]", prompt.replace("\r\n", "\n"))
-    return m.group(1) if m else None
-
-
-def vkey(v):
-    return [int(x) for x in v.split(".")]
-
-
-def auto_update_plan(tasks, responsibility, history, current_version, brain_version,
-                     setting="yes", can_compare=True, brain_title="Business Brain", connections_in_use=None):
-    """Decide what a standard task's stored text may do. Returns (action, detail).
-
-    history: {(responsibility, version): (template_text, needs_brain_version[, needed_connections])}
-    A run compares fingerprints only (the shipped table), never old prompt texts.
-    can_compare: a shell is available to compute the fingerprint.
-    Tasks are matched only by the tag on their instructions' first line.
-    action: none | update | warn | ask
-    """
-    if setting == "no":
-        return "warn", "automatic updates turned off"
-    if responsibility not in STANDARD:
-        return "warn", "custom responsibility"
-    matches = matching_tasks(tasks, responsibility)
-    if len(matches) != 1:
-        return "ask", f"{len(matches)} matching tasks"
-    task = matches[0]
-    table = {v: fingerprint(e[0]) for (r, v), e in history.items() if r == responsibility}
-    current_text, needs = history[(responsibility, current_version)][:2]
-    needed = set(history[(responsibility, current_version)][2]) if len(history[(responsibility, current_version)]) > 2 else set()
-    if not can_compare:     # no shell: the run already follows the current plugin either way
-        return ("none", None) if task_version(task["prompt"]) == current_version else ("warn", "can't compare reliably")
-    fp = fingerprint(task["prompt"])
-    if fp == table[current_version]:
-        return "none", None
-    found = [v for v, f in table.items() if f == fp]
-    if not found:
-        return "warn", "custom instructions"          # includes unknown old versions and inline edits
-    if vkey(brain_version) < vkey(needs):
-        return "warn", f"needs Business Brain {needs}"
-    missing = needed - set(connections_in_use or ())
-    if missing:
-        return "warn", f"needs connection {', '.join(sorted(missing))}"
-    new = current_text.replace("<BRAIN>", brain_title)
-    extra = owner_additions(task["prompt"])
-    if extra:
-        new = new + "\n\n" + extra
-    return "update", {"task": task["id"], "from": found[0], "to": current_version, "backup": task["prompt"],
-                      "new": new}
-
-
+# ---- run-modes.md / schedule-workforce: the team's own recurring tasks ----
 def task_marker(prompt):
-    """The skill a task belongs to, read only from the first line's tag (run-modes.md)."""
+    """The skill a task belongs to, read only from the first line's tag (run-modes.md).
+    The version on that line is never compared: tasks always follow the installed plugin."""
     first = prompt.replace("\r\n", "\n").split("\n", 1)[0].strip()
     m = re.match(r"^\[AI Workforce task: ([a-z0-9-]+) \|", first)
     return m.group(1) if m else None
@@ -320,117 +246,40 @@ def matching_tasks(tasks, skill):
     return [t for t in tasks if task_marker(t["prompt"]) == skill]
 
 
-class FakeScheduler:
-    """A scheduled-task list whose calls can be made to fail or misbehave.
-
-    fail_update: the change call fails.     corrupt_setting: the change also alters a setting.
-    fail_restore: the restore call fails.   restore_keeps_setting: restore fixes the text only.
-    fail_reads: set of read numbers (1-based) that fail.   truncate: save only the first N chars.
-    owner_edit_before_change: the owner edits the task between inspection and change.
-    """
-    def __init__(self, tasks, fail_update=False, corrupt_setting=None, fail_restore=False,
-                 fail_reads=(), truncate=None, owner_edit_before_change=None, resumes_on_update=False):
-        self.tasks = {t["id"]: dict(t) for t in tasks}
-        self.fail_update, self.corrupt, self.fail_restore = fail_update, corrupt_setting, fail_restore
-        self.fail_reads, self.truncate, self.owner_edit = set(fail_reads), truncate, owner_edit_before_change
-        self.resumes = resumes_on_update               # a tool that switches a paused task back on
-        self.calls = self.reads = 0
-
-    def update_prompt(self, task_id, prompt):
-        self.calls += 1
-        restoring = self.calls > 1
-        if (self.fail_update and not restoring) or (self.fail_restore and restoring):
-            return False
-        self.tasks[task_id]["prompt"] = prompt[:self.truncate] if (self.truncate and not restoring) else prompt
-        if self.corrupt and not restoring:
-            self.tasks[task_id][self.corrupt] = "changed"
-        if self.resumes:
-            self.tasks[task_id]["enabled"] = True
-        return True
-
-    def get(self, task_id):
-        self.reads += 1
-        if self.reads in self.fail_reads:
-            raise ConnectionError("read failed")
-        if self.owner_edit and self.reads == 2:          # the re-check just before the change
-            self.tasks[task_id]["prompt"] += self.owner_edit
-        return dict(self.tasks[task_id])
+def run_may_change_task(scheduled_run):
+    """run-modes.md: a run never changes a recurring task; only the owner does, in chat."""
+    return not scheduled_run
 
 
-class BackupStore:
-    """The Briefings record that holds the backup. Write or read-back can fail or truncate."""
-    def __init__(self, fail_write=False, fail_read=False, truncate=None):
-        self.fail_write, self.fail_read, self.truncate = fail_write, fail_read, truncate
-        self.saved = None
-
-    def save(self, text):
-        if self.fail_write:
-            return False
-        self.saved = text[:self.truncate] if self.truncate else text
-        return True
-
-    def read(self):
-        if self.fail_read:
-            raise ConnectionError("read failed")
-        return self.saved
+def separate_inbox_task_to_pause(tasks):
+    """schedule-workforce "One morning run": when a daily briefing task and a separate inbox triage
+    task run at the same rhythm less than 3 hours apart, the inbox one is offered for pausing (never
+    deleted, and only on the owner's yes). An inbox check at another rhythm, an extra check 3 hours
+    or more away (an afternoon one), or a task already paused, is left alone."""
+    briefings = [t for t in matching_tasks(tasks, "daily-executive-briefing") if t["enabled"]]
+    inboxes = [t for t in matching_tasks(tasks, "inbox-triage") if t["enabled"]]
+    if not briefings:
+        return None
+    for inbox in inboxes:
+        if any(inbox["rhythm"] == b["rhythm"] and abs(inbox["hour"] - b["hour"]) < 3 for b in briefings):
+            return inbox["id"]
+    return None
 
 
-def safe_change(scheduler, task_id, new_prompt, backup_store=None):
-    """run-modes.md "Changing a recurring task's instructions safely". Returns (status, detail).
-
-    status: updated | stopped | restored | restored_settings_changed | unconfirmed
-    """
-    backup_store = BackupStore() if backup_store is None else backup_store
-    try:
-        before = scheduler.get(task_id)                         # 1. capture everything
-    except ConnectionError:
-        return "stopped", "couldn't read the task"
-    if not backup_store.save(before["prompt"]):                 # 2. back up and read back
-        return "stopped", "backup not saved"
-    try:
-        if backup_store.read() != before["prompt"]:
-            return "stopped", "backup incomplete"
-    except ConnectionError:
-        return "stopped", "backup not readable"
-    try:
-        now = scheduler.get(task_id)                            # 3. re-check
-    except ConnectionError:
-        return "stopped", "couldn't re-check the task"
-    if now != before:
-        return "stopped", "task changed since inspection"
-    scheduler.update_prompt(task_id, new_prompt)                # 4. change the instructions only
-    try:
-        after = scheduler.get(task_id)                          # 5. verify everything
-        changed = [k for k in SETTINGS if after.get(k) != before.get(k)]
-        if after["prompt"] == new_prompt and not changed:
-            return "updated", after
-    except ConnectionError:
-        pass                                                    # unverified counts as failed
-    scheduler.update_prompt(task_id, before["prompt"])          # 6. restore, re-verify separately
-    try:
-        restored = scheduler.get(task_id)
-    except ConnectionError:
-        return "unconfirmed", "couldn't read the task after restoring"
-    if restored["prompt"] != before["prompt"]:
-        return "unconfirmed", "instructions not confirmed restored"
-    changed = [k for k in SETTINGS if restored.get(k) != before.get(k)]
-    if changed:
-        return "restored_settings_changed", changed             # ask before setting them back
-    return "restored", restored
-
-
-def apply_update(scheduler, plan, backup_store=None):
-    return safe_change(scheduler, plan["task"], plan["new"], backup_store)
-
-
-def merged_prompt(template, owner_additions):
-    """schedule-workforce attended update: the new template plus the owner's approved additions."""
-    if not owner_additions:
-        return template
-    return template.rstrip() + "\n\nOwner's additions:\n" + owner_additions.strip()
+def add_owner_instruction(prompt, words):
+    """schedule-workforce "Adding the owner's own instruction": everything before stays exactly
+    as it was; the owner's words go at the end under "Owner's additions:"."""
+    body = prompt.rstrip("\n")
+    if re.search(r"(?m)^Owner's additions:", body):
+        return body + "\n" + words.strip()
+    return body + "\n\nOwner's additions:\n" + words.strip()
 
 
 # ---- brain-upgrades.md: saved views, structure check and repair ----
+def vkey(v):
+    return [int(x) for x in v.split(".")]
+
+
 STANDARD_VIEWS = {
     "Approvals": ("Active approvals", 'FILTER "Status" IN ("Pending", "Approved", "Handed to you"); SORT BY "AP" ASC'),
     "Assignments": ("Open work", 'FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC'),

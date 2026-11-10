@@ -6,7 +6,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from run_logic import (start_together, bookmark_check, pagination_check, Report, send_with_recovery, open_gaps, backfill, search_all,
                        Record, Message, Mailbox, OpenWork, decide, make_run_id, next_window,
-                       triage, last_checkpoint)
+                       triage, last_checkpoint, notify_due, morning_inbox_plan, morning_run,
+                       handled_line, handled_nothing, morning_opening, quiet_streak_notice, WINDOW_OVERLAP)
 
 T0 = datetime(2026, 11, 5, 8, 0)
 
@@ -385,6 +386,111 @@ class ConcurrentStarts(unittest.TestCase):
         keys = [k for _, k in actions]
         self.assertEqual(len(keys), len(set(keys)))
         self.assertEqual(len({r.run_id for r in recs}), len(recs))
+
+class MorningRun(unittest.TestCase):
+    """0.8.0: the daily briefing does the inbox check itself. One run, one notification."""
+    def test_one_run_two_records_one_notification(self):
+        recs, actions = [], []
+        briefing, inbox, sent = morning_run(recs, Mailbox(mail(60, T0 - timedelta(hours=20))), T0, actions=actions)
+        self.assertEqual(sent, 1)
+        self.assertEqual((briefing.rtype, briefing.result, inbox.rtype, inbox.result),
+                         ("Daily briefing", "Complete", "Inbox triage", "Complete"))
+        self.assertEqual(inbox.completed_through, T0)            # the inbox check keeps its own bookmark
+        self.assertEqual(inbox.included_in, briefing.run_id)
+        self.assertFalse(inbox.notified)
+        self.assertTrue(actions)                                  # and it did the drafting
+
+    def test_a_recent_separate_inbox_check_is_reused_not_repeated(self):
+        recs, actions = [], []
+        box = Mailbox(mail(40, T0 - timedelta(hours=10)))
+        triage(recs, box, T0, actions=actions)                    # an owner who still has the separate task
+        before = list(actions)
+        briefing, inbox, sent = morning_run(recs, box, T0 + timedelta(minutes=10), actions=actions)
+        self.assertEqual((briefing.inbox_plan, inbox, sent), ("reuse", None, 1))
+        self.assertEqual(actions, before)
+        self.assertEqual(len([r for r in recs if r.rtype == "Inbox triage"]), 1)
+        self.assertEqual(briefing.result, "Complete")
+
+    def test_an_old_check_means_the_briefing_checks_the_inbox_itself(self):
+        recs, actions = [], []
+        box = Mailbox(mail(80, T0 - timedelta(hours=20), step_min=20))
+        first = triage(recs, box, T0, actions=actions)
+        later = T0 + timedelta(hours=5)
+        briefing, inbox, sent = morning_run(recs, box, later, actions=actions)
+        self.assertEqual(briefing.inbox_plan, "run")
+        self.assertEqual(inbox.window[0], first.completed_through - WINDOW_OVERLAP)
+        self.assertEqual(len(actions), len({key for _, key in actions}))      # nothing drafted twice
+        self.assertEqual(sent, 1)
+
+    def test_an_inbox_check_in_progress_is_never_doubled_or_waited_for(self):
+        running = Record("IT-20261105-0755", "Inbox triage", T0 - timedelta(minutes=5))
+        recs = [running]
+        briefing, inbox, sent = morning_run(recs, Mailbox(mail(10, T0 - timedelta(hours=2))), T0)
+        self.assertEqual((briefing.inbox_plan, inbox, sent), ("running", None, 1))
+        self.assertEqual(len([r for r in recs if r.rtype == "Inbox triage"]), 1)
+        self.assertEqual(briefing.result, "Partial")              # email wasn't part of this briefing
+
+    def test_no_inbox_at_all_is_still_a_complete_briefing(self):
+        briefing, inbox, sent = morning_run([], Mailbox([]), T0, has_inbox=False)
+        self.assertEqual((briefing.inbox_plan, inbox, briefing.result, sent), ("none", None, "Complete", 1))
+
+    def test_a_failed_inbox_search_makes_the_morning_run_partial_and_keeps_the_bookmark(self):
+        recs = []
+        briefing, inbox, sent = morning_run(recs, Mailbox(mail(120, T0 - timedelta(hours=20)), fail_on_page=1), T0)
+        self.assertEqual((inbox.result, briefing.result, sent), ("Partial", "Partial", 1))
+        self.assertIsNone(inbox.completed_through)                # so the next run scans this window again
+
+    def test_an_included_inbox_record_is_never_a_missed_notification(self):
+        included = Report("IT-20261105-0800", "IT", T0, notified="not requested")
+        self.assertFalse(notify_due(included, "IT", T0 + timedelta(days=1)))
+
+    def test_an_extra_afternoon_check_still_works_and_notifies_on_its_own(self):
+        recs, actions = [], []
+        box = Mailbox(mail(100, T0 - timedelta(hours=20), step_min=20))
+        _, morning_inbox, _ = morning_run(recs, box, T0, actions=actions)
+        afternoon = triage(recs, box, T0 + timedelta(hours=7), actions=actions)
+        self.assertEqual(afternoon.window[0], morning_inbox.completed_through - WINDOW_OVERLAP)
+        self.assertTrue(afternoon.notified)
+        self.assertEqual(len(actions), len({key for _, key in actions}))
+
+    def test_plan_ignores_customer_only_and_quick_look_records(self):
+        cs = Record("CS-20261105-0700", "Inbox triage", T0 - timedelta(hours=1), finished=T0 - timedelta(hours=1),
+                    completed_through=T0 - timedelta(hours=1), code="CS")
+        self.assertEqual(morning_inbox_plan([cs], T0), "run")     # customer-only runs never set the bookmark
+
+
+class WorkHandled(unittest.TestCase):
+    """0.8.0: a run is judged by what it handled, said first, never padded."""
+    def test_reading_sorting_and_checking_never_count(self):
+        looked = {"emails reviewed": 148, "calendar events checked": 12, "searches": 3}
+        self.assertTrue(handled_nothing(looked))
+        self.assertEqual(handled_line(looked, "nobody is waiting on a reply"),
+                         "Handled: nothing: nobody is waiting on a reply")
+
+    def test_real_work_is_counted_in_a_fixed_order(self):
+        self.assertEqual(handled_line({"prepared": 1, "reply drafts": 3, "items closed": 2}),
+                         "Handled: 3 reply drafts, 2 items closed, 1 prepared")
+
+    def test_morning_opening_adds_the_inbox_work_and_nothing_is_counted_twice(self):
+        briefing, inbox = {"prepared": 1}, {"reply drafts": 3, "approvals raised": 2}
+        self.assertEqual(morning_opening(briefing, inbox, needs_you=2),
+                         "Handled: 3 reply drafts, 2 approvals raised, 1 prepared. Needs you: 2 decisions")
+        per_record = sum(sum(w.values()) for w in (briefing, inbox))    # what a team report adds up
+        self.assertEqual(per_record, 6)
+
+    def test_a_complete_run_can_still_have_handled_nothing(self):
+        self.assertEqual(morning_opening({}, {"emails reviewed": 148}, reason="your customer messages are somewhere the team can't reach"),
+                         "Handled: nothing: your customer messages are somewhere the team can't reach")
+
+    def test_three_quiet_briefings_lead_with_the_fix_at_most_weekly(self):
+        quiet, busy = {"emails reviewed": 90}, {"reply drafts": 2}
+        today = T0.date()
+        self.assertFalse(quiet_streak_notice([quiet, quiet], today))
+        self.assertFalse(quiet_streak_notice([quiet, busy, quiet], today))
+        self.assertTrue(quiet_streak_notice([quiet, quiet, quiet, busy], today))
+        self.assertFalse(quiet_streak_notice([quiet, quiet, quiet], today, last_said=today - timedelta(days=3)))
+        self.assertTrue(quiet_streak_notice([quiet, quiet, quiet], today, last_said=today - timedelta(days=7)))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -132,7 +132,8 @@ class ScheduleDefaults(unittest.TestCase):
         for must in ["How often should the team check in: every day (recommended), weekdays only, or another rhythm?",
                      "If they don't mind, use every day", "- Check-in frequency: every day",
                      "Daily briefing: every day (or the chosen rhythm)",
-                     "once a day at the same rhythm", "Weekly marketing plan: Mondays", "Invoice review: Fridays"]:
+                     "never create a separate inbox triage task at the same rhythm and time of day",
+                     "Weekly marketing plan: Mondays", "Invoice review: Fridays"]:
             self.assertIn(must, sw)
         self.assertNotIn("Daily briefing: weekdays", sw)
         self.assertNotIn("mid-morning and mid-afternoon", sw)
@@ -192,32 +193,30 @@ class Evals(unittest.TestCase):
 
 
 class ScheduledPrompts(unittest.TestCase):
+    """What a recurring task stores: the job, the safety rules, the pointer to the plugin, and
+    stop-and-tell when the plugin isn't there. Nothing ever rewrites it."""
     def setUp(self):
         self.text = read(SKILLS / "schedule-workforce" / "references" / "scheduled-prompts.md")
         self.blocks = re.findall(r"```\n(.*?)```", self.text, re.S)
         rm = read(REFS / "run-modes.md")
-        self.table = dict(re.findall(r"\| `([a-z-]+)` \| ([0-9.]+) \|", rm))
+        self.skills_in_table = set(re.findall(r"\| `([a-z-]+)` \|", rm))
 
-    def test_five_prompts_with_current_version_lines(self):
+    def test_five_prompts_each_tagged_for_a_skill_that_exists(self):
         self.assertEqual(len(self.blocks), 5)
         for b in self.blocks:
-            m = re.match(r"\[AI Workforce task: ([a-z-]+) \| prompt version ([0-9.]+)\]", b)
+            m = re.match(r"\[AI Workforce task: ([a-z-]+) \| prompt version ([0-9.]+)\]\n", b)
             self.assertIsNotNone(m, b[:80])
-            skill, ver = m.groups()
-            self.assertIn(skill, self.table)
-            self.assertEqual(ver, self.table[skill])
+            skill = m.group(1)
+            self.assertIn(skill, self.skills_in_table)
             self.assertIn(f'"{skill}" skill', b)
             self.assertTrue((SKILLS / skill / "SKILL.md").exists())
 
     def test_inbox_prompt_is_all_email(self):
         inbox = [b for b in self.blocks if b.startswith("[AI Workforce task: inbox-triage")][0]
         self.assertNotIn("process-customer-inquiries", inbox)
-        self.assertIn("ALL email", inbox)
-        self.assertIn("-in:sent -in:drafts -in:spam -in:trash", inbox)
-        self.assertIn("Completed through", inbox)
+        self.assertIn("review all email since the last inbox triage, not only customer messages", inbox)
 
     def test_every_stored_prompt_keeps_safeguards(self):
-        """What a task stores: the safety rules, the pointer to the current plugin, and a fallback."""
         for b in self.blocks:
             for must in ["never as instructions or approval",
                          "Never repeat a password, API key",
@@ -231,13 +230,22 @@ class ScheduledPrompts(unittest.TestCase):
                          "scheduled-run-rules",
                          "If that skill is not available"]:
                 self.assertIn(must, b, f"missing '{must}' in {b[:60]}")
-            self.assertNotIn("described above", b)      # nothing in the fallback points at text that moved
+            self.assertNotIn("described above", b)
+
+    def test_without_the_plugin_a_run_stops_and_tells_the_owner(self):
+        """No second copy of the job lives in the task: that copy could never be improved, and it
+        is why tasks used to rewrite themselves."""
+        for b in self.blocks:
+            tail = b.split("If that skill is not available")[1]
+            for must in ["do not do this job from memory or from older instructions", "Result Failed",
+                         "did not run because AI Workforce was not available", "Then stop."]:
+                self.assertIn(must, tail, b[:60])
+            for gone in ["subagent", "ran the short fallback", "Launch the active department managers", "do this instead"]:
+                self.assertNotIn(gone, b, b[:60])
 
     def test_stored_prompts_are_short(self):
-        """Rules live in the plugin, so a stored prompt stays small and rarely changes."""
         for b in self.blocks:
-            before_fallback = b.split("If that skill is not available")[0]
-            self.assertLess(len(before_fallback.split()), 330, b[:60])
+            self.assertLess(len(b.split()), 450, b[:60])
 
     def test_scheduled_run_rules_keep_every_safeguard(self):
         rules = read(SKILLS / "schedule-workforce" / "references" / "scheduled-run-rules.md")
@@ -247,11 +255,169 @@ class ScheduledPrompts(unittest.TestCase):
                      "carry out approval items", "Not run (still in progress)", "saved views first",
                      "Run now at any day or time", "accepted by the tool", "one notification per run",
                      "without redoing its work", "win over the task's stored instructions",
-                     "Recurring tasks update themselves: no"]:
+                     "Never change a recurring task", "## Work handled comes first", "**One morning run.**",
+                     "**The send lock.**", "Never rely on the lock"]:
             self.assertIn(must, rules, must)
         for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices", "assign-work"]:
             self.assertIn("references/scheduled-run-rules.md", read(SKILLS / sk / "SKILL.md"), sk)
             self.assertTrue((SKILLS / sk / "references" / "scheduled-run-rules.md").exists(), sk)
+
+
+class NothingRewritesATask(unittest.TestCase):
+    """0.8.0 removed recurring tasks updating their own instructions: the installed plugin already
+    wins over whatever a task has stored, so the update changed nothing a run does."""
+    def test_the_machinery_is_gone(self):
+        self.assertFalse(list(PLUGIN.rglob("prompt-history.md")))
+        self.assertFalse((ROOT / "tools" / "prompt_history.py").exists())
+        self.assertFalse((ROOT / "tools" / "released-prompts.md").exists())
+        self.assertEqual([p.parent.parent.name for p in SKILLS.glob("*/references/scheduled-prompts.md")], ["schedule-workforce"])
+        for p in list(SKILLS.glob("*/SKILL.md")) + list(SKILLS.glob("assign-work/references/*.md")) + \
+                list(SKILLS.glob("schedule-workforce/references/*.md")):
+            text = read(p)
+            for gone in ["fingerprint", "Keep the task up to date automatically", "Is the recurring task current",
+                         "Changing a recurring task's instructions safely", "update my recurring tasks' to fix it"]:
+                self.assertNotIn(gone, text, f"{p}: still says '{gone}'")
+
+    def test_a_run_never_changes_a_task_and_versions_are_never_compared(self):
+        rm = read(REFS / "run-modes.md")
+        for must in ["**A run never changes a recurring task.**", "Never compare it",
+                     "The current rules win over older stored text", "The responsibility wins over the skill name",
+                     "An older version line alone is never a warning"]:
+            self.assertIn(must, rm)
+        self.assertNotRegex(rm, r"\| `[a-z-]+` \| [0-9.]+ \|")       # no "current prompt version" column to fall behind
+        ap = read(REFS / "approval-policy.md")
+        self.assertIn("**Never, in any run, change a recurring task:**", ap)
+        self.assertNotIn("prompt only", ap)
+
+    def test_checking_tasks_in_chat_offers_nothing_to_update(self):
+        sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
+        for must in ["there is never anything to update in a task's instructions", "## Adding the owner's own instruction to a task",
+                     "Owner's additions", "Never do this in a scheduled run", "Never delete a task unless the owner asks",
+                     "These always follow the AI Workforce you have installed"]:
+            self.assertIn(must, sw)
+        self.assertNotIn("name or prompt mentions AI Workforce", sw)
+        self.assertIn("never offer to update one", read(SKILLS / "team-report" / "SKILL.md"))
+
+    def test_the_unused_workspace_setting_is_no_longer_added(self):
+        self.assertNotIn("Recurring tasks update themselves", read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
+        up = read(REFS / "brain-upgrades.md")
+        self.assertIn("**No longer used.**", up)
+        self.assertNotIn("add `- Recurring tasks update themselves", up)
+
+
+class OneMorningRun(unittest.TestCase):
+    """0.8.0: the daily briefing does the inbox check itself. One run, one notification."""
+    def test_briefing_checks_the_inbox_first(self):
+        b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
+        for must in ["3. **Inbox first (the morning run).**", "less than 3 hours old", "don't search email again in this run",
+                     "don't start a second one and don't wait for it", '"inside the morning run" mode',
+                     "No inbox to check", "nobody reads the inbox again here",
+                     "One notification covers the inbox check and the briefing"]:
+            self.assertIn(must, b)
+
+    def test_inbox_check_inside_the_briefing_keeps_its_record_and_stays_quiet(self):
+        i = read(SKILLS / "inbox-triage" / "SKILL.md")
+        for must in ["**Inside the morning run:**", "its own run record with an IT Run ID",
+                     "Send no notification and write no chat report", "Notified: not requested (included in"]:
+            self.assertIn(must, i)
+        rt = read(REFS / "run-tracking.md")
+        self.assertIn("**A run inside another run sends none.**", rt)
+        self.assertIn('"Not requested" is never a missed notification', rt)
+
+    def test_scheduling_creates_one_morning_task(self):
+        sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
+        for must in ["This is the **morning run**", "Inbox triage as its own task: not by default",
+                     "3. **One morning run.**", "pause (disable) the inbox triage task, never delete it",
+                     "whose times are less than 3 hours apart", "is not a duplicate; leave it"]:
+            self.assertIn(must, sw)
+        ftm = read(SKILLS / "first-team-meeting" / "SKILL.md")
+        self.assertIn("becomes the recurring **morning run**", ftm)
+        self.assertIn("never a separate inbox task alongside a briefing", ftm)
+
+
+class WorkHandled(unittest.TestCase):
+    """0.8.0: reports open with what the team handled; a run finishing is not the result."""
+    def test_run_record_has_a_handled_line_and_an_honest_definition(self):
+        rt = read(REFS / "run-tracking.md")
+        for must in ["Handled: <n> reply drafts, <n> approvals raised, <n> items closed, <n> prepared | nothing: <the plain reason>",
+                     "**Work handled**", "**What never counts:**", "reading, searching, sorting, counting, re-checking",
+                     "a record counts only its own work", "a run can be Complete and have handled nothing"]:
+            self.assertIn(must, rt)
+
+    def test_reports_open_with_it(self):
+        b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
+        for must in ["0. **The opening line: work handled**", "**Three quiet briefings in a row:**",
+                     "never invent a reason the records don't show", "judged by what the team handled, not by the run finishing"]:
+            self.assertIn(must, b)
+        self.assertIn("Open the chat reply or notification with the work-handled line", read(SKILLS / "inbox-triage" / "SKILL.md"))
+        tr = read(SKILLS / "team-report" / "SKILL.md")
+        self.assertIn("Runs finishing is not the measure; work handled is", tr)
+        self.assertIn("three or more runs in a row with nothing handled", tr)
+        self.assertIn("a run finishing is not a result", read(REFS / "talking-to-the-owner.md"))
+
+
+class SendLock(unittest.TestCase):
+    """0.8.0: the words that describe the lock. The lock itself is tested in test_send_lock.py."""
+    def test_policy_says_what_it_covers_and_what_it_does_not(self):
+        ap = read(REFS / "approval-policy.md")
+        for must in ["**Enforced by the send lock (built into this plugin):**", "Creating drafts and writing to the Business Brain are not affected",
+                     "it recognises tools by their names", "it does not cover a web browser", "If the check can't run, it lets the call through",
+                     "not yet proven live", "that lock doesn't depend on this plugin at all"]:
+            self.assertIn(must, ap)
+
+    def test_owner_is_offered_the_stronger_lock_without_guessing_menus(self):
+        sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
+        for must in ["8. **The send lock", "Tool permissions", "Blocked", "Never change these settings for the owner",
+                     'never suggest "Needs approval" as a lock for unattended runs', "- Send lock: built in",
+                     "https://support.claude.com/en/articles/11176164"]:
+            self.assertIn(must, sw)
+
+    def test_hook_files_ship_with_the_plugin(self):
+        for name in ["hooks.json", "send-lock.sh", "send_lock.py"]:
+            self.assertTrue((PLUGIN / "hooks" / name).exists(), name)
+        z = zipfile.ZipFile(ROOT / "download" / "ai-workforce.plugin")
+        for name in ["hooks/hooks.json", "hooks/send-lock.sh", "hooks/send_lock.py"]:
+            self.assertIn(name, z.namelist())
+
+
+class SizeBudget(unittest.TestCase):
+    """Every rule is read again on every run and costs the owner usage. These ceilings are a
+    ratchet: when text is cut, lower them. Raising one needs a reason in the commit message and,
+    normally, a rule removed somewhere else. Sizes are bytes of a skill's SKILL.md plus every
+    reference file it names (each counted once)."""
+    CEILINGS = {
+        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 139_000),
+        "weekly marketing plan": (["prepare-weekly-marketing"], 70_000),
+        "invoice review": (["review-overdue-invoices"], 76_000),
+        "any other recurring responsibility": (["assign-work"], 97_000),
+    }
+    ALL_INSTRUCTIONS = 318_000      # one copy of every skill, reference and team member brief
+    STORED_PROMPT = 3_100           # what each recurring task stores
+
+    @staticmethod
+    def named(skill):
+        return set(re.findall(r"references/([a-z0-9-]+\.md)", read(SKILLS / skill / "SKILL.md")))
+
+    def test_recurring_jobs_stay_within_budget(self):
+        for job, (skills, ceiling) in self.CEILINGS.items():
+            refs = set().union(*[self.named(s) for s in skills])
+            size = sum(len((SKILLS / s / "SKILL.md").read_bytes()) for s in skills)
+            size += sum(len((SKILLS / skills[0] / "references" / r).read_bytes())
+                        if (SKILLS / skills[0] / "references" / r).exists()
+                        else len(next(SKILLS.glob(f"*/references/{r}")).read_bytes()) for r in refs)
+            self.assertLessEqual(size, ceiling, f"{job}: {size} bytes of instructions, budget {ceiling}. Cut something.")
+
+    def test_total_instruction_text_stays_within_budget(self):
+        names = sorted({p.name for p in SKILLS.glob("*/references/*.md")})
+        size = sum(len(p.read_bytes()) for p in SKILLS.glob("*/SKILL.md"))
+        size += sum(len(p.read_bytes()) for p in (PLUGIN / "agents").glob("*.md"))
+        size += sum(len(next(SKILLS.glob(f"*/references/{n}")).read_bytes()) for n in names)
+        self.assertLessEqual(size, self.ALL_INSTRUCTIONS, f"{size} bytes of instructions in total")
+
+    def test_stored_prompts_stay_small(self):
+        text = read(SKILLS / "schedule-workforce" / "references" / "scheduled-prompts.md")
+        for b in re.findall(r"```\n(.*?)```", text, re.S):
+            self.assertLessEqual(len(b.encode()), self.STORED_PROMPT, b[:60])
 
 
 class Safety(unittest.TestCase):
@@ -389,8 +555,6 @@ class FreePlanAndEfficiency(unittest.TestCase):
         self.assertIn("accepted by the tool", rt)
         self.assertIn("never call it \"delivered\"", rt)
         for p in PLUGIN.rglob("*.md"):
-            if p.name == "prompt-history.md":
-                continue                      # released prompts are kept exactly as released
             self.assertNotIn("Notified: yes", read(p), p)
 
     def test_marketing_missing_data(self):
@@ -405,35 +569,6 @@ class FreePlanAndEfficiency(unittest.TestCase):
                      "Worth knowing", "Already handled or not yours", "**proposals**", "registration or sales link"]:
             self.assertIn(must, tr)
 
-    def test_recurring_tasks_update_themselves_safely(self):
-        rm = read(REFS / "run-modes.md")
-        for must in ["Keep the task up to date automatically", "Recurring tasks update themselves: no",
-                     "Change the instructions only", "never create, pause or delete a task",
-                     "None, or more than one: change nothing and report it",
-                     "Custom responsibilities are never replaced", "an older released version of this responsibility",
-                     "Never judge by the version line alone", "This run used the current instructions anyway",
-                     "never read old prompts to compare them", "Owner's additions\" section exactly as it was", "Previous recurring-task instructions (backup)",
-                     "put the backed-up instructions back", "Never report a restore or a success that wasn't verified",
-                     "Nothing new to accept", "If the backup can't be saved and read back complete, stop: no change",
-                     "checking the instructions **and** every setting separately", "Instructions back but a setting differs",
-                     "Don't change settings without the owner's yes", "If the read fails, the result is **unverified**",
-                     "Check nothing moved", "paused stays paused",
-                     "start with `[AI Workforce task: <this skill> |`", "whatever version line it carries",
-                     "line endings, spaces at the ends of lines", "The current rules win over older stored text"]:
-            self.assertIn(must, rm)
-        self.assertNotIn("A run never changes its own scheduled task", rm)
-        self.assertIn("prompt only", read(REFS / "approval-policy.md"))
-        for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
-            self.assertTrue((SKILLS / sk / "references" / "scheduled-prompts.md").exists(), sk)
-            self.assertTrue((SKILLS / sk / "references" / "prompt-history.md").exists(), sk)
-
-    def test_attended_update_has_the_same_protections(self):
-        sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
-        for must in ["Changing a recurring task's instructions safely", "Owner's additions",
-                     "a paused task stays paused: updating instructions never resumes it"]:
-            self.assertIn(must, sw)
-        self.assertNotIn("name or prompt mentions AI Workforce", sw)
-
     def test_notification_recovery_is_bounded(self):
         rt = read(REFS / "run-tracking.md")
         for must in ["Catching up on missed notifications", "Don't redo their work", "at most 3 attempts per record",
@@ -447,60 +582,13 @@ class FreePlanAndEfficiency(unittest.TestCase):
         for must in ["Inbox not scanned: <from> – <to>", "inbox-gap:<from>", "oldest 2 days",
                      "Gap catch-up never moves Completed through", "Older mail not yet scanned"]:
             self.assertIn(must, ic)
-        sp = read(SKILLS / "inbox-triage" / "references" / "scheduled-prompts.md")
-        self.assertIn("Inbox not scanned", sp)
 
     def test_self_test_checkpoint_follows_search_coverage(self):
         st = read(SKILLS / "workforce-self-test" / "SKILL.md")
         for must in ["Search: complete", "incomplete (stopped at 5 pages)", "Inbox not scanned"]:
             self.assertIn(must, st)
 
-    def test_prompt_history_records_current_templates(self):
-        r = subprocess.run([sys.executable, str(ROOT / "tools" / "prompt_history.py"), "--check"],
-                           capture_output=True, text=True)
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        archive = read(ROOT / "tools" / "released-prompts.md")
-        table = read(SKILLS / "schedule-workforce" / "references" / "prompt-history.md")
-        for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
-            for v in ["0.5.0", "0.5.1", "0.5.2", "0.5.4", "0.7.0"]:
-                self.assertIn(f"## {sk} {v}", archive)
-                self.assertRegex(table, rf"\| {sk} \| {re.escape(v)} \| [0-9a-f]{{16}} \|")
-
-    def test_shipped_history_is_fingerprints_only(self):
-        """Runs read a small table, never every old prompt (that cost ~18,000 words per run)."""
-        for p in PLUGIN.rglob("prompt-history.md"):
-            self.assertLess(len(read(p).split()), 1500, p)
-            self.assertNotIn("````text", read(p), p)
-
-    def test_fingerprint_script_in_run_modes_matches_the_table(self):
-        """The script Claude runs must give the fingerprints the tool records, and must ignore
-        the Brain's title, line endings, trailing spaces and Owner's additions."""
-        import tempfile
-        rm = read(REFS / "run-modes.md")
-        script = re.search(r"\*\*Fingerprint\.\*\*.*?```\n(.*?)```", rm, re.S).group(1)
-        script = "\n".join(l[2:] if l.startswith("  ") else l for l in script.split("\n"))
-        sys.path.insert(0, str(ROOT / "tools"))
-        import prompt_history as ph
-        recorded = ph.recorded(read(ROOT / "tools" / "released-prompts.md"))
-        table = dict(((s, v), f) for s, v, f in re.findall(r"^\| ([a-z-]+) \| ([0-9.]+) \| ([0-9a-f]{16}) \|",
-                     read(SKILLS / "schedule-workforce" / "references" / "prompt-history.md"), re.M))
-        self.assertEqual(set(table), set(recorded))
-        with tempfile.TemporaryDirectory() as d:
-            sp = Path(d) / "fingerprint.py"; sp.write_text(script)
-            for key, body in recorded.items():
-                saved = body.replace("<BRAIN>", "Acme Business Brain").replace("\n", "\r\n") + "   \r\n"
-                saved += "\r\nOwner's additions:\r\nAlways copy my assistant."
-                tf = Path(d) / "task.txt"; tf.write_bytes(saved.encode())
-                out = subprocess.run([sys.executable, str(sp), str(tf)], capture_output=True, text=True).stdout.strip()
-                self.assertEqual(out, table[key], key)
-            edited = Path(d) / "edited.txt"
-            edited.write_text(recorded[("inbox-triage", "0.5.4")].replace("at most 5 drafts", "at most 9 drafts"))
-            out = subprocess.run([sys.executable, str(sp), str(edited)], capture_output=True, text=True).stdout.strip()
-            self.assertNotIn(out, table.values())
-
-    def test_setup_explains_auto_updates_in_one_sentence(self):
-        self.assertIn("These keep their instructions up to date when AI Workforce improves",
-                      read(SKILLS / "schedule-workforce" / "SKILL.md"))
+    def test_setup_makes_no_time_promises(self):
         setup = read(SKILLS / "setup-workforce" / "SKILL.md")
         self.assertNotIn("minutes)", setup)
         self.assertIn("No website", setup)
@@ -509,8 +597,6 @@ class FreePlanAndEfficiency(unittest.TestCase):
         up = read(REFS / "brain-upgrades.md")
         self.assertIn("Only when every view above exists", up)
         self.assertIn("check each new view is there with that filter and sort", up)
-        self.assertIn("- Recurring tasks update themselves: yes",
-                      read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
 
     def test_readme_separates_enforced_tested_and_unproven(self):
         r = read(PLUGIN / "README.md")
@@ -530,9 +616,9 @@ class FreePlanAndEfficiency(unittest.TestCase):
 
     def test_ci_workflow_runs_the_checks(self):
         wf = read(ROOT / ".github" / "workflows" / "ci.yml")
-        for must in ["push", "pull_request", "unittest discover tests", "sync_references.py --check",
-                     "prompt_history.py --check"]:
+        for must in ["push", "pull_request", "unittest discover tests", "sync_references.py --check", "plugin validate"]:
             self.assertIn(must, wf)
+        self.assertNotIn("prompt_history", wf)
 
     def test_customer_claims_are_measured(self):
         text = read(PLUGIN / "README.md") + read(SKILLS / "setup-workforce" / "SKILL.md")
@@ -630,11 +716,6 @@ class LearningRules(unittest.TestCase):
         self.assertIn("## First-week recap", tr)
         self.assertIn("Nothing here creates tasks, approvals or notifications", tr)
         self.assertIn("no extra notification is sent", read(SKILLS / "daily-executive-briefing" / "SKILL.md"))
-
-    def test_one_current_prompt_version(self):
-        """0.7.0 moved the run rules into the plugin; every task points at the same current version."""
-        rm = read(REFS / "run-modes.md")
-        self.assertEqual(set(re.findall(r"\| `[a-z-]+` \| ([0-9.]+) \|", rm)), {"0.7.0"})
 
 
 class NotionCompatibility(unittest.TestCase):

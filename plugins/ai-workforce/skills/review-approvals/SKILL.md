@@ -2,12 +2,12 @@
 name: review-approvals
 description: This skill should be used when the user asks to "review my approvals", "what's waiting for me", "clear my approvals", "approve AP-12", "what does the team need from me", answers the team's items in plain words ("two is fine", "look into three", "one isn't my problem", "decline those invitations"), or wants to go through the AI team's pending approval queue and decide on each item.
 metadata:
-  version: "0.7.1"
+  version: "0.8.0"
 ---
 
 # Review Approvals (the owner's few minutes a day)
 
-_Files named `references/…` are in this skill's own folder._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
 
 This skill only runs with the owner present. It is the one place where queued actions get carried out, and only after the owner says yes in this chat. Follow `references/approval-policy.md` and `references/owner-corrections.md`.
 
