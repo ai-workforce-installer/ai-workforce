@@ -29,6 +29,8 @@ mcp__Notion__notion-list-shared-pages mcp__Notion__notion-calendar-list-events m
 mcp__plugin_ai-workforce_HighLevel__conversations_search-conversation mcp__plugin_ai-workforce_HighLevel__conversations_get-messages
 mcp__plugin_ai-workforce_HighLevel__contacts_get-contact mcp__plugin_ai-workforce_HighLevel__calendars_get-calendar-events
 mcp__HighLevel__payments_list-transactions mcp__HighLevel__emails_fetch-template mcp__HighLevel__social-media-posting_get-posts
+mcp__HighLevel__search mcp__HighLevel__fetch mcp__HighLevel__search_operations mcp__HighLevel__describe_operation mcp__HighLevel__list_locations
+mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__search_operations mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__describe_operation
 mcp__cowork__send_notification mcp__x__send_user_message mcp__x__SendUserFile
 mcp__stripe__list_refunds mcp__stripe__get_refund mcp__stripe__list_invoices mcp__stripe__retrieve_charge
 mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__search_threads
@@ -71,6 +73,67 @@ class ToolNames(unittest.TestCase):
         self.assertIsNone(send_lock.decide("mcp__stripe__get_refund"))
         self.assertIsNotNone(send_lock.decide("mcp__stripe__refund_charge"))
         self.assertIsNotNone(send_lock.decide("mcp__x__get_and_send_report"))     # "send" is refused wherever it appears
+
+
+class RunAnOperationTools(unittest.TestCase):
+    """HighLevel's connection has one general tool, execute_operation, and the operation is named
+    in the call's input. The tool's name says nothing, so the lock reads the input: a call goes
+    through only when what it names is a plain read. The exact field names are HighLevel's, so
+    several likely shapes are covered and anything unclear is refused."""
+    TOOLS = ["mcp__HighLevel__execute_operation", "mcp__plugin_ai-workforce_HighLevel__execute_operation",
+             "mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__execute_operation"]       # whatever the connection is called
+    READS = [
+        {"operation_id": "conversations.search", "input": {"query": "please send me the invoice"}},
+        {"operationId": "getMessagesByConversationId", "locationId": "ve9EPM428h8vShlRW1KT", "params": {"conversationId": "abc"}},
+        {"operation": "contacts_get-contact", "location_id": "x"},
+        {"method": "GET", "path": "/conversations/abc/messages"},
+        {"method": "POST", "path": "/contacts/search", "body": {"query": "delete"}},      # a search sent as POST is still a read
+        {"id": "payments.transactions.list"},
+        {"operation": {"id": "conversations.search-conversation"}, "arguments": {}},
+        {"name": "list-calendar-events"},
+        {"operation_id": "social-media-posting.get-posts"},
+    ]
+    CHANGES = [
+        {"operation_id": "conversations_send-a-new-message", "input": {"message": "hi"}},
+        {"operation_id": "conversations.messages.send"},
+        {"operation": "contacts_add-tags"},
+        {"operation": "contacts.update-contact"},
+        {"method": "POST", "path": "/conversations/messages"},
+        {"method": "DELETE", "path": "/contacts/abc"},
+        {"method": "PUT", "path": "/contacts/abc"},
+        {"operation_id": "calendars.events.appointments.create"},
+        {"operation_id": "opportunities.upsert"},
+        {"operation_id": "workflows.start"},                                  # no reading word: not clearly a read
+        {"operation_id": "refund-order"},
+        {"operation_id": "get-contact", "action": "delete"},                  # a read-looking name can't hide a change
+        {"operation_id": "conversations.search", "x": "send-message"},
+    ]
+    UNCLEAR = [{}, None, "search", {"input": {"operation": "search"}}, {"locationId": "abc"}]
+
+    def test_plain_reads_go_through(self):
+        for tool in self.TOOLS:
+            for call in self.READS:
+                self.assertIsNone(send_lock.decide(tool, call), (tool, call))
+
+    def test_changes_are_refused_whatever_the_connection_is_called(self):
+        for tool in self.TOOLS:
+            for call in self.CHANGES:
+                self.assertIsNotNone(send_lock.decide(tool, call), (tool, call))
+
+    def test_anything_unclear_is_refused(self):
+        for call in self.UNCLEAR:
+            self.assertIsNotNone(send_lock.decide(self.TOOLS[0], call), call)
+
+    def test_what_a_customer_wrote_never_decides(self):
+        """Free text and the payload are ignored: a search for the word "delete" is still a search,
+        and a message body saying "get" doesn't make a send a read."""
+        self.assertIsNone(send_lock.decide(self.TOOLS[0], {"operation_id": "conversations.search", "query": "delete my account"}))
+        self.assertIsNotNone(send_lock.decide(self.TOOLS[0], {"operation_id": "conversations.messages.send",
+                                                               "message": "get back to you soon", "input": {"note": "search"}}))
+
+    def test_the_other_highlevel_tools_only_look_things_up(self):
+        for name in ["search", "fetch", "search_operations", "describe_operation", "list_locations"]:
+            self.assertIsNone(send_lock.decide("mcp__HighLevel__" + name, {"query": "send a message"}), name)
 
 
 class Hook(unittest.TestCase):
@@ -151,6 +214,26 @@ class Hook(unittest.TestCase):
         """Hook input for an agent carries the parent session's id and transcript."""
         t = self.transcript(TAG_PROMPT)
         self.assertEqual(self.pre("mcp__Gmail__reply", transcript_path=t, agent_type="general-purpose", agent_id="a2")[0], 2)
+
+    def test_a_scheduled_run_can_read_highlevel_but_not_change_it(self):
+        t = self.transcript(TAG_PROMPT)
+        tool = "mcp__HighLevel__execute_operation"
+        def call(tool_input, **extra):
+            return self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=tool_input,
+                                 session_id="s1", transcript_path=t, **extra)
+        self.assertEqual(call({"operation_id": "conversations.search", "input": {"locationId": "abc"}})[0], 0)
+        code, err, _ = call({"operation_id": "conversations.messages.send", "input": {"message": "hi"}})
+        self.assertEqual(code, 2)
+        self.assertIn("send", err)
+        self.assertEqual(call({"input": {}})[0], 2)                                  # unclear: refused
+        self.assertEqual(self.pre("mcp__HighLevel__search_operations", transcript_path=t)[0], 0)
+        # with the owner present, the Chief of Staff isn't locked; a team member still is
+        owner_chat = self.transcript("Reply to Dana in HighLevel", name="o.jsonl")
+        send = {"operation_id": "conversations.messages.send"}
+        self.assertEqual(self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=send,
+                                       session_id="s2", transcript_path=owner_chat)[0], 0)
+        self.assertEqual(self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=send, session_id="s2",
+                                       transcript_path=owner_chat, agent_type="ai-workforce:client-success-manager")[0], 2)
 
     def test_broken_input_lets_the_call_through(self):
         for raw in ["", "not json", "[]", '{"hook_event_name": "PreToolUse"}', '{"hook_event_name": "Stop"}']:
