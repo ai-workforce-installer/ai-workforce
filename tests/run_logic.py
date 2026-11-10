@@ -548,3 +548,61 @@ def highlevel_in_setup(line, moment, answer=None, lookup_works=False):
     if moment == "first result":
         return "one line, no question", None
     return "ask", None                         # 'finish my setup' with a plain not set
+
+
+# ---- approval-queue.md "What goes in the queue": a reply draft is never a decision ----
+def where_it_waits(kind, needs_a_decision=False):
+    """kind: 'reply draft', 'prepared piece', 'only the owner can do it', or 'decision'.
+    Returns the lists an item is written to. A reply draft waits in open work, and the owner
+    pressing Send is the approval. Only when it can't be written without a decision is that
+    decision queued, naming the draft that waits on it."""
+    if kind == "decision":
+        return ["Approvals"]
+    if kind == "only the owner can do it":
+        return ["Open work (Handed to you)"]
+    return ["Open work (Prepared)"] + (["Approvals"] if needs_a_decision else [])
+
+
+# ---- run-tracking.md section 6: prepared work closes itself once the owner has used it ----
+def prepared_row(kind, still_in_drafts=True, owner_replied=False, meeting_passed=False,
+                 days_waiting=0, owner_said=None, asked_before=False):
+    """Returns (status, reason, ask the owner whether to drop it?). Never closed for age alone."""
+    if owner_said in ("used", "dropped"):
+        return "Done", "owner: " + owner_said, False
+    if kind == "reply draft" and (not still_in_drafts or owner_replied):
+        return "Done", "sent or discarded by the owner", False
+    if kind == "meeting prep" and meeting_passed:
+        return "Done", "meeting held", False
+    return "Prepared", None, days_waiting >= 7 and not asked_before
+
+
+# ---- daily-executive-briefing step 4: one finished piece toward the top priority, never a pile ----
+def priority_piece(goals, waiting_goals, told_not_to=False, prepared_left=1):
+    """goals: the owner's goals in order. waiting_goals: the goal of each "Priority:" piece still
+    waiting on the owner. Returns ('make', goal), ('ask about what is waiting', None),
+    ('ask for goals', None) or ('none', None)."""
+    if told_not_to or prepared_left < 1:
+        return "none", None
+    if not goals:
+        return "ask for goals", None
+    if len(waiting_goals) >= 2 or goals[0] in waiting_goals:
+        return "ask about what is waiting", None
+    return "make", goals[0]
+
+
+# ---- daily-executive-briefing step 8: what is on the owner's first screen ----
+def first_screen(finished_now=0, new_decisions=0, older_decisions=0, older_waiting=0, worth_knowing=0, questions=0):
+    """The sections outside the collapsed ones, in order. Empty sections are left out; older
+    waiting work is one line however long the list is; Details and the run record are always
+    folded away at the bottom."""
+    out = ["work handled", "today"]
+    if finished_now:
+        out.append("ready for you")
+    if new_decisions or older_decisions:
+        out.append("decisions for you (%d cards, %d lines)" % (new_decisions, min(older_decisions, 5)))
+    if older_waiting:
+        out.append("still waiting on you (1 line)")
+    if worth_knowing or questions:
+        out.append("worth knowing (%d items, %d question)" % (min(worth_knowing, 3), min(questions, 1)))
+    return out, ["details", "run record"]
+

@@ -2,12 +2,12 @@
 name: first-team-meeting
 description: This skill should be used at the end of setup, and when the owner asks "what can my team take off my plate?", "what should my team work on?", "let's have a team meeting", "what else can you handle?", or wants the Chief of Staff to recommend responsibilities and get the team doing real work.
 metadata:
-  version: "0.8.1"
+  version: "0.9.0"
 ---
 
 # Team Meeting
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
 
 The owner should leave with real work done, not a plan. Recommend a few responsibilities grounded in this business, do one now, show the result, and offer to make it recurring. Speak like a Chief of Staff in a short meeting (`references/talking-to-the-owner.md`). Follow `references/approval-policy.md`, `references/team-roles.md`, `references/just-in-time.md`, `references/connections.md` and `references/owner-corrections.md`. This skill needs the owner present.
 
@@ -16,7 +16,7 @@ A brand-new owner should see a real result quickly, without choosing from a menu
 0. **Already done during setup?** If a setup job (email quick look or calendar look) has already finished while the owner connected apps, that is the first job: skip step 1 and go straight to checking and showing it (step 3), with its run record. If one is still running, say so in one line and wait for it. Never run the same job a second time.
 1. **Pick the first job yourself**, in this order, and say it in one line ("First job: I'll have the team check your newest email for anyone waiting on you."). Don't ask which to start with; the owner can redirect in reply.
    - The owner's answer to "what do you spend too much time on?", if it maps to something the team can do right now with what's connected.
-   - Otherwise, **email connected:** a **quick look** at the inbox (`inbox-triage`, quick look in its `references/inbox-coverage.md` section 6): the newest 50 threads, people waiting on the owner and anything time-sensitive, up to 3 reply drafts.
+   - Otherwise, **email connected:** a **quick look** at the inbox (`inbox-triage`, the quick look in `references/if-quick-look.md`): the newest 50 threads, people waiting on the owner and anything time-sensitive, up to 3 reply drafts.
    - Otherwise, **calendar connected:** the next 48 hours of commitments, with a prep for the next meeting with another person (Operations).
    - Otherwise (paste mode): ask the owner to paste two or three real customer emails or this week's key dates, and work on those.
 2. **Skip the separate look-around** in step 1 below (the first job is the evidence), and ask no just-in-time questions unless the job truly can't be done without the answer (at most one).

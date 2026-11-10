@@ -9,7 +9,7 @@
       "name": "ai-workforce",
       "source": "./plugins/ai-workforce",
       "description": "A ready-made AI team for business owners: a Chief of Staff and five team members who learn your business from a Notion Business Brain, take work off your plate, and ask before anything leaves your hands.",
-      "version": "0.8.1"
+      "version": "0.9.0"
     }
   ]
 }

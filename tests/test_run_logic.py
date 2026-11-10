@@ -8,7 +8,8 @@ from run_logic import (start_together, bookmark_check, pagination_check, Report,
                        Record, Message, Mailbox, OpenWork, decide, make_run_id, next_window,
                        triage, last_checkpoint, notify_due, morning_inbox_plan, morning_run,
                        handled_line, handled_nothing, morning_opening, quiet_streak_notice, WINDOW_OVERLAP,
-                       customer_messages, highlevel_in_setup, WANTED)
+                       customer_messages, highlevel_in_setup, WANTED,
+                       where_it_waits, prepared_row, priority_piece, first_screen)
 
 T0 = datetime(2026, 11, 5, 8, 0)
 
@@ -543,6 +544,78 @@ class HighLevelLine(unittest.TestCase):
         self.assertEqual(customer_messages(WANTED, lookup_works=True), (True, False))
         self.assertEqual(customer_messages("not set", lookup_works=True), (True, False))
         self.assertEqual(customer_messages("None", lookup_works=True), (False, False))        # the owner said no
+
+
+class DraftsAndDecisions(unittest.TestCase):
+    """0.9.0: a reply draft is never an approval; the owner pressing Send is."""
+    def test_a_draft_waits_in_open_work_not_in_approvals(self):
+        self.assertEqual(where_it_waits("reply draft"), ["Open work (Prepared)"])
+        self.assertEqual(where_it_waits("prepared piece"), ["Open work (Prepared)"])
+        self.assertEqual(where_it_waits("only the owner can do it"), ["Open work (Handed to you)"])
+
+    def test_only_a_real_decision_is_queued(self):
+        self.assertEqual(where_it_waits("decision"), ["Approvals"])
+        self.assertEqual(where_it_waits("reply draft", needs_a_decision=True), ["Open work (Prepared)", "Approvals"])
+
+    def test_a_sent_or_discarded_draft_closes_itself(self):
+        self.assertEqual(prepared_row("reply draft", still_in_drafts=False)[:2], ("Done", "sent or discarded by the owner"))
+        self.assertEqual(prepared_row("reply draft", owner_replied=True)[0], "Done")
+        self.assertEqual(prepared_row("reply draft")[0], "Prepared")                       # still sitting in drafts
+
+    def test_a_meeting_prep_closes_when_the_meeting_has_happened(self):
+        self.assertEqual(prepared_row("meeting prep", meeting_passed=True)[:2], ("Done", "meeting held"))
+        self.assertEqual(prepared_row("meeting prep")[0], "Prepared")
+
+    def test_nothing_is_closed_for_age_alone_but_the_owner_is_asked_once(self):
+        self.assertEqual(prepared_row("prepared piece", days_waiting=6), ("Prepared", None, False))
+        self.assertEqual(prepared_row("prepared piece", days_waiting=7), ("Prepared", None, True))
+        self.assertEqual(prepared_row("prepared piece", days_waiting=30, asked_before=True), ("Prepared", None, False))
+        self.assertEqual(prepared_row("prepared piece", days_waiting=30, owner_said="dropped")[0], "Done")
+
+
+class PriorityPiece(unittest.TestCase):
+    """0.9.0: one finished piece toward the top goal each morning, and never a pile."""
+    GOALS = ["Launch the spring workshop", "Grow the list to 5,000", "Hire a bookkeeper"]
+
+    def test_one_piece_toward_the_first_goal(self):
+        self.assertEqual(priority_piece(self.GOALS, []), ("make", "Launch the spring workshop"))
+        self.assertEqual(priority_piece(self.GOALS, ["Hire a bookkeeper"]), ("make", "Launch the spring workshop"))
+
+    def test_never_while_one_for_the_same_goal_is_waiting(self):
+        self.assertEqual(priority_piece(self.GOALS, ["Launch the spring workshop"])[0], "ask about what is waiting")
+
+    def test_never_while_two_are_waiting(self):
+        self.assertEqual(priority_piece(self.GOALS, ["Grow the list to 5,000", "Hire a bookkeeper"])[0], "ask about what is waiting")
+
+    def test_no_goals_means_a_question_not_a_guess(self):
+        self.assertEqual(priority_piece([], []), ("ask for goals", None))
+
+    def test_the_owner_can_turn_it_off_and_it_never_exceeds_the_run_limit(self):
+        self.assertEqual(priority_piece(self.GOALS, [], told_not_to=True)[0], "none")
+        self.assertEqual(priority_piece(self.GOALS, [], prepared_left=0)[0], "none")
+
+
+class FirstScreen(unittest.TestCase):
+    """0.9.0: the briefing is read on a phone. Bookkeeping is folded away at the bottom."""
+    def test_a_quiet_day_is_two_sections(self):
+        shown, folded = first_screen()
+        self.assertEqual(shown, ["work handled", "today"])
+        self.assertEqual(folded, ["details", "run record"])
+
+    def test_empty_sections_are_left_out_and_the_order_is_fixed(self):
+        shown, _ = first_screen(finished_now=2, new_decisions=1, older_waiting=6, worth_knowing=2)
+        self.assertEqual([s.split(" (")[0] for s in shown],
+                         ["work handled", "today", "ready for you", "decisions for you", "still waiting on you", "worth knowing"])
+
+    def test_older_waiting_work_is_one_line_however_long_the_list(self):
+        for n in (1, 6, 40):
+            shown, _ = first_screen(older_waiting=n)
+            self.assertIn("still waiting on you (1 line)", shown)
+
+    def test_caps(self):
+        shown, _ = first_screen(new_decisions=2, older_decisions=11, worth_knowing=9, questions=4)
+        self.assertIn("decisions for you (2 cards, 5 lines)", shown)
+        self.assertIn("worth knowing (3 items, 1 question)", shown)
 
 
 if __name__ == "__main__":

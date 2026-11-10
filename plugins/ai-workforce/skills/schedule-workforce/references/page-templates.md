@@ -10,9 +10,9 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 
 ## Your 15-minute daily routine
 
-1. Read today's briefing in **Briefings**.
-2. Open **Approvals** and look at everything marked Pending.
-3. In Claude, say **"review my approvals"** and approve or reject each one by its AP number.
+1. Read today's briefing in **Briefings**. The first screen is all you need.
+2. Send the reply drafts that are ready. They are in your own drafts, and pressing Send is your approval.
+3. If the briefing lists decisions, answer them in Claude in one message: **"approve 3; reject 4"**.
 
 ## Ground rules your team follows
 

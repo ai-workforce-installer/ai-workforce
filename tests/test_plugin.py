@@ -198,7 +198,7 @@ class ScheduledPrompts(unittest.TestCase):
     def setUp(self):
         self.text = read(SKILLS / "schedule-workforce" / "references" / "scheduled-prompts.md")
         self.blocks = re.findall(r"```\n(.*?)```", self.text, re.S)
-        rm = read(REFS / "run-modes.md")
+        rm = read(REFS / "if-old-task.md")
         self.skills_in_table = set(re.findall(r"\| `([a-z-]+)` \|", rm))
 
     def test_five_prompts_each_tagged_for_a_skill_that_exists(self):
@@ -279,7 +279,7 @@ class NothingRewritesATask(unittest.TestCase):
                 self.assertNotIn(gone, text, f"{p}: still says '{gone}'")
 
     def test_a_run_never_changes_a_task_and_versions_are_never_compared(self):
-        rm = read(REFS / "run-modes.md")
+        rm = read(REFS / "if-old-task.md")
         for must in ["**A run never changes a recurring task.**", "Never compare it",
                      "The current rules win over older stored text", "The responsibility wins over the skill name",
                      "An older version line alone is never a warning"]:
@@ -346,7 +346,7 @@ class WorkHandled(unittest.TestCase):
 
     def test_reports_open_with_it(self):
         b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
-        for must in ["0. **The opening line: work handled**", "**Three quiet briefings in a row:**",
+        for must in ["1. **The opening line: work handled**", "**Three quiet briefings in a row:**",
                      "never invent a reason the records don't show", "judged by what the team handled, not by the run finishing"]:
             self.assertIn(must, b)
         self.assertIn("Open the chat reply or notification with the work-handled line", read(SKILLS / "inbox-triage" / "SKILL.md"))
@@ -359,7 +359,7 @@ class WorkHandled(unittest.TestCase):
 class SendLock(unittest.TestCase):
     """0.8.0: the words that describe the lock. The lock itself is tested in test_send_lock.py."""
     def test_policy_says_what_it_covers_and_what_it_does_not(self):
-        ap = read(REFS / "approval-policy.md")
+        ap = read(REFS / "if-asked-how-safe.md")
         for must in ["**Enforced by the send lock (built into this plugin):**", "Creating drafts and writing to the Business Brain are not affected",
                      "it recognises tools by their names", "it does not cover a web browser", "If the check can't run, it lets the call through",
                      "not yet proven live", "that lock doesn't depend on this plugin at all"]:
@@ -367,6 +367,7 @@ class SendLock(unittest.TestCase):
 
     def test_owner_is_offered_the_stronger_lock_without_guessing_menus(self):
         sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
+        self.assertIn("`references/if-asked-how-safe.md`", sw)
         for must in ["8. **The send lock", "Tool permissions", "Blocked", "Never change these settings for the owner",
                      'never suggest "Needs approval" as a lock for unattended runs', "- Send lock: built in",
                      "https://support.claude.com/en/articles/11176164"]:
@@ -384,34 +385,61 @@ class SizeBudget(unittest.TestCase):
     """Every rule is read again on every run and costs the owner usage. These ceilings are a
     ratchet: when text is cut, lower them. Raising one needs a reason in the commit message and,
     normally, a rule removed somewhere else. Sizes are bytes of a skill's SKILL.md plus every
-    reference file it names (each counted once)."""
-    CEILINGS = {
-        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 139_000),
-        "weekly marketing plan": (["prepare-weekly-marketing"], 70_000),
-        "invoice review": (["review-overdue-invoices"], 76_000),
-        "any other recurring responsibility": (["assign-work"], 97_000),
+    reference file it names (each counted once). Files named if-….md cover one situation each and
+    are read only when it comes up, so they are counted apart: `always` is a normal run, and
+    `with every situation` is a run where everything comes up at once."""
+    CEILINGS = {   # job: (skills, always read, with every read-when-needed file reachable from them)
+        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 114_000, 146_000),   # 0.8.1: 137,371
+        "weekly marketing plan": (["prepare-weekly-marketing"], 54_500, 79_000),                                             # 0.8.1: 68,573
+        "invoice review": (["review-overdue-invoices"], 59_500, 87_000),                                                     # 0.8.1: 75,797
+        "any other recurring responsibility": (["assign-work"], 73_500, 101_000),                                            # 0.8.1: 96,056
     }
-    ALL_INSTRUCTIONS = 318_000      # one copy of every skill, reference and team member brief
+    # One copy of every skill, reference and team member brief. Raised from 318,000 in 0.9.0: the
+    # read-when-needed files each open by saying when to read them, and three behaviours were added
+    # (the phone-first report, the priority piece, learning the owner's voice). What any one run reads
+    # went down by 17 to 24 percent in the same release.
+    ALL_INSTRUCTIONS = 330_000
     STORED_PROMPT = 3_100           # what each recurring task stores
+    REF = re.compile(r"references/([a-z0-9-]+\.md)")
 
-    @staticmethod
-    def named(skill):
-        return set(re.findall(r"references/([a-z0-9-]+\.md)", read(SKILLS / skill / "SKILL.md")))
+    @classmethod
+    def ref(cls, name):
+        return next(SKILLS.glob(f"*/references/{name}"))
+
+    @classmethod
+    def named(cls, skill):
+        return set(cls.REF.findall(read(SKILLS / skill / "SKILL.md")))
+
+    @classmethod
+    def sizes(cls, skills):
+        """(bytes always read, bytes when every situation comes up) for a run of these skills."""
+        always = {n for s in skills for n in cls.named(s) if not n.startswith("if-")}
+        situational, todo = set(), set(always) | {n for s in skills for n in cls.named(s)}
+        seen = set()
+        while todo:                                    # if-files are named by the files that trigger them
+            n = todo.pop()
+            if n in seen:
+                continue
+            seen.add(n)
+            if n.startswith("if-"):
+                situational.add(n)
+            if n in always or n.startswith("if-"):
+                todo |= {m for m in cls.REF.findall(read(cls.ref(n))) if m.startswith("if-")}
+        base = sum(len((SKILLS / s / "SKILL.md").read_bytes()) for s in skills)
+        base += sum(len(cls.ref(n).read_bytes()) for n in always)
+        return base, base + sum(len(cls.ref(n).read_bytes()) for n in situational)
 
     def test_recurring_jobs_stay_within_budget(self):
-        for job, (skills, ceiling) in self.CEILINGS.items():
-            refs = set().union(*[self.named(s) for s in skills])
-            size = sum(len((SKILLS / s / "SKILL.md").read_bytes()) for s in skills)
-            size += sum(len((SKILLS / skills[0] / "references" / r).read_bytes())
-                        if (SKILLS / skills[0] / "references" / r).exists()
-                        else len(next(SKILLS.glob(f"*/references/{r}")).read_bytes()) for r in refs)
+        for job, (skills, ceiling, worst) in self.CEILINGS.items():
+            size, everything = self.sizes(skills)
             self.assertLessEqual(size, ceiling, f"{job}: {size} bytes of instructions, budget {ceiling}. Cut something.")
+            self.assertLessEqual(everything, worst, f"{job}: {everything} bytes when every situation comes up, budget {worst}.")
 
     def test_total_instruction_text_stays_within_budget(self):
         names = sorted({p.name for p in SKILLS.glob("*/references/*.md")})
         size = sum(len(p.read_bytes()) for p in SKILLS.glob("*/SKILL.md"))
         size += sum(len(p.read_bytes()) for p in (PLUGIN / "agents").glob("*.md"))
-        size += sum(len(next(SKILLS.glob(f"*/references/{n}")).read_bytes()) for n in names)
+        size += sum(len(self.ref(n).read_bytes()) for n in names)
         self.assertLessEqual(size, self.ALL_INSTRUCTIONS, f"{size} bytes of instructions in total")
 
     def test_stored_prompts_stay_small(self):
@@ -420,9 +448,179 @@ class SizeBudget(unittest.TestCase):
             self.assertLessEqual(len(b.encode()), self.STORED_PROMPT, b[:60])
 
 
+class ReadWhenNeeded(unittest.TestCase):
+    """0.9.0: rules for one situation live in a file of their own (if-….md) and are read only when
+    that situation comes up. The text moved word for word; what every run reads got shorter."""
+    FILES = {   # file: (the file whose text sends a run to it, the words that do)
+        "if-run-unfinished.md": ("run-tracking.md", "One found: follow `references/if-run-unfinished.md`"),
+        "if-notification-missed.md": ("run-tracking.md", "follow `references/if-notification-missed.md`"),
+        "if-old-task.md": ("scheduled-run-rules.md", "follow `references/if-old-task.md`"),
+        "if-owner-corrects.md": ("owner-corrections.md", "follow `references/if-owner-corrects.md`"),
+        "if-no-team-agents.md": ("team-roles.md", "brief from `references/if-no-team-agents.md`"),
+        "if-highlevel.md": ("connections.md", "follow `references/if-highlevel.md`"),
+        "if-asked-how-safe.md": ("approval-policy.md", "read `references/if-asked-how-safe.md` first"),
+        "if-queuing-a-decision.md": ("approval-queue.md", "follow `references/if-queuing-a-decision.md`"),
+        "if-inbox-gap.md": ("inbox-coverage.md", "follow `references/if-inbox-gap.md`"),
+        "if-quick-look.md": (None, None),               # named by the skills that run a quick look
+    }
+
+    def test_every_file_says_when_to_read_it_and_something_sends_runs_there(self):
+        found = sorted({p.name for p in SKILLS.glob("*/references/if-*.md")})
+        self.assertEqual(found, sorted(self.FILES))
+        for name, (home, words) in self.FILES.items():
+            text = read(SizeBudget.ref(name))
+            self.assertTrue(text.startswith("# "), name)
+            self.assertIn("\n\nRead this only when ", text[:400], name)
+            if home:
+                self.assertIn(words, read(SizeBudget.ref(home)), name)
+        for sk in ["inbox-triage", "first-team-meeting", "setup-workforce"]:
+            self.assertIn("`references/if-quick-look.md`", read(SKILLS / sk / "SKILL.md"), sk)
+
+    def test_every_skill_is_told_how_these_files_work(self):
+        for s in SKILLS.glob("*/SKILL.md"):
+            self.assertIn("A file named `references/if-….md` covers one situation: read it only when", read(s), s)
+        self.assertIn("A file named `if-…` covers one situation", read(SizeBudget.ref("scheduled-run-rules.md")))
+
+    def test_what_must_never_wait_for_a_second_file_stays_in_the_first(self):
+        """The trigger line carries the rule that matters even if the second file is never opened."""
+        rt = read(REFS / "run-tracking.md")
+        self.assertIn("is never run alongside", rt)
+        self.assertIn("without redoing its work", rt)
+        self.assertIn("Never hide a gap", read(SizeBudget.ref("inbox-coverage.md")))
+        self.assertIn("never claim more protection than it says", read(REFS / "approval-policy.md"))
+        self.assertIn("the team only reads HighLevel", read(REFS / "connections.md"))
+        self.assertIn("Scheduled runs never create or change rules", read(REFS / "owner-corrections.md"))
+        rules = read(SizeBudget.ref("scheduled-run-rules.md"))
+        self.assertIn("the job wins over the skill name, and a smaller job is never done quietly", rules)
+
+    def test_unattended_rules_have_one_home(self):
+        rm = read(REFS / "run-modes.md")
+        self.assertIn("Its rules are in `references/scheduled-run-rules.md`", rm)
+        self.assertNotIn("9. **Stay within budget.**", rm)                 # the second copy is gone
+        self.assertIn("## Active departments (both modes)", rm)
+        for sk in SKILLS.glob("*/references"):
+            if (sk / "run-modes.md").exists():
+                self.assertTrue((sk / "scheduled-run-rules.md").exists(), sk)
+
+
+class OwnerFirstReports(unittest.TestCase):
+    """0.9.0: a report is read on a phone. What the owner needs is on the first screen; the run's
+    own bookkeeping is at the bottom, folded away."""
+    def test_the_briefing_is_written_for_a_phone(self):
+        b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
+        order = ["8. **Write the briefing for a phone.**", "1. **The opening line: work handled**", "2. **Today:**",
+                 "3. **Ready for you:**", "4. **Decisions for you:**", "5. **Still waiting on you:**",
+                 "6. **Worth knowing:**", "7. **Details** (one toggle"]
+        places = [b.index(o) for o in order]
+        self.assertEqual(places, sorted(places))
+        for must in ["Outside the toggles the whole briefing stays under about 200 words", "Never the whole list again",
+                     "With nothing to decide, leave this section and that line out", "at most one question",
+                     "is said here the first time and when it changes", "the first screen has to be enough",
+                     "Save** the briefing at the top of this run's record, above its run record"]:
+            self.assertIn(must, b)
+        for gone in ["**Your team handled:**", "**Spotted:**", "5. **Spotted", "Reading taken"]:
+            self.assertNotIn(gone, b)
+
+    def test_the_run_record_sits_below_the_report(self):
+        rt = read(REFS / "run-tracking.md")
+        for must in ["**The owner's report goes above it.**", 'a toggle titled "Run record"',
+                     'never Run IDs or "Status: Running"', "Records from before 0.9.0 begin with the run record instead"]:
+            self.assertIn(must, rt)
+        self.assertNotIn("The body starts with this header", rt)
+        na = read(REFS / "notion-access.md")
+        for must in ["**Collapsed sections (toggles).**", "`<toggle>`", "Never use `<details>`", "use a plain heading in the same place"]:
+            self.assertIn(must, na)
+        self.assertIn("put the report above the run record", read(REFS / "approval-policy.md"))
+
+    def test_the_inbox_report_follows_the_same_shape(self):
+        i = read(SKILLS / "inbox-triage" / "SKILL.md")
+        for must in ["9. **Report** for a phone", "3. **Ready for you:**", "5. **Details** (one toggle)"]:
+            self.assertIn(must, i)
+
+    def test_the_reading_taken_is_not_the_first_line(self):
+        rules = read(SizeBudget.ref("scheduled-run-rules.md"))
+        self.assertIn("note which reading you took in the report's Details", rules)
+        self.assertIn("Only two things may come before that line", rules)
+        self.assertIn("the report's single question", read(REFS / "just-in-time.md"))
+
+
+class DraftsAreNotApprovals(unittest.TestCase):
+    """0.9.0: a reply draft used to raise an approval whose "yes" only told the owner to go and
+    press Send. The owner pressing Send is the approval; the queue is for real decisions."""
+    def test_the_queue_is_for_decisions(self):
+        aq = read(REFS / "approval-queue.md")
+        for must in ["## What goes in the queue", "**A reply draft is not a decision.**",
+                     "The owner pressing Send is the approval", "queue the decision, and say in its Exact action which draft is waiting on it"]:
+            self.assertIn(must, aq)
+        self.assertIn("pressing Send is the approval", read(REFS / "approval-policy.md"))
+        self.assertIn("A reply the owner only has to read and send is a draft, never an approval", read(REFS / "team-roles.md"))
+        self.assertIn("A reply draft by itself is never an approval", read(SizeBudget.ref("inbox-coverage.md")))
+        self.assertIn("A reply never needs an Approvals row just to be sent", read(SKILLS / "process-customer-inquiries" / "SKILL.md"))
+        self.assertIn("A reply draft by itself is never one", read(SKILLS / "inbox-triage" / "SKILL.md"))
+        self.assertIn("A reply draft is never one by itself", read(SKILLS / "daily-executive-briefing" / "SKILL.md"))
+        for a in (PLUGIN / "agents").glob("*-manager.md"):
+            self.assertIn("(a reply draft waiting to be sent is not one)", read(a), a)
+        for p in list(SKILLS.glob("*/SKILL.md")) + [REFS / "team-roles.md"]:
+            self.assertNotIn("sending on their behalf, money", read(p), p)
+            self.assertNotIn("escalations, anything sensitive) becomes an Approvals row", read(p), p)
+
+    def test_drafts_and_prepared_pieces_wait_in_open_work_and_close_themselves(self):
+        rt = read(REFS / "run-tracking.md")
+        for must in ["**Reply drafts and prepared pieces wait here, not in Approvals.**", "sent or discarded by the owner",
+                     "meeting held", "never draft by draft", "They are never closed for age alone",
+                     "Updating a row, re-checking or carrying something forward is not closing it"]:
+            self.assertIn(must, rt)
+        ra = read(SKILLS / "review-approvals" / "SKILL.md")
+        self.assertIn("**Waiting work**", ra)
+        self.assertIn("a Gmail draft stays where it is, never deleted", ra)
+
+
+class PriorityPiece(unittest.TestCase):
+    """0.9.0: the inbox is not the owner's business. Each morning the team finishes one piece toward
+    the top priority, and never stacks them up when the owner isn't using them."""
+    def test_one_finished_piece_and_no_pile(self):
+        b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
+        for must in ["**One finished piece toward the top priority.**", "usable as it is in five minutes", "one page at most",
+                     'its title starting "Priority:"', "**Never pile them up.**", "or one toward this same goal is",
+                     '"Use it, redo it or drop it?"', "when Extra rules say not to", "passing the Ready check",
+                     "(meeting preps, at most 2; the priority piece; research)"]:
+            self.assertIn(must, b)
+        self.assertNotIn("skip if a recent briefing already has one", b)             # Marketing's weekly item is replaced
+        tr = read(REFS / "team-roles.md")
+        self.assertIn("6. **Is something like it still waiting?**", tr)
+        self.assertNotIn("(Marketing: once a week)", tr)
+        self.assertIn("the morning run's priority piece is a marketing step", read(REFS / "run-modes.md"))
+
+
+class VoiceFromSentMail(unittest.TestCase):
+    """0.9.0: the first drafts sound like the owner, because setup reads how they already write."""
+    def test_setup_learns_the_voice_and_never_the_content(self):
+        q = read(SizeBudget.ref("if-quick-look.md"))
+        for must in ["**Their voice first.**", "`in:sent`", "at most five short lines", "Style only: never copy those emails' contents, names or addresses",
+                     "Fewer than three such emails: skip this and draft plainly", "once the owner confirms"]:
+            self.assertIn(must, q)
+        s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.assertIn("learned from their own sent mail", s)
+        self.assertIn("on their yes, or their corrected version, save it to Brand & Tone", s)
+        self.assertIn("Never sign as the owner in a style that is neither confirmed nor their own", read(REFS / "team-roles.md"))
+        self.assertIn("If setup already picked up their style", read(SKILLS / "setup-workforce" / "references" / "interview.md"))
+
+
+class LockWording(unittest.TestCase):
+    """0.9.0: what the written rules say about the tightened lock."""
+    def test_rules_match_the_lock(self):
+        rules = read(SizeBudget.ref("scheduled-run-rules.md"))
+        for must in ["tools that create, change or start a scheduled task", "**If the owner writes in this conversation later,**",
+                     "to ask again in a new chat"]:
+            self.assertIn(must, rules)
+        s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.assertIn("Then check once what HighLevel allowed", s)
+        self.assertIn("connect again and allow viewing only", s)
+
+
 class Safety(unittest.TestCase):
     def test_policy_core_rules(self):
-        t = read(REFS / "approval-policy.md")
+        t = read(REFS / "approval-policy.md") + read(REFS / "if-asked-how-safe.md")
         for must in ["Spend money", "Modify financial records", "Delete anything",
                      "Publish or post publicly", "Send an external message",
                      "Scheduled (unattended) runs never execute approval items",
@@ -456,9 +654,13 @@ class Safety(unittest.TestCase):
 class HighLevelIsReadOnly(unittest.TestCase):
     def test_highlevel_rules(self):
         c = read(REFS / "connections.md")
-        for must in ["- Customer messages: HighLevel | None", "**Read only.**", "Never run an operation that sends",
-                     "Replies ready to copy", "HighLevel unavailable"]:
+        for must in ["- Customer messages: HighLevel | None", "Replies ready to copy", "HighLevel unavailable",
+                     "follow `references/if-highlevel.md`"]:
             self.assertIn(must, c)
+        hl = read(REFS / "if-highlevel.md")
+        for must in ["**Read only.**", "Never run an operation that sends", "Replies ready to copy", "HighLevel unavailable",
+                     "ask only for reads", "begins with a reading word"]:
+            self.assertIn(must, hl)
         self.assertIn("Customer messages: _not set_", read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
         self.assertIn("HighLevel", read(SKILLS / "setup-workforce" / "SKILL.md"))
         triage = read(SKILLS / "inbox-triage" / "SKILL.md")
@@ -531,7 +733,7 @@ class HighLevelComesAfterTheFirstResult(unittest.TestCase):
         r = read(PLUGIN / "README.md")
         for must in ["connect HighLevel", "four short steps", "after your first result"]:
             self.assertIn(must, r)
-        self.assertIn("allow only viewing", read(REFS / "approval-policy.md"))
+        self.assertIn("allow only viewing", read(REFS / "if-asked-how-safe.md"))
 
 
 class FreePlanAndEfficiency(unittest.TestCase):
@@ -603,7 +805,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
         self.assertIn("owner confirmed", rt)
 
     def test_duplicate_checks_read_finished_rows(self):
-        self.assertIn("unfiltered \"Decision board\" view", read(REFS / "approval-queue.md"))
+        self.assertIn("unfiltered \"Decision board\" view", read(REFS / "if-queuing-a-decision.md"))
         self.assertIn("not \"Open work\", which hides finished rows", read(REFS / "run-tracking.md"))
 
     def test_legacy_handed_to_you_stays_pending(self):
@@ -638,7 +840,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
             self.assertIn(must, tr)
 
     def test_notification_recovery_is_bounded(self):
-        rt = read(REFS / "run-tracking.md")
+        rt = read(REFS / "run-tracking.md") + read(REFS / "if-notification-missed.md")
         for must in ["Catching up on missed notifications", "Don't redo their work", "at most 3 attempts per record",
                      "failed (permanent)", "may arrive twice", "last 8 days"]:
             self.assertIn(must, rt)
@@ -646,7 +848,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
             self.assertIn("without redoing its work", read(SKILLS / sk / "references" / "scheduled-run-rules.md"), sk)
 
     def test_inbox_gaps_are_durable(self):
-        ic = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md")
+        ic = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md") + read(SKILLS / "inbox-triage" / "references" / "if-inbox-gap.md")
         for must in ["Inbox not scanned: <from> – <to>", "inbox-gap:<from>", "oldest 2 days",
                      "Gap catch-up never moves Completed through", "Older mail not yet scanned"]:
             self.assertIn(must, ic)
@@ -699,7 +901,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
 class LearningRules(unittest.TestCase):
     """0.6.0: the written rules behind owner corrections, setup, approvals and drafts are present."""
     def test_owner_corrections_reference(self):
-        oc = read(REFS / "owner-corrections.md")
+        oc = read(REFS / "owner-corrections.md") + read(REFS / "if-owner-corrects.md")
         for must in ["This item only", "Lasting rule", "Temporary rule", "Draft feedback",
                      "Not my responsibility anymore", "Always worth my attention", "Things to ignore for now",
                      "What a rule never hides", "new security incident", "Money leaving the owner's own accounts",
@@ -717,7 +919,7 @@ class LearningRules(unittest.TestCase):
         self.assertIn("Has the owner already ruled it out?", read(REFS / "team-roles.md"))
         self.assertIn("your rules", read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md"))
         self.assertIn("Saved corrections hide, never permit", read(REFS / "approval-policy.md"))
-        self.assertIn("Another automated email repeating the same alert is not new", read(REFS / "approval-queue.md"))
+        self.assertIn("Another automated email repeating the same alert is not new", read(REFS / "if-queuing-a-decision.md"))
         for a in (PLUGIN / "agents").glob("*-manager.md"):
             self.assertIn("**Owner's corrections:**", read(a), a)
 
@@ -737,8 +939,8 @@ class LearningRules(unittest.TestCase):
             self.assertIn(must, tr)
 
     def test_quick_look_is_labelled_and_never_moves_the_bookmark(self):
-        ic = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md")
-        for must in ["## 6. Quick look", "newest 50 threads", "Completed through: not moved (quick look)",
+        ic = read(SKILLS / "inbox-triage" / "references" / "if-quick-look.md")
+        for must in ["# Quick look", "newest 50 threads", "Completed through: not moved (quick look)",
                      "Never say all email was reviewed", "never moves it"]:
             self.assertIn(must, ic)
         ftm = read(SKILLS / "first-team-meeting" / "SKILL.md")

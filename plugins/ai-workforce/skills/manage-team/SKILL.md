@@ -2,12 +2,12 @@
 name: manage-team
 description: This skill should be used when the owner changes how the team works or who is on it, or corrects what the team thinks matters, such as "from now on…", "always…", "never…", "make those replies shorter and friendlier", "our refund policy changed", "we raised our prices", "that isn't my responsibility anymore", "stop bringing this up", "that company isn't one of my businesses anymore", "this kind of email doesn't matter to me", "family and school emails matter", "add a team member", "I'd like someone handling my podcast", "do we need another person for this?", "turn off Finance", or "remove the Podcast Producer".
 metadata:
-  version: "0.8.1"
+  version: "0.9.0"
 ---
 
 # Manage the Team
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
 
 The owner should never have to rebuild a team member. They say how they want the job done, in their own words, and you put it where the team will follow it every time. Everything is saved in the owner's Business Brain, so plugin updates never touch it. Follow `references/talking-to-the-owner.md`, `references/approval-policy.md`, `references/team-roles.md` and `references/owner-corrections.md`. This skill needs the owner present.
 
@@ -37,7 +37,7 @@ The owner should never have to rebuild a team member. They say how they want the
 The team also learns this way from the review step: when the owner keeps changing drafts the same way, `review-approvals` offers to save the change here.
 
 ## A2. "That's not mine anymore" / "stop bringing this up"
-The owner is correcting what the team thinks matters. Follow `references/owner-corrections.md`: decide whether it's about this item only, this thread, a lasting rule or a temporary one; for a lasting rule, confirm the exact line (and the related open items you'd close) in one message, save it on Priorities, close the related items with their history kept, and say how it applies: "Done. The team won't raise the old Northwind automations again. A new security problem on your own accounts would still come to you." Scheduled runs never save rules; they list a possible correction under Questions for you.
+The owner is correcting what the team thinks matters. Follow `references/if-owner-corrects.md`: decide whether it's about this item only, this thread, a lasting rule or a temporary one; for a lasting rule, confirm the exact line (and the related open items you'd close) in one message, save it on Priorities, close the related items with their history kept, and say how it applies: "Done. The team won't raise the old Northwind automations again. A new security problem on your own accounts would still come to you." Scheduled runs never save rules; they list a possible correction under Questions for you.
 
 To take a rule back ("actually, do tell me about Northwind"), add " · no longer applies <date>" to its line after the owner confirms; never delete it.
 

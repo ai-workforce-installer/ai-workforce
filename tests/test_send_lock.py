@@ -34,6 +34,7 @@ mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__search_operations mcp__c1fc4002-5f49-
 mcp__cowork__send_notification mcp__x__send_user_message mcp__x__SendUserFile
 mcp__stripe__list_refunds mcp__stripe__get_refund mcp__stripe__list_invoices mcp__stripe__retrieve_charge
 mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__search_threads
+mcp__claude-code-remote__list_triggers mcp__scheduled-tasks__list_scheduled_tasks mcp__x__create_task mcp__x__get_trigger
 Bash Read Write WebFetch PushNotification SendUserMessage Agent
 """.split()
 
@@ -51,6 +52,10 @@ mcp__stripe__create_refund mcp__stripe__create_invoice mcp__stripe__update_subsc
 mcp__meta__update_campaign_budget mcp__qb__void_invoice
 mcp__slack__slack_send_message mcp__x__sendMessage mcp__x__create_post mcp__x__publish_page mcp__cal__book_meeting
 mcp__x__unsubscribe_from_list mcp__x__archive_thread mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__send_message
+mcp__claude-code-remote__create_trigger mcp__claude-code-remote__update_trigger mcp__claude-code-remote__fire_trigger
+mcp__claude-code-remote__delete_trigger mcp__claude-code-remote__send_later
+mcp__scheduled-tasks__create_scheduled_task mcp__scheduled-tasks__update_scheduled_task mcp__x__run_routine
+mcp__HighLevel__projects_set-task-home-list
 """.split()
 
 
@@ -136,6 +141,92 @@ class RunAnOperationTools(unittest.TestCase):
             self.assertIsNone(send_lock.decide("mcp__HighLevel__" + name, {"query": "send a message"}), name)
 
 
+class RealHighLevelOperations(unittest.TestCase):
+    """Operation names as HighLevel's own connection lists them (looked up on a connected account,
+    2026-11-10), in the shape its execute_operation tool takes: operationId, params, and a free-text
+    reason. HighLevel labels each one read, write or delete; the lock has to reach the same answer
+    from the name alone."""
+    TOOL = "mcp__HighLevel__execute_operation"
+    READS = """search-conversation get-conversation get-messages get-message get-message-transcription
+        get-message-recording get-email-by-id fb-get-conversation-forms get-conversation-channel
+        download-message-transcription search-opportunities-advanced""".split()
+    POST_READS = """google-get-keyword-ideas get-tags-by-ids get-statistics getSitemapPreview get-posts
+        fetchCalendarList get-comment-list fetchQueues fetchQueueItems fetchSlots""".split()   # labelled "write": they read by POST
+    WRITES = """send-a-new-message add-an-inbound-message add-an-outbound-message create-conversation
+        update-conversation update-message-status add-message-attachments live-chat-agent-typing
+        fb-create-conversation-form send-invoice send-estimate send-documents-contracts
+        google-create-offline-user-list-job create-projects-list-task add-projects-list-task
+        create-projects-folder-list update-projects-list create-projects-space-list
+        set-projects-task-home-list updateProject create-pipeline google-upsert-segment li-create-lead-form
+        li-create-integration create-contact update-contact create-task create update
+        bulk-delete-social-planner-posts schedule-campaign planProjectChange create-projects-recurring-task
+        promoteProjectToProduction submitAgentRun google-upsert-campaign locations.create-custom-field
+        locations.update-custom-field bulkUpdate cliSandboxRegisterExtensionRoute fb-publish-campaign
+        publishAppCustomization restoreMobileCustomizationRevision create-enrollment discoverWebsite
+        create-projects-space create-projects-space-folder upsert-projects-space-statuses
+        create-watermark-template update-watermark-template apply-watermark-to-image create-comment
+        mark-payout-method-primary create-workflow update-workflow-definition validate-workflow-definition""".split()
+    DELETES = """remove-projects-list-task delete-projects-list-user delete-projects-list
+        deleteTrainedUrlsForKnowledgeBase delete-enrollment knowledge-base.delete deleteFile
+        delete-projects-task-comment delete-like delete-redirect-by-id""".split()
+
+    def call(self, operation, **extra):
+        asked = {"operationId": operation, "params": {"query": {"limit": 20}},
+                 "reason": "Find customers waiting on a reply so the owner can send the suggested replies"}
+        asked.update(extra)
+        return send_lock.decide(self.TOOL, asked)
+
+    def test_the_reads_the_team_needs_go_through(self):
+        for op in self.READS + self.POST_READS:
+            self.assertIsNone(self.call(op), op)
+
+    def test_every_write_and_delete_is_refused(self):
+        self.assertEqual(len(self.WRITES) + len(self.DELETES), 66)
+        for op in self.WRITES + self.DELETES:
+            self.assertIsNotNone(self.call(op), op)
+
+    def test_a_reading_word_used_as_a_thing_does_not_make_a_read(self):
+        """0.8.1 let "set-projects-task-home-list" (which moves a task) through, because "list" is
+        a reading word. The name has to begin with one."""
+        for op in ["set-projects-task-home-list", "move-list-item", "mark-as-read", "assign-saved-search", "toggle-view"]:
+            self.assertIsNotNone(self.call(op), op)
+        for name, reads in [("search-conversation", True), ("fb-get-conversation-forms", True), ("getSitemapPreview", True),
+                            ("conversations.search", True), ("contacts_get-contact", True), ("payments.transactions.list", True),
+                            ("social-media-posting_get-posts", True), ("list", True),
+                            ("set-projects-task-home-list", False), ("projects_set-task-home-list", False),
+                            ("export-messages-by-location", False), ("", False), (None, False)]:
+            self.assertEqual(send_lock.begins_as_a_read(name), reads, name)
+
+    def test_what_the_reason_says_never_decides(self):
+        self.assertIsNone(self.call("get-conversation", reason="so the owner can send, delete or refund as they see fit"))
+        self.assertIsNotNone(self.call("send-a-new-message", reason="only to get and read the conversation"))
+
+    def test_an_idempotency_key_marks_a_change(self):
+        """HighLevel requires one for writes and never for reads."""
+        self.assertIsNotNone(self.call("get-conversation", idempotencyKey="reply-2026-11-10"))
+        self.assertIsNone(self.call("get-conversation", idempotencyKey=""))
+        self.assertIsNotNone(self.call("send-a-new-message", dryRun=True))            # a preview of a send is still not a read
+
+    def test_looking_up_operations_is_always_allowed(self):
+        for tool in ["search_operations", "describe_operation", "list_locations"]:
+            self.assertIsNone(send_lock.decide("mcp__HighLevel__" + tool, {"query": "send a message", "kind": "write"}), tool)
+
+
+class ScheduledTasks(unittest.TestCase):
+    """A run never changes a recurring task (older tasks' stored text still asks runs to update
+    their own instructions). The lock refuses the tools that would."""
+    def test_a_run_can_list_tasks_but_not_create_change_or_start_one(self):
+        for tool in ["mcp__claude-code-remote__list_triggers", "mcp__scheduled-tasks__list_scheduled_tasks"]:
+            self.assertIsNone(send_lock.decide(tool), tool)
+        for tool in ["mcp__claude-code-remote__create_trigger", "mcp__claude-code-remote__update_trigger",
+                     "mcp__claude-code-remote__fire_trigger", "mcp__scheduled-tasks__update_scheduled_task"]:
+            self.assertIn("scheduled task", send_lock.decide(tool), tool)
+
+    def test_ordinary_tasks_and_notes_are_not_mistaken_for_scheduled_ones(self):
+        for tool in ["mcp__x__create_task", "mcp__Notion__notion-create-pages", "mcp__x__update_task_status"]:
+            self.assertIsNone(send_lock.decide(tool), tool)
+
+
 class Hook(unittest.TestCase):
     """Runs the launcher exactly as hooks.json does."""
     def setUp(self):
@@ -171,7 +262,18 @@ class Hook(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("send lock", err)
         self.assertIn("draft", err)
+        self.assertIn("ask again in a new chat", err)           # what to tell an owner who joined this conversation
         self.assertEqual(out, "")                               # nothing is ever printed for Claude to read as context
+
+    def test_a_run_started_by_a_recurring_task_cannot_rewrite_or_start_tasks(self):
+        t = self.transcript(TAG_PROMPT)
+        for tool in ["mcp__claude-code-remote__update_trigger", "mcp__claude-code-remote__create_trigger", "mcp__claude-code-remote__fire_trigger"]:
+            code, err, _ = self.pre(tool, transcript_path=t)
+            self.assertEqual(code, 2, tool)
+            self.assertIn("scheduled task", err)
+        self.assertEqual(self.pre("mcp__claude-code-remote__list_triggers", transcript_path=t)[0], 0)
+        owner_chat = self.transcript("Move my briefing to 7 AM", name="o.jsonl")     # the owner may always change their own tasks
+        self.assertEqual(self.pre("mcp__claude-code-remote__update_trigger", session="s3", transcript_path=owner_chat)[0], 0)
 
     def test_the_same_run_can_still_read_and_draft(self):
         t = self.transcript(TAG_PROMPT)
@@ -222,6 +324,9 @@ class Hook(unittest.TestCase):
             return self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=tool_input,
                                  session_id="s1", transcript_path=t, **extra)
         self.assertEqual(call({"operation_id": "conversations.search", "input": {"locationId": "abc"}})[0], 0)
+        self.assertEqual(call({"operationId": "search-conversation", "params": {"query": {"limit": 20}},
+                               "reason": "Find customers waiting on a reply"})[0], 0)             # HighLevel's real shape
+        self.assertEqual(call({"operationId": "set-projects-task-home-list", "params": {}})[0], 2)
         code, err, _ = call({"operation_id": "conversations.messages.send", "input": {"message": "hi"}})
         self.assertEqual(code, 2)
         self.assertIn("send", err)

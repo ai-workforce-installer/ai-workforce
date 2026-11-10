@@ -2,12 +2,12 @@
 name: workforce-self-test
 description: This skill should be used when the user asks to "test the workforce", "verify the subagents run", "run the self-test", "check that the AI team works", or wants proof of how the team members and connections actually run.
 metadata:
-  version: "0.8.1"
+  version: "0.9.0"
 ---
 
 # Workforce Self-Test
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation._
+_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when the text naming it says that situation has come up._
 
 Prove what actually works, and never claim more. Do not simulate anything. Follow `references/approval-policy.md`, `references/connections.md`, `references/run-tracking.md` and the run rule in `references/team-roles.md`. The test never sends anything, never changes real business records, and never deletes; every test record it creates is marked "Self-test" and left as history.
 
@@ -31,7 +31,7 @@ Never label a member "separate agent" unless that launch returned the code.
 4. **Check each reply:** correct role, exact code echoed, connections honestly reported, hard-limit sentence present. Missing code or role = Failed for that member. If one launch fails, retry that member once before marking it Failed.
 5. **Check the Business Brain.** If none exists yet (a clean install), say so plainly ("Your team's workspace isn't set up yet. Say 'set up my AI team' to start."), mark the checks that need it as skipped, and still test the team members and connections. Otherwise search Notion for "Business Brain" and confirm these exist: pages Workforce Settings (with a Connections section and a Business Brain version line), Company Profile, Priorities, Policies, Brand & Tone, FAQs, Paste Box, Your Team (missing pieces from older versions: offer the upgrade in `references/brain-upgrades.md`); databases Approvals, Assignments, Briefings, Pricing & Offers, Customers & Leads. Count "not set" markers (they read back as `<i>not set</i>`) on each page as a completeness score. Count active rows in Pricing & Offers.
 6. **Check the approval queue end to end, including duplicates:** create one Approvals row: Item "Self-test: queue check <code>", Department "Chief of Staff", Action type "Other", Exact action "No action. Test row. (source: selftest:<code>)", Status "Pending", Source run "<Run ID> Self-test". Read it back to confirm an AP number was assigned. Then try to queue the same item again following `references/approval-queue.md`: PASS only if the duplicate check finds the existing row by its source key and no second row is created. Then list the whole active queue (every Pending and Approved row) with the one-line reply instructions, exactly as a briefing would, and confirm the count matches the database. Set the test row's Status to "Done". Never delete it.
-6b. **Check run tracking with test records.** Use only records titled "Self-test fixture <code> A/B" (Type Self-test). Real runs ignore fixtures, and these checks look only at fixtures, never at this run's own record. Apply `references/run-tracking.md` section 3 as if a run of the responsibility "fixture <code>" were starting now:
+6b. **Check run tracking with test records.** Use only records titled "Self-test fixture <code> A/B" (Type Self-test). Real runs ignore fixtures, and these checks look only at fixtures, never at this run's own record. Apply `references/run-tracking.md` section 3 and `references/if-run-unfinished.md` as if a run of the responsibility "fixture <code>" were starting now:
    - Create fixture A (header: Run ID ST-<code>-A, Started now, Source Manual, Status Running). PASS if section 3 says **still in progress, don't run**.
    - Finish A (Run finished, Result Complete). Create fixture B, unfinished, header saying it started 60 minutes ago with no Progress lines. PASS if section 3 says **interrupted, resume B** (add a "Resumed" section to B; no new record).
    - Finish B. PASS if section 3 now says **new run**, so two legitimate runs on one day stay separate.

@@ -2,7 +2,7 @@
 
 The team doesn't need every fact on day one. Before a piece of work, check only the facts that work needs. If one is missing:
 - **Attended** (owner present): ask for it (at most 3 questions, propose an answer when you can), confirm, save it to the field below, then do the work.
-- **Scheduled** (no one there): do the work with what is known, don't guess the missing fact, and list it under **Questions for you** in the briefing (at most 3 per briefing, skip any already asked in the last 7 days).
+- **Scheduled** (no one there): do the work with what is known, don't guess the missing fact, and put the one that matters most to the owner as the report's single question (skip any already asked in the last 7 days; the rest can wait for the next run).
 
 Never invent a missing price, policy, customer or date. A draft that needs one says so, and becomes an approval item or a question instead.
 

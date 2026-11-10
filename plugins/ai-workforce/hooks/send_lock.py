@@ -26,8 +26,11 @@ What is refused (by tool name; see `decide`):
 - creating or changing calendar events, appointments, invitations and bookings;
 - creating or changing invoices, payments, subscriptions, expenses and budgets;
 - on an app that works through one general "run an operation" tool (HighLevel is one), any
-  operation the lock can't recognise as a plain read from what the call says it will run;
-- anything else but a plain read in HighLevel.
+  operation the lock can't recognise as a plain read from what the call says it will run: the
+  operation's name has to begin with a reading word ("search-conversation", "get-messages"),
+  so a reading word used as a noun ("set-task-home-list") doesn't pass;
+- anything else but a plain read in HighLevel;
+- creating, changing or starting a scheduled task: a run never changes a recurring task.
 Creating drafts and writing to the Business Brain in Notion are never refused.
 
 Limits: tools are recognised by their names; a web browser driven by Claude is not covered;
@@ -81,6 +84,11 @@ EXECUTE_THINGS = frozenset([
     "tool", "function", "command",
 ])
 HTTP_METHODS = frozenset(["get", "post", "put", "patch", "delete", "head", "options"])
+# A short product prefix may come before the reading word: "fb-get-conversation-forms".
+VENDOR_PREFIXES = frozenset(["fb", "facebook", "google", "li", "linkedin", "ig", "instagram", "tiktok", "meta", "wa", "whatsapp"])
+# Scheduled tasks ("triggers", "routines"): a run may list them, never create, change or start one.
+SCHEDULE_THINGS = frozenset(["trigger", "triggers", "routine", "routines"])
+SCHEDULE_CHANGE = CHANGE | frozenset(["fire", "run", "start", "enable", "disable", "pause", "resume", "set"])
 # Input fields that hold what the owner or a customer wrote, not which operation runs.
 FREE_TEXT = frozenset([
     "query", "q", "text", "message", "body", "content", "prompt", "description", "reason",
@@ -141,27 +149,52 @@ def _operation_fields(tool_input):
     return fields
 
 
+def begins_as_a_read(name):
+    """True when a tool or operation name begins with a reading word.
+
+    A reading word later in the name doesn't count: in "set-projects-task-home-list" (which moves
+    a task) "list" is a thing, not what the operation does. What may come before the reading word:
+    - a namespace ending in "." "/" or ":"       conversations.search, payments.transactions.list
+    - a domain joined by "_" to a hyphenated name contacts_get-contact, calendars_get-calendar-events
+    - one short product prefix                    fb-get-conversation-forms, google-get-keyword-ideas
+    """
+    if not isinstance(name, str):
+        return False
+    last = re.split(r"[./:]+", name.strip().strip("./:"))[-1]
+    if "_" in last and "-" in last:
+        last = last.split("_", 1)[1]
+    ws = words(last)
+    if ws and ws[0] in VENDOR_PREFIXES:
+        ws = ws[1:]
+    return bool(ws) and ws[0] in READ
+
+
 def operation_is_a_plain_read(tool_input):
     """For a "run an operation" tool: (True, None) only when the input names an operation that
     reads and nothing in it names a change. Anything unclear is not a plain read."""
+    if isinstance(tool_input, dict):
+        for key, value in tool_input.items():
+            if "idempotency" in re.sub(r"[^a-z]", "", str(key).lower()) and value not in (None, "", False):
+                return False, "it carries an idempotency key, which only a change needs"
     fields = _operation_fields(tool_input)
     if not fields:
         return False, "it doesn't say which operation it would run"
     reads = False
     for field in fields:
-        ws = words(field)
+        name, ws = field, words(field)
         if ws and ws[0] in HTTP_METHODS:                      # "GET /conversations/search", or a method field
             method, ws = ws[0], ws[1:]
             if method in ("put", "patch", "delete"):
                 return False, "it would change something (%s)" % method.upper()
             reads = reads or method == "get"
+            name = field.strip()[len(method):]
         read_at = _first(ws, READ)
         for i, w in enumerate(ws):
             if w in STRONG or w in CHANGE:
                 return False, "it would %s something" % w
             if w in WEAK and i < read_at:
                 return False, "it would %s something" % w
-        reads = reads or read_at < len(ws)
+        reads = reads or begins_as_a_read(name)
     if not reads:
         return False, "the lock can't tell that the operation only reads"
     return True, None
@@ -183,9 +216,13 @@ def decide(tool_name, tool_input=None):
         return None if plain_read else why
 
     read_at = _first(ws, READ)
+    scheduled = SCHEDULE_THINGS.intersection(ws) or ("scheduled" in ws and {"task", "tasks"}.intersection(ws))
+    if scheduled and _first(ws, SCHEDULE_CHANGE) < read_at:
+        return "it would create, change or start a scheduled task"
+
     whole = re.sub(r"[^a-z0-9]", "", (server + tool).lower())
     if any(app in whole for app in READ_ONLY_APPS):
-        if read_at == len(ws) or STRONG.intersection(ws) or CHANGE.intersection(ws):
+        if not begins_as_a_read(tool) or STRONG.intersection(ws) or CHANGE.intersection(ws):
             return "it is not a plain read, and the team only reads HighLevel"
         return None
 
@@ -311,8 +348,9 @@ def handle(data):
         why = ("team members read, research and draft only. Return the draft or your recommendation "
                "to the Chief of Staff instead")
     elif unattended_run(data):
-        why = ("this run was started by a recurring task and nobody is watching. Save a draft or queue "
-               "an approval for the owner instead")
+        why = ("this conversation was started by a recurring task, where the team only reads, drafts and "
+               "prepares. Save a draft or leave it for the owner instead. If the owner is here now and asked "
+               "for this, tell them it can't be done from this conversation and to ask again in a new chat")
     else:
         return 0, None
     _, tool = split_tool(tool_name)

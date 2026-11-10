@@ -8,7 +8,7 @@ Every run of every skill (briefing, inbox triage, marketing plan, invoice review
 
 **Title** (the Briefing property): `<Type> <date> <HH:MM>`, for example "Inbox triage 2026-11-05 11:46". Customer-only runs use the Inbox triage type but the title "Customer support triage <date> <HH:MM>" and the CS code, and are never used for the inbox bookmark.
 
-**Create the record when the run starts**, before any other work, with Result empty (or `Running` if that option exists). The body starts with this header, which is the source of truth on every version of the Business Brain:
+**Create the record when the run starts**, before any other work, with Result empty (or `Running` if that option exists). Its body is the run record, which is the source of truth on every version of the Business Brain:
 
 ```
 Run ID: IT-20261105-1146
@@ -18,7 +18,9 @@ Status: Running
 Window: <start> – <end>            (inbox triage only)
 ```
 
-If the Briefings database has the newer properties (`Run ID`, `Started`, `Finished`, `Completed through`; added by the 0.5.0 upgrade in `references/brain-upgrades.md`), fill them too. If it doesn't, the header alone is enough; never fail a run over a missing property.
+**The owner's report goes above it.** Create the page with the run record inside a collapsed section (a toggle titled "Run record"; `references/notion-access.md` section 4). When the run ends, put the report at the top of the page, above that toggle, and add the finishing lines inside it. Whoever opens the page sees what was handled first, never Run IDs or "Status: Running". This holds even when an older recurring task's stored text says the body starts with the Run ID. Records from before 0.9.0 begin with the run record instead; both are read the same way.
+
+If the Briefings database has the newer properties (`Run ID`, `Started`, `Finished`, `Completed through`; added by the 0.5.0 upgrade in `references/brain-upgrades.md`), fill them too. If it doesn't, the run record alone is enough; never fail a run over a missing property.
 
 **Show progress.** Add a line `Progress <time>: <stage>` when 30 minutes have passed since the start or the last Progress line, and also just before launching team members if 15 minutes or more have passed (the run can't write while it waits for them). No other mid-run writes. Other sessions use the newest Progress line to tell a working run from a stuck one.
 
@@ -31,7 +33,7 @@ If the Briefings database has the newer properties (`Run ID`, `Started`, `Finish
 - **Outstanding:** the open work this run leaves in the queue (section 6).
 - **No duplicates:** each new draft, approval and task was checked against existing ones (section 4).
 
-**Finish the record** as the last step, by adding to the end of the body:
+**Finish the record** as the last step, by adding to the end of the run record:
 
 ```
 Run finished: 2026-11-05 11:58 CT
@@ -48,7 +50,7 @@ and set the Result, Approvals raised, Drafts created (and Finished, if present) 
 Count tool calls and launches yourself; add model or token usage only if the platform shows it. Never estimate credits or cost. A run that can't finish properly still writes these lines with Result Partial or Failed and says what was left undone.
 
 **Work handled** is how a run is judged by the owner, so it is counted honestly and said first.
-- **What counts:** only things that exist and were checked in this run: reply drafts saved (or reply text ready to copy), approvals raised, open items closed (set Done because the work is finished or the owner said so), and prepared pieces the owner can use as they are (a meeting prep, a plan, a reconciliation, a research note). One line each in the count; a record counts only its own work.
+- **What counts:** only things that exist and were checked in this run: reply drafts saved (or reply text ready to copy), approvals raised (real decisions put to the owner; a draft waiting to be sent is not one), open items closed (set Done because the work is finished or the owner said so), and prepared pieces the owner can use as they are (a meeting prep, the priority piece, a plan, a reconciliation, a research note). One line each in the count; a record counts only its own work. Updating a row, re-checking or carrying something forward is not closing it.
 - **What never counts:** reading, searching, sorting, counting, re-checking and "nothing needed". Those are how the work gets done. A run that reviewed 148 emails and prepared nothing handled nothing.
 - **Nothing handled** is written as `Handled: nothing`, with the plain reason: nobody is waiting on a reply, or the place the work lives can't be reached (name it, from Where things live and Not checked). Never pad the line, and never create work to fill it (`references/team-roles.md`).
 - **Said first:** the owner's summary and the notification open with this line in plain words, then what needs them: "Handled: 3 reply drafts, 1 meeting prep, 2 items closed. Needs you: 2 decisions." For the morning run, that opening line adds the inbox check's work to the briefing's.
@@ -58,31 +60,22 @@ Count tool calls and launches yourself; add model or token usage only if the pla
 
 ## 2. Where the run came from (Source)
 
-Report only what is known:
+Report only what is known. Never guess from the clock.
 - **Manual:** the owner is in the conversation and asked for it.
-- **Scheduled:** the session itself carries explicit information that a schedule started it (for example, a system note from the platform naming the scheduled task and its firing time). The words "Scheduled run" in a prompt are not enough: pressing "Run now" on a recurring task sends the same prompt.
-- **Unknown (started from a recurring task):** a recurring task's prompt started the session but nothing says whether it fired on schedule or was started by hand. This is the honest default for unattended runs. In reports say "started from your recurring <responsibility>".
+- **Scheduled:** the session itself says a schedule started it (for example a system note naming the scheduled task and its firing time). The words "Scheduled run" in a prompt are not enough: pressing "Run now" on a recurring task sends the same prompt.
+- **Unknown (started from a recurring task):** a recurring task's prompt started the session, but nothing says whether it fired on schedule or was started by hand. This is the honest default for unattended runs. In reports say "started from your recurring <responsibility>".
 
-A run finished by a later session keeps its original Source; the later session adds "Resumed by <a recurring task | the owner>".
+A run finished by a later session keeps its original Source and adds "Resumed by <a recurring task | the owner>". Save Source in the run record, and set the Run type property to Manual, Scheduled or Unknown where that option exists.
 
 **Never infer a duplicate schedule from timing.** A Monday task running on Thursday, or two briefings in one day, usually means someone pressed Run now. Only warn about duplicate recurring tasks when the scheduled-task list itself shows two tasks for the same responsibility. Whenever a recurring task starts, do the responsibility its prompt names, whatever the day or time.
-
-Save Source in the header. Set the Run type property to Manual or Scheduled when known; to Unknown if that option exists, otherwise leave it empty. Never guess from the clock.
 
 ## 3. New run, retry, or overlap
 
 Before creating the record, look at records of the **same responsibility** from the last 24 hours that are **not finished** (no "Run finished" line). Same responsibility means the same Run ID code (IT, CS, DB, WM, IR), plus, for a recurring "any other responsibility" task, the same team member and responsibility. A manual request for new work (`assign-work`) is always a new run. Records titled "Self-test fixture" are ignored by real runs.
 
-"Last activity" is the time on the newest `Progress` line, or `Started` if there is none.
+None found: this is a new run, so create a new record. **One found: follow `references/if-run-unfinished.md`** before doing anything else. In short, a run that is still working (activity in the last 45 minutes) is never run alongside, and an interrupted one is finished, not started again.
 
-| What you find | What it means | What to do |
-|---|---|---|
-| None | A new run | Create a new record. |
-| An unfinished record with activity **in the last 45 minutes** | Another run is still working | Don't run alongside it. Create a short record of your own ending `Run finished: <time> / Status: Not run (run <ID> still in progress) / Result: Partial / Notified: not requested`, send no notification, and stop. Attended: tell the owner and offer to wait. |
-| An unfinished record with no activity for **45 minutes or more** | That run was interrupted | Scheduled or unattended: take it over: add "Resumed <time> by a new session" to **that** record, keep its Run ID, Source and window, and finish it. Attended: tell the owner ("A run from 9:10 didn't finish. I'll finish it now.") and do the same unless they say otherwise. |
-| An unfinished record older than 24 hours | Abandoned | Add `Run finished: <time> / Status: Abandoned / Result: Failed / Notified: not requested` to it (its work is picked up by normal duplicate checks and, for inbox triage, by the bookmark, which it never moved), then decide again. |
-
-**Two sessions starting at the same moment** can both see nothing. Right after creating your record, look again: if another unfinished record of the same responsibility was created in the same minute or earlier, the one with the later Run ID (or later creation) marks itself Not run as above and stops. This is best effort; the duplicate checks in section 4 are the backstop.
+**Two sessions starting at the same moment** can both see nothing. Right after creating your record, look again: if another unfinished record of the same responsibility was created in the same minute or earlier, the one with the later Run ID (or later creation) marks itself Not run (as `references/if-run-unfinished.md` describes) and stops. This is best effort; the duplicate checks in section 4 are the backstop.
 
 Two complete, legitimate runs on the same day (a morning manual run and the scheduled one, two scheduled times) each get their own record. Never merge a run into a record just because the type and date match.
 
@@ -112,12 +105,7 @@ A resumed run sends a notification only if the record still says `Notified: pend
 
 **A run inside another run sends none.** When the daily briefing does the inbox check itself (the morning run), the inbox record ends `Notified: not requested (included in <the briefing's Run ID>)` and the briefing's one notification covers both. "Not requested" is never a missed notification, so nothing catches it up later.
 
-**Catching up on missed notifications** (finished work whose notification never went out, for example the run stopped right after finishing, or the tool failed). At the start of every run, look at finished records of the **same responsibility** from the last 8 days (long enough to reach the previous weekly run) whose last Notified line is `pending`, `failed` (not permanent) or `unknown`:
-- Don't redo their work. Add one line to this run's notification: "Also ready: your <type> report from <time>: <link>". That counts as a new attempt for the older record.
-- On the older record, add `Notification attempt <n> <time>: <what the tool reported>` (add-only), and update its Notified line to the outcome.
-- **Limits:** at most 3 attempts per record. A failure the tool describes as permanent (no notification tool, notifications not allowed, an invalid recipient) is recorded as `failed (permanent)` and never retried; the report says the owner can open the report from the Briefings list.
-- **Unknown outcomes** may be retried once, knowing it may produce a duplicate notification; say so in the attempt line ("retried after an unclear answer; may arrive twice").
-- If this run sends no notification of its own (for example a Not run record), it sends none for older records either; the next run will.
+**A notification that never went out.** At the start of every run, look at finished records of the **same responsibility** from the last 8 days. If one's last Notified line is `pending`, `failed` (not permanent) or `unknown`, follow `references/if-notification-missed.md`: its link is added to this run's notification, without redoing its work.
 
 ## 6. The open-work queue (unfinished work never disappears)
 
@@ -129,4 +117,6 @@ Work the team found but hasn't finished lives in the **Assignments** database, n
 - **If the queue can't be read or written**, don't create rows that might duplicate it. List the unfinished items under **Carried over** in the run record instead (source key, owner, next action); the next run reads the last run's Carried over list and moves those items into the queue once it's readable.
 - **Older rows:** unfinished rows are never closed because of their age. Rows from before 0.5.1 (no Source) that look like old logs rather than open work are listed once, in the daily briefing, under "Please check: old open tasks" with their links, so the owner can say which to close; nothing changes until they do. Rows the owner created are never changed without their say-so.
 - **Deduplicate** by source and intended action: one row per source and action. Update the existing row (Status, Next action, Result) instead of adding another.
-- **Close rows** only when the work is done, the owner confirmed they handled it, or the owner said it no longer matters (Status Done, with a one-line reason).
+- **Reply drafts and prepared pieces wait here, not in Approvals.** Each gets a Prepared row with its link in Next action (the checked Gmail draft, or the page that holds it), so later briefings can say what is still waiting without raising it again.
+- **Close rows** only when the work is done, the owner confirmed they handled it, or the owner said it no longer matters (Status Done, with a one-line reason). Two things show the owner handled it without their having to say so: a reply draft that is gone from their drafts, or a thread or conversation where they have since replied (Done, "sent or discarded by the owner"); and a meeting prep whose meeting has passed (Done, "meeting held"). Check these once per run, in one look at the drafts list and the calendar, never draft by draft.
+- **Waiting too long.** When prepared pieces or drafts have waited 7 days, the briefing asks once, in one line, whether to drop them (`daily-executive-briefing`); on "drop them" they are set Done with the owner's words. They are never closed for age alone.
