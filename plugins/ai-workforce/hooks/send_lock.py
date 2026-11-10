@@ -25,7 +25,9 @@ What is refused (by tool name; see `decide`):
   as spam (unless the name starts as a read, such as "get_refund");
 - creating or changing calendar events, appointments, invitations and bookings;
 - creating or changing invoices, payments, subscriptions, expenses and budgets;
-- anything but a plain read in HighLevel.
+- on an app that works through one general "run an operation" tool (HighLevel is one), any
+  operation the lock can't recognise as a plain read from what the call says it will run;
+- anything else but a plain read in HighLevel.
 Creating drafts and writing to the Business Brain in Notion are never refused.
 
 Limits: tools are recognised by their names; a web browser driven by Claude is not covered;
@@ -71,6 +73,20 @@ MONEY_THINGS = frozenset([
     "subscription", "subscriptions", "charge", "charges", "refund", "refunds", "payout", "payouts",
     "transaction", "transactions", "budget", "budgets",
 ])
+# Tools that run "an operation" named in their input rather than in their own name
+# (HighLevel's execute_operation). The name says nothing, so the input is checked.
+EXECUTE_VERBS = frozenset(["execute", "call", "invoke", "perform"])
+EXECUTE_THINGS = frozenset([
+    "operation", "operations", "action", "actions", "api", "endpoint", "request",
+    "tool", "function", "command",
+])
+HTTP_METHODS = frozenset(["get", "post", "put", "patch", "delete", "head", "options"])
+# Input fields that hold what the owner or a customer wrote, not which operation runs.
+FREE_TEXT = frozenset([
+    "query", "q", "text", "message", "body", "content", "prompt", "description", "reason",
+    "notes", "note", "search", "keyword", "keywords", "title", "subject", "comment",
+])
+NAMES_THE_OPERATION = ("operation", "action", "tool", "function", "endpoint", "method", "path", "name")
 # The harness's own ways of reporting to the owner are never refused.
 NOTIFY = frozenset(["notification", "notifications", "notify"])
 OWNER_REPORT = re.compile(r"^send[_-]?user[_-]?(message|file)$", re.I)
@@ -103,8 +119,56 @@ def _first(ws, group):
     return len(ws)
 
 
-def decide(tool_name):
-    """Return a short reason if this tool is one the lock refuses, else None."""
+def _operation_fields(tool_input):
+    """The short text fields of a call's input that say which operation it runs.
+    Free text, ids of records, and the payload (nested objects) are left out."""
+    fields = []
+    if not isinstance(tool_input, dict):
+        return fields
+    for key, value in tool_input.items():
+        k = re.sub(r"[^a-z0-9]", "", str(key).lower())
+        if isinstance(value, dict) and any(n in k for n in ("operation", "action")):
+            fields.extend(_operation_fields(value))           # {"operation": {"id": "..."}}
+            continue
+        if not isinstance(value, str) or not value.strip() or len(value) > 300:
+            continue
+        if k in FREE_TEXT:
+            continue
+        names_it = any(n in k for n in NAMES_THE_OPERATION)
+        if k.endswith("id") and k != "id" and not names_it:
+            continue                                          # locationId, contactId: a record, not an operation
+        fields.append(value)
+    return fields
+
+
+def operation_is_a_plain_read(tool_input):
+    """For a "run an operation" tool: (True, None) only when the input names an operation that
+    reads and nothing in it names a change. Anything unclear is not a plain read."""
+    fields = _operation_fields(tool_input)
+    if not fields:
+        return False, "it doesn't say which operation it would run"
+    reads = False
+    for field in fields:
+        ws = words(field)
+        if ws and ws[0] in HTTP_METHODS:                      # "GET /conversations/search", or a method field
+            method, ws = ws[0], ws[1:]
+            if method in ("put", "patch", "delete"):
+                return False, "it would change something (%s)" % method.upper()
+            reads = reads or method == "get"
+        read_at = _first(ws, READ)
+        for i, w in enumerate(ws):
+            if w in STRONG or w in CHANGE:
+                return False, "it would %s something" % w
+            if w in WEAK and i < read_at:
+                return False, "it would %s something" % w
+        reads = reads or read_at < len(ws)
+    if not reads:
+        return False, "the lock can't tell that the operation only reads"
+    return True, None
+
+
+def decide(tool_name, tool_input=None):
+    """Return a short reason if this tool call is one the lock refuses, else None."""
     server, tool = split_tool(tool_name)
     if server is None:
         return None                                   # only connected-app tools are checked
@@ -113,6 +177,10 @@ def decide(tool_name):
         return None
     if OWNER_REPORT.match(tool) or NOTIFY.intersection(ws):
         return None                                   # reporting to the owner is always allowed
+
+    if EXECUTE_VERBS.intersection(ws) and EXECUTE_THINGS.intersection(ws):
+        plain_read, why = operation_is_a_plain_read(tool_input)
+        return None if plain_read else why
 
     read_at = _first(ws, READ)
     whole = re.sub(r"[^a-z0-9]", "", (server + tool).lower())
@@ -235,7 +303,7 @@ def handle(data):
         return 0, None
 
     tool_name = data.get("tool_name")
-    reason = decide(tool_name)
+    reason = decide(tool_name, data.get("tool_input"))
     if not reason:
         return 0, None
     member = team_agent(data)
