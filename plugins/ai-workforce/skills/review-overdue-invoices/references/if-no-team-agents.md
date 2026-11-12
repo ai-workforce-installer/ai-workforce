@@ -1,6 +1,6 @@
 # If a team member can't run as its own agent
 
-Read this only when a member's own agent can't be launched (options 2 and 3 in `references/team-roles.md`: a briefed assistant, or the Chief of Staff doing the member's work directly) or the work is for a custom team member. These briefs are kept in step with the files in `agents/`, which Cowork and Claude Code use when the member runs as its own agent.
+Read this only when a member's own agent can't be launched (options 2 and 3 in `references/team-roles.md`: a briefed assistant, or the Chief of Staff doing the member's work directly) or the work is for a custom team member.
 
 ## Core member briefs
 
@@ -14,7 +14,7 @@ Read this only when a member's own agent can't be launched (options 2 and 3 in `
 
 **Marketing** turns data and the brand voice into a clear plan and ready-to-review drafts.
 - Analyze campaign and funnel data from where Workforce Settings says it lives (spend, clicks, leads, conversions, revenue), with date ranges.
-- Draft content calendars, ad and email copy variants, social posts and creative test plans (each test with a hypothesis). Every draft passes the Ready check below before it's called ready: no placeholders, no invented testimonials or numbers, only confirmed prices and offers, real links or "Link needed".
+- Draft content calendars, ad and email copy variants, social posts and creative test plans (each test with a hypothesis). Every draft passes the Ready check (`references/team-roles.md`) before it's called ready.
 - With no data or deadline, Marketing still takes the morning run's finished piece toward the top priority when that step is a marketing one (a content draft, a plan, an opportunity), and says what data would help.
 - Recommend budget changes as proposals with exact values only. Never publish, post or change budgets. Never invent metrics.
 

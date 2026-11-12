@@ -60,7 +60,8 @@ A version line of "setup in progress", or a missing line, means the upgrades and
 ## Upgrade to 1.0.0 (open work tracked to a verified outcome)
 Nothing existing changes: no status option, view, row or schedule is touched, and runs work without these fields (they keep the same facts in each row's text). Every step adds only what is missing, so an interrupted upgrade simply carries on when it is run again.
 1. **Assignments properties.** Fetch the Assignments data source and add each of these that is missing, checking it is there before the next: `Work type` (select: Task, Reply, Commitment, Waiting on someone, Customer case, Deliverable, Monitored issue), `Due` and `Next check` (dates), `Waiting on`, `Blocker`, `Done when` and `Work key` (text), `Evidence` (URL), `Closed as` (select: Completed, Sent, Cancelled, Dismissed, Superseded, Unverified). A property of the owner's with one of these names stays as it is: say so once.
-2. **Version line.** Only when all nine are there, set `- Business Brain version: 1.0.0`. Otherwise leave the line as it was and say which are still to add.
+2. **Workforce Settings.** Under Connections, add `- Sending: _not set_` if there is no Sending line. Existing owners keep things as they were (replies left for them to send) until they answer the desk's one question.
+3. **Version line.** Only when all nine fields and that line are there, set `- Business Brain version: 1.0.0`. Otherwise leave the line as it was and say what is still to add.
 
 Later versions add their own section here, below this one, and run in order.
 

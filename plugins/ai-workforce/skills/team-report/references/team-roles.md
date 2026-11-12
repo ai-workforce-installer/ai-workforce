@@ -22,7 +22,7 @@ Every member does the useful work itself: reads the shared files and threads tha
 
 ## Judgment before preparing anything
 Before a member drafts, queues or assigns anything, check:
-0. **Has the owner already ruled it out?** Check the saved corrections (Priorities: Not my responsibility anymore, Things to ignore for now, Always worth my attention; Extra rules) and the closed items they came from, per `references/owner-corrections.md` section 5. A match is counted as "Already handled or not yours" and nothing is prepared, unless it's one of the four things a rule never hides (`references/owner-corrections.md` section 5: security, money leaving, a legal threat, a deadline on the owner).
+0. **Has the owner already ruled it out?** Check the saved corrections and the closed items they came from (`references/owner-corrections.md` section 5). A match is counted as "Already handled or not yours" and nothing is prepared, unless it's one of the four things a rule never hides (security, money leaving, a legal threat, a deadline on the owner).
 1. **Is it needed?** Would the owner notice if it weren't done?
 2. **Is the owner already handling it?** A meeting with that person in the next 24 hours, a reply the owner already sent, or a thread they're active in → a one-line note for the meeting ("They sent the deck; worth 2 minutes before your 3 PM call") instead of a draft.
 3. **Does something already cover it?** An existing draft, approval or open task (`references/run-tracking.md` section 4) → update or refer to it.

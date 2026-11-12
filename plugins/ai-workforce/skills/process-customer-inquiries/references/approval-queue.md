@@ -27,4 +27,4 @@ Specialists (subagents) never write to Notion: they return approval items in the
 When this run has an item to queue, follow `references/if-queuing-a-decision.md` (find the database, check for duplicates, create the row, read back its AP number, and when an old item may be set to Expired). A run with nothing to queue doesn't need it.
 
 ## The active queue
-The active queue is every row with Status Pending or Approved. Briefings and reviews always account for all of them, not only new ones. Handed to you rows are counted with what is still waiting on the owner, not as decisions. Done, Rejected and Expired rows stay in the database as history and never appear in the active queue. That's how "already handled" and "not mine" items leave the queue: by their status, never by deleting them.
+The active queue is every row with Status Pending or Approved. Briefings and reviews always account for all of them, not only new ones. Handed to you rows are counted with what is still waiting on the owner, not as decisions. Done, Rejected and Expired rows stay in the database as history: items leave the queue by their status, never by being deleted.

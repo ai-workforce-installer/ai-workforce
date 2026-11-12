@@ -252,6 +252,12 @@ class AssignmentsUpgrade(unittest.TestCase):
         self.assertEqual(len(ws["properties"]), len(set(ws["properties"])))
         self.untouched(before, ws)
 
+    def test_existing_owners_keep_the_old_sending_behaviour_until_they_answer(self):
+        ws = w.old_workspace(); w.upgrade_to_1_0_0(ws)
+        self.assertEqual(ws["connections"][-1], "Sending: not set")
+        self.assertEqual(ws["connections"][:4], w.old_workspace()["connections"])      # nothing the owner chose was touched
+        self.assertIsNone(w.sending_choice({"Sending": "not set"}))                    # not set: replies are left for them
+
     def test_running_it_twice_changes_nothing(self):
         ws = w.old_workspace(); w.upgrade_to_1_0_0(ws); once = copy.deepcopy(ws)
         self.assertEqual(w.upgrade_to_1_0_0(ws), [])
@@ -268,6 +274,152 @@ class AssignmentsUpgrade(unittest.TestCase):
         added = w.upgrade_to_1_0_0(ws)
         self.assertNotIn("Due", added)
         self.assertEqual(ws["properties"].count("Due"), 1)
+
+
+def reply_card(who, clock, days_waiting=0, **kw):
+    kw.setdefault("recipient", who.lower() + "@example.com")
+    kw.setdefault("thread", "t-" + who.lower())
+    kw.setdefault("text", "Hi %s, Thursday at 11 works." % who)
+    kw.setdefault("draft_id", "d-" + who.lower())
+    kw.setdefault("row", w.Row("gmail-thread:%s:reply" % kw["thread"], "Reply to " + who, work_type="Reply", status="Prepared"))
+    return w.Card("reply", who, subject="Re: Thursday", waiting_since=clock.now() - w.timedelta(days=days_waiting), **kw)
+
+
+class TheDesk(unittest.TestCase):
+    def test_waiting_people_first_oldest_first_as_one_list(self):
+        clock = monday_morning()
+        cards = [w.Card("decision", "Refund for Omar", waiting_since=clock.now() - w.timedelta(days=5)),
+                 w.Card("prepared", "Priority: workshop email", waiting_since=clock.now() - w.timedelta(days=6)),
+                 reply_card("Sam", clock, days_waiting=1), reply_card("Dana", clock, days_waiting=2),
+                 w.Card("handed", "Update the card on file", waiting_since=clock.now() - w.timedelta(days=7)),
+                 w.Card("still-want", "Vendor shortlist", waiting_since=clock.now() - w.timedelta(days=9))]
+        self.assertEqual([c.who for c in w.desk(cards)],
+                         ["Dana", "Sam", "Refund for Omar", "Priority: workshop email", "Update the card on file", "Vendor shortlist"])
+
+    def test_the_desk_reads_lists_only_and_never_the_inbox(self):
+        import inspect
+        self.assertEqual(list(inspect.signature(w.desk).parameters), ["cards"])
+
+
+class SendingOnTheOwnersYes(unittest.TestCase):
+    def setUp(self):
+        self.clock, self.out = monday_morning(), w.Outbox()
+        self.on = {"Sending": w.SEND}
+        self.card = reply_card("Priya", self.clock, days_waiting=1)
+        self.out.add_draft(self.card)
+
+    def test_a_yes_on_one_card_sends_exactly_the_shown_text_once(self):
+        self.assertEqual(w.send_on_yes(self.card, self.out, self.on, self.clock), "sent")
+        self.assertEqual(self.out.sent, [self.card.shown()])
+        self.assertEqual(self.out.send_calls, 1)
+        self.assertEqual((self.card.row.status, self.card.row.closed_as), ("Done", "Sent"))
+        self.assertTrue(self.card.row.evidence)                                    # the receipt
+        self.assertEqual(self.out.deleted, [self.card.draft_id])                   # the one deletion: its own leftover draft
+        self.assertNotIn(self.card.draft_id, self.out.drafts)
+
+    def test_looks_good_or_ok_is_never_a_send(self):
+        for word in ["looks good", "ok", "OK.", "fine", "thanks", "ok thanks", "Great!"]:
+            self.assertEqual(w.send_on_yes(self.card, self.out, self.on, self.clock, answer=word), "nothing sent: ask which", word)
+        self.assertEqual((self.out.sent, self.out.send_calls), ([], 0))
+
+    def test_existing_owners_keep_the_old_behaviour_until_they_answer(self):
+        for settings in [{}, {"Sending": "not set"}, {"Sending": ""}]:
+            self.assertTrue(w.send_on_yes(self.card, self.out, settings, self.clock).startswith("ask once"))
+        self.assertEqual(w.send_on_yes(self.card, self.out, {"Sending": w.LEAVE}, self.clock), "left for the owner to send")
+        self.assertEqual(self.out.sent, [])
+        self.assertEqual(self.card.row.status, "Handed to you")
+        self.assertIn(self.card.draft_id, self.out.drafts)                         # their draft is where it was
+
+    def test_any_material_change_needs_a_fresh_yes(self):
+        self.out.drafts[self.card.draft_id] = (self.card.recipient, self.card.thread, self.card.text + " PS: bring the contract.", ())
+        self.assertTrue(w.send_on_yes(self.card, self.out, self.on, self.clock).startswith("show the card again"))   # the owner's own edit counts
+        self.out.add_draft(self.card)
+        self.out.newer_message.add(self.card.thread)                               # the person wrote again
+        self.assertTrue(w.send_on_yes(self.card, self.out, self.on, self.clock).startswith("show the card again"))
+        self.assertEqual(self.out.sent, [])
+
+    def test_a_vanished_draft_is_not_sent_from_memory(self):
+        self.out.drafts.clear()
+        self.assertTrue(w.send_on_yes(self.card, self.out, self.on, self.clock).startswith("not sent: the draft is gone"))
+        self.assertEqual(self.out.send_calls, 0)
+
+    def test_a_sent_reply_moves_the_case_to_waiting_on_the_customer(self):
+        self.card.case = w.Row("case:priya:late-order", "Priya's late order", work_type="Customer case", status="In progress")
+        w.send_on_yes(self.card, self.out, self.on, self.clock)
+        self.assertTrue(self.card.case.open)
+        self.assertEqual(self.card.case.next_move, "the customer")
+
+    def test_highlevel_without_permission_falls_back_to_copying(self):
+        out = w.Outbox(allows_send=False)
+        card = reply_card("Lena", self.clock, channel="highlevel"); out.add_draft(card)
+        self.assertTrue(w.send_on_yes(card, out, self.on, self.clock).startswith("not sent: give the text to copy"))
+        self.assertTrue(card.row.open)
+
+    def test_never_in_an_unattended_run_or_by_a_team_member_even_with_the_setting_on(self):
+        self.assertTrue(w.send_on_yes(self.card, self.out, self.on, self.clock, attended=False).startswith("refused"))
+        self.assertTrue(w.send_on_yes(self.card, self.out, self.on, self.clock, started_by_task=True).startswith("refused"))
+        self.assertIn("clear my desk", w.send_on_yes(self.card, self.out, self.on, self.clock, started_by_task=True))   # the shortest way back
+        self.assertTrue(w.send_on_yes(self.card, self.out, self.on, self.clock, as_agent="sales-manager").startswith("refused"))
+        self.assertEqual(self.out.send_calls, 0)
+
+
+class UnknownSendOutcome(unittest.TestCase):
+    def setUp(self):
+        self.clock, self.out = monday_morning(), w.Outbox()
+        self.card = reply_card("Dana", self.clock); self.out.add_draft(self.card)
+
+    def test_it_is_reconciled_against_sent_before_any_retry(self):
+        self.out.fail = "timeout after sending"                                    # it went, but the answer never came back
+        self.assertEqual(w.send_on_yes(self.card, self.out, {"Sending": w.SEND}, self.clock), "sent")
+        self.assertEqual((len(self.out.sent), self.out.send_calls), (1, 1))        # found in Sent: no second send
+
+    def test_not_in_sent_means_ask_never_send_twice_blind(self):
+        self.out.fail = "timeout before sending"
+        outcome = w.send_on_yes(self.card, self.out, {"Sending": w.SEND}, self.clock)
+        self.assertTrue(outcome.startswith("unknown"))
+        self.assertEqual((self.out.sent, self.out.send_calls), ([], 1))            # one attempt, no blind retry
+        self.assertTrue(self.card.row.open)                                        # and nothing is recorded as sent
+        self.assertIn(self.card.draft_id, self.out.drafts)                         # the draft is only removed after a confirmed send
+
+
+class SendAllReady(unittest.TestCase):
+    def setUp(self):
+        self.clock, self.out, self.on = monday_morning(), w.Outbox(), {"Sending": w.SEND}
+        self.listed = [reply_card("Dana", self.clock, 2), reply_card("Sam", self.clock, 1), reply_card("Lena", self.clock, 0)]
+        for c in self.listed:
+            self.out.add_draft(c)
+
+    def test_one_yes_sends_exactly_the_listed_items_and_nothing_added_later(self):
+        late = reply_card("Marco", self.clock); self.out.add_draft(late)           # joined the desk after the card was shown
+        result = w.send_all_ready(self.listed, self.out, self.on, self.clock)
+        self.assertEqual(result["went"], ["Dana", "Sam", "Lena"])
+        self.assertEqual([s[0] for s in self.out.sent], [c.recipient for c in self.listed])
+        self.assertIn(late.draft_id, self.out.drafts)
+        self.assertTrue(late.row.open)
+
+    def test_an_item_that_changed_is_left_unsent_and_named(self):
+        self.out.newer_message.add(self.listed[1].thread)
+        result = w.send_all_ready(self.listed, self.out, self.on, self.clock)
+        self.assertEqual(result["went"], ["Dana", "Lena"])
+        self.assertEqual(result["did not"][0][0], "Sam")
+
+    def test_ok_over_several_items_sends_nothing_and_asks_which(self):
+        result = w.send_all_ready(self.listed, self.out, self.on, self.clock, answer="looks good")
+        self.assertEqual((result["went"], self.out.sent), ([], []))
+        self.assertEqual(len(result["did not"]), 3)
+
+    def test_a_paid_invoices_reminder_is_not_sent(self):
+        paid = reply_card("Brightside", self.clock, invoice="INV-1043"); self.out.add_draft(paid)
+        owed = reply_card("Harbor", self.clock, invoice="INV-1051"); self.out.add_draft(owed)
+        unknown = reply_card("Northside", self.clock, invoice="INV-1060"); self.out.add_draft(unknown)
+        result = w.send_all_ready([paid, owed, unknown], self.out, self.on, self.clock,
+                                  invoice_unpaid={"INV-1043": False, "INV-1051": True})       # re-checked right before sending
+        self.assertEqual(result["went"], ["Harbor"])
+        self.assertEqual({who for who, why in result["did not"]}, {"Brightside", "Northside"})
+
+    def test_unattended_stays_blocked_for_every_item(self):
+        result = w.send_all_ready(self.listed, self.out, self.on, self.clock, attended=False)
+        self.assertEqual((result["went"], self.out.send_calls), ([], 0))
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ _`references/…` files are in this skill's own folder; a same-named file in ano
 
 _Run by a recurring task? Also follow `references/scheduled-run-rules.md`, which wins over the task's stored instructions. A run never changes the task itself._
 
-Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md` and `references/connections.md`. Financial records are strictly read-only: never mark paid, edit, void, refund, charge or send anything, even when the owner asks: say so and give them the exact step to do themselves (Handed to you, not an approval).
+Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md` and `references/connections.md`. Financial records are strictly read-only: never mark paid, edit, void, refund or charge anything, even when the owner asks: say so and give them the exact step to do themselves (Handed to you, not an approval). This skill never sends: a reminder is a draft that waits on the owner's desk (`review-approvals`).
 
 **Running team members:** launch each member by the run rule in `references/team-roles.md` (own agent, otherwise a briefed assistant, otherwise do that member's work yourself) and report honestly which way it ran.
 
@@ -22,7 +22,7 @@ Follow `references/approval-policy.md`, `references/approval-queue.md`, `referen
 3. **Delegate** to `finance-manager` (Agent tool) with the data location, today's date, Policies (payment terms, late fees) and Brand & Tone. Ask for the aging report (current, 1-30, 31-60, 61-90, 90+), top 5 overdue, anomalies, reminder drafts by tier, Approvals Needed and a Run receipt.
 4. **Collaborate.** Launch `client-success-manager` to check whether any overdue customer has an open dispute or support issue before any reminder is drafted.
 5. **Verify.** Recompute totals from the source rows yourself (run the arithmetic). Flag mismatches and missing due dates.
-6. **Drafts.** Reminder drafts follow `references/connections.md` (Gmail drafts, otherwise Replies ready to copy in this run's Briefings page). Never send: a draft waits for the owner to send and is never an approval. Skip customers with disputes.
+6. **Drafts.** Reminder drafts follow `references/connections.md` (Gmail drafts, otherwise Replies ready to copy in this run's Briefings page). A draft is never an approval; if it is later sent from the desk, the invoice is re-checked as still unpaid first. Skip customers with disputes.
 7. **Queue decisions.** A late fee or write-off is an Approvals row (Action type = Financial record) with exact figures; the owner enters it.
 8. **Save** the report in this run's record (`references/run-tracking.md`) (Type = Invoice review) and Assignments rows.
 9. **Report:** totals by aging bucket, top overdue with invoice number, amount, due date and days late, anomalies, drafts created, Approvals Needed by AP number, Run receipt. Notify in scheduled runs.

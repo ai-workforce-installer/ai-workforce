@@ -329,6 +329,7 @@ def old_workspace():
         "rows": [{"Assignment": "Reply to Dana", "Status": "Prepared", "Result": "Draft saved"},
                  {"Assignment": "Owner's own note", "Status": "On hold", "Result": ""}],
         "schedule": ["Daily briefing: every day 7:23 AM, scheduled, confirmed 2026-11-02"],
+        "connections": ["Email: Gmail", "Calendar: Google Calendar", "Files: None", "Customer messages: None"],
     }
 
 
@@ -344,6 +345,156 @@ def upgrade_to_1_0_0(ws, stop_after=None, can_write=True):
                               % (name, [n for n in NEW_PROPERTIES if n not in ws["properties"]]))
         ws["properties"].append(name)
         added.append(name)
+    if not any(line.startswith("Sending:") for line in ws["connections"]):
+        if not can_write:
+            raise Interrupted("the Sending line is still to add")
+        ws["connections"].append("Sending: not set")   # existing owners keep the old behaviour until they answer
     if all(n in ws["properties"] for n in NEW_PROPERTIES):
         ws["version"] = "1.0.0"
     return added
+
+
+# ---- 1.0.0 step 2: the desk, and sending on the owner's yes (skills/review-approvals/SKILL.md) ----
+
+SEND, LEAVE = "Send the ones I approve", "Leave them for me to send"
+DESK_ORDER = ["reply", "decision", "prepared", "handed", "still-want"]      # people waiting first
+ACKNOWLEDGEMENTS = ("looks good", "ok", "okay", "fine", "thanks", "ok thanks", "great", "sure", "all good", "👍")
+
+
+@dataclass
+class Card:
+    kind: str                       # reply | decision | prepared | handed | still-want
+    who: str
+    subject: str = ""
+    text: str = ""
+    recipient: str = ""
+    thread: str = ""
+    attachments: tuple = ()
+    waiting_since: datetime | None = None
+    draft_id: str = ""
+    channel: str = "gmail"          # gmail | highlevel | outlook | paste
+    row: Row | None = None
+    case: Row | None = None         # the customer case this reply belongs to, if any
+    invoice: str = ""               # set for a payment reminder
+
+    def shown(self):
+        """What the owner saw on the card and said yes to."""
+        return (self.recipient, self.thread, self.text, tuple(self.attachments))
+
+
+def desk(cards):
+    """Everything waiting on the owner as one list: people waiting first, the longest wait first.
+    It takes the lists only: the desk never searches the inbox."""
+    far_future = datetime.max.replace(tzinfo=timezone.utc)
+    return sorted(cards, key=lambda c: (DESK_ORDER.index(c.kind), c.waiting_since or far_future))
+
+
+def is_a_yes(answer):
+    """"Looks good" or "ok" is never a send, for one item or many."""
+    a = answer.strip().lower().rstrip(".!")
+    if a in ACKNOWLEDGEMENTS:
+        return False
+    return a in ("send", "send it", "yes, send it", "yes send it", "approve", "send all", "yes, send all", "yes")
+
+
+def sending_choice(settings):
+    """Existing owners keep the old behaviour until they answer the one question."""
+    return settings.get("Sending") if settings.get("Sending") in (SEND, LEAVE) else None
+
+
+class Timeout(Exception):
+    pass
+
+
+class Outbox:
+    """A mailbox (or a HighLevel conversation list) as far as sending goes, with failures the tests choose."""
+
+    def __init__(self, allows_send=True):
+        self.drafts = {}             # draft_id -> (recipient, thread, text, attachments)
+        self.sent = []               # (recipient, thread, text, attachments)
+        self.newer_message = set()   # threads where the person wrote again after the card was made
+        self.fail = None             # None | "timeout after sending" | "timeout before sending" | "error"
+        self.allows_send = allows_send
+        self.send_calls = 0
+        self.deleted = []
+
+    def add_draft(self, card):
+        self.drafts[card.draft_id] = card.shown()
+
+    def send(self, recipient, thread, text, attachments):
+        self.send_calls += 1
+        if not self.allows_send:
+            raise PermissionError("the connection does not allow sending")
+        if self.fail == "error":
+            raise RuntimeError("the app said no")
+        if self.fail == "timeout before sending":
+            raise Timeout()
+        self.sent.append((recipient, thread, text, tuple(attachments)))
+        if self.fail == "timeout after sending":
+            raise Timeout()
+        return "sent:%d" % len(self.sent)
+
+    def find_sent(self, shown):
+        return "sent:%d" % (self.sent.index(shown) + 1) if shown in self.sent else None
+
+    def delete_draft(self, draft_id):
+        self.drafts.pop(draft_id, None)
+        self.deleted.append(draft_id)
+
+
+def send_on_yes(card, outbox, settings, clock, answer="send", attended=True, started_by_task=False,
+                as_agent=None, invoice_unpaid=None):
+    """What happens when the owner answers a reply card. Returns the outcome in a few words."""
+    if started_by_task or not attended:
+        return "refused: this conversation was started by a recurring task. Open a new chat and say 'clear my desk'"
+    if as_agent:
+        return "refused: team members never send"
+    if not is_a_yes(answer):
+        return "nothing sent: ask which"
+    if sending_choice(settings) is None:
+        return "ask once: send the ones I approve, or leave them for me to send?"
+    if sending_choice(settings) == LEAVE or card.channel in ("outlook", "paste"):
+        if card.row:
+            card.row.status = "Handed to you"
+        return "left for the owner to send"
+    if card.invoice and invoice_unpaid is not True:
+        return "not sent: the invoice is paid, disputed or unclear"
+    # 1. re-read right before sending
+    current = outbox.drafts.get(card.draft_id)
+    if current is None:
+        return "not sent: the draft is gone (follow the closing rule)"
+    if current != card.shown() or card.thread in outbox.newer_message:
+        return "show the card again as it now stands: a fresh yes is needed"
+    # 2. send exactly what was shown, once
+    try:
+        receipt = outbox.send(*card.shown())
+    except PermissionError:
+        return "not sent: give the text to copy, and say once how to allow sending"
+    except Timeout:
+        # 3. unknown outcome: look in Sent before anything else, never retry blind
+        receipt = outbox.find_sent(card.shown())
+        if receipt is None:
+            return "unknown: not in Sent. Say so and ask before trying again"
+    except RuntimeError:
+        return "not sent: the app refused it"
+    # 4. receipt, move the row, remove the team's own leftover draft
+    if card.row:
+        card.row.result.append("Sent on the owner's yes: %s to %s" % (receipt, card.recipient))
+        _close(card.row, "Sent", clock.now(), evidence=receipt)
+    if card.case:
+        after_reply_sent(card.case, clock, receipt)
+    outbox.delete_draft(card.draft_id)
+    return "sent"
+
+
+def send_all_ready(listed, outbox, settings, clock, answer="send all", invoice_unpaid=None, **where):
+    """One yes to a card listing every ready reply sends exactly the items listed, one at a time,
+    each with its own re-read and receipt. Nothing that joined the desk afterwards is sent."""
+    if not is_a_yes(answer):
+        return {"went": [], "did not": [(c.who, "nothing sent: ask which") for c in listed]}
+    went, did_not = [], []
+    for card in list(listed):                        # the list as it was shown, not the desk as it is now
+        unpaid = (invoice_unpaid or {}).get(card.invoice) if card.invoice else None
+        outcome = send_on_yes(card, outbox, settings, clock, invoice_unpaid=unpaid, **where)
+        (went if outcome == "sent" else did_not).append(card.who if outcome == "sent" else (card.who, outcome))
+    return {"went": went, "did not": did_not}
