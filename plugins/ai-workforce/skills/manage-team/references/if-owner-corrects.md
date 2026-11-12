@@ -6,8 +6,7 @@ Read this only when the owner, in the chat, pushes back on something the team ra
 
 | The owner says (examples) | Kind | What happens |
 |---|---|---|
-| "I already handled that." "I sent it." "I checked five." | **This item only** | Close this item (section 4). No rule. |
-| "That purchase was intentional." "Two is fine." | **This item only** (an acknowledgement) | Close this item. Not permission for any other action (`review-approvals`, "Understanding replies"). |
+| "I already handled that." "I sent it." "That purchase was intentional." "Two is fine." | **This item only** | Close this item (section 4). No rule, and never permission for any other action (`review-approvals`, "Understanding replies"). |
 | "Ignore this thread." "Stop telling me about this one." | **Narrow lasting rule** (this one thing) | Close it, confirm one line naming just that thread or sender and subject ("Things to ignore: the 'Weekly sync failed' emails from Make"), and save it under Things to ignore for now, so it holds however long it goes on. |
 | "That isn't my responsibility anymore." "That company isn't one of my businesses." "Don't keep bringing this up." | **Lasting rule** | Confirm once, then save it (sections 2-3) and close related open work (section 4). |
 | "This kind of notification isn't important to me." "GitHub notifications from other repos don't matter." | **Lasting rule** (what to ignore) | Same. |

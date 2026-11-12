@@ -26,7 +26,7 @@ The rest of this skill is the full meeting, used when the owner asks for one lat
 
 ## Steps
 
-1. **Look at what you know.** From the Business Brain: Company Profile, Priorities (especially "Work I'd like to hand off"), Connections, Workforce Settings / Schedule, Customers & Leads, and the Your Team page (custom members, and suggestions already made or declined). If email or calendar is connected, ground the recommendations with a quick read-only look: how many recent customer and prospect emails look unanswered (last 14 days) and how busy the next 7 days are, from senders and subjects only, never storing their contents. On paste mode, look at the Paste Box; if it's empty, invite the owner to paste two or three real customer emails and this week's key dates.
+1. **Look at what you know.** From the Business Brain: Company Profile, Priorities (especially "Work I'd like to hand off"), Connections, Schedule, Customers & Leads, and the Your Team page (custom members, suggestions already made or declined). With email or calendar connected, ground the recommendations in a quick read-only look: how many recent customer and prospect emails look unanswered (last 14 days) and how busy the next 7 days are, from senders and subjects only, never storing contents. On paste mode, look at the Paste Box; if it's empty, invite the owner to paste two or three real customer emails and this week's key dates.
 
 2. **Recommend up to three responsibilities**, choosing from what the team can actually do today:
 
@@ -39,8 +39,8 @@ The rest of this skill is the full meeting, used when the owner asks for one lat
    | Overdue invoice report and reminder drafts | Finance | `review-overdue-invoices` (needs an invoice source) |
 
    Rules:
-   - Put the owner's own answer ("what do you spend too much time on?") first when it maps to one of these. If it maps to none, say plainly what the team can and can't do about it today, offer the closest fit, and mention that a custom team member is possible later (`manage-team`).
-   - For each recommendation, give the reason in one line, using only what you actually saw or the owner said: "You have 14 customer emails from the last two weeks, 6 with no reply yet." With no evidence, say so: "A common place to start; I don't have numbers yet."
+   - Put the owner's own hand-off answer first when it maps to one of these. If it maps to none, say plainly what the team can and can't do about it today, offer the closest fit, and mention that a custom team member is possible later (`manage-team`).
+   - Give each recommendation's reason in one line, from what you actually saw or the owner said: "You have 14 customer emails from the last two weeks, 6 with no reply yet." No evidence: "A common place to start; I don't have numbers yet."
    - Leave out anything that needs a missing connection or data source, unless the owner asked for it; then say what's needed in one line.
    - Skip anything already set up as a recurring responsibility (the morning run covers both the inbox and the briefing), anything the owner declined before, and anything their saved corrections rule out (`references/owner-corrections.md`).
 

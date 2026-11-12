@@ -1,19 +1,17 @@
 # Business Brain Interview (complete version)
 
-Used when the owner says "finish my setup" or "update my Business Brain answers", and as the field map for saving any answer. The normal first-time setup does **not** run this whole interview: it learns from the website, asks one question, and the team asks the rest just in time (`references/just-in-time.md`). Ask only about fields that are still empty.
-
-Goal: every field in the Business Brain is either answered by the owner or deliberately skipped, and every answer is saved to Notion as soon as the owner confirms it.
+Used when the owner says "finish my setup" or "update my Business Brain answers", and as the field map for saving any answer. First-time setup does **not** run it: the team asks the rest just in time (`references/just-in-time.md`). Ask only about fields that are still empty, until each is answered or deliberately skipped.
 
 ## How to run it
 
-- **One topic at a time**, at most 3 questions per message. Use multiple-choice options when a question tool is available; otherwise ask in plain text.
+- **One topic at a time**, at most 3 questions per message, multiple choice when a question tool is available.
 - **Propose before you ask.** Draft an answer from what you already know (website, earlier answers, connected email and calendar) and ask "Is this right?", saying what you looked at.
-- **Confirm, then save immediately.** After each topic, show the answers as 2-6 bullets, ask "Save this?", and on yes write them to Notion right away (see Saving). Then show one progress line, e.g. `Saved: Policies (topic 5 of 11)`.
+- **Confirm, then save at once.** After each topic, show the answers as 2-6 bullets, ask "Save this?", and on yes write them to Notion (see Saving), then one progress line: `Saved: Policies (topic 5 of 11)`.
 - **Skipping is fine.** "Skip" or "later" leaves that field as `not set` and moves on. Keep a list of skipped fields for the end.
-- **Confirmed, not inferred.** Only what the owner confirms is saved. Facts drafted from the website, an email or a calendar are proposals until then, and a yes to a summary covers its descriptive points, not prices or policies: confirm each price, offer and policy on its own line ("from your website, not confirmed: 30-day refunds. Still right?"). Never save or quote an unconfirmed one.
-- **Already answered is answered.** Anything the owner said earlier in setup, in this chat, or that's already saved is not asked again; show it for a quick check instead ("You said replies within a day. Still right?").
+- **Confirmed, not inferred.** Only what the owner confirms is saved. A yes to a summary covers its descriptive points, not prices or policies: confirm each price, offer and policy on its own line ("from your website, not confirmed: 30-day refunds. Still right?"). Never save or quote an unconfirmed one.
+- **Already answered is answered.** Anything the owner said earlier, or that's already saved, is shown for a quick check, not asked again ("You said replies within a day. Still right?").
 - **The owner's words, lightly tidied.** Never invent prices, policies, facts or quotes. A vague answer ("depends") is saved as said, plus "ask me case by case".
-- **Resuming.** If setup is restarted, fetch every page first and start at the first topic that still has `not set` fields. Don't re-ask answered fields; offer to review them instead.
+- **Resuming.** Fetch every page first and start at the first topic that still has `not set` fields.
 - **In a hurry?** Do the topics marked ★ first (the minimum for a useful team) and offer the rest later.
 
 ## Saving
@@ -43,7 +41,6 @@ Filled elsewhere, never asked here: **Connections** (the setup skill), **Active 
 
 ## Completeness check (end of interview)
 
-1. Re-fetch every page and count the remaining `not set`-style markers and the rows in Pricing & Offers.
-2. Show a short table: page, fields saved, fields still empty.
-3. If any ★ field is still empty, or Pricing & Offers has no rows, say plainly what the team can't do without it ("Sales can't quote anything until at least one offer is saved") and offer to fill those now.
-4. Finish with the Business Brain link and one line: "You can change any answer by editing the page in Notion, or by telling me."
+1. Re-fetch every page; count the remaining `not set`-style markers and the rows in Pricing & Offers, and show page, fields saved, fields still empty.
+2. If a ★ field is still empty, or Pricing & Offers has no rows, say plainly what the team can't do without it ("Sales can't quote anything until at least one offer is saved") and offer to fill it now.
+3. Finish with the Business Brain link and one line: "You can change any answer by editing the page in Notion, or by telling me."
