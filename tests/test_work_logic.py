@@ -270,6 +270,18 @@ class AssignmentsUpgrade(unittest.TestCase):
         self.assertEqual(len(ws["properties"]), len(set(ws["properties"])))
         self.untouched(before, ws)
 
+    def test_it_resumes_from_an_interruption_at_any_field(self):
+        for done in range(len(w.NEW_PROPERTIES)):
+            ws = w.old_workspace(); before = copy.deepcopy(ws)
+            with self.assertRaises(w.Interrupted):
+                w.upgrade_to_1_0_0(ws, stop_after=done)
+            self.assertEqual(ws["version"], "0.6.0", done)
+            self.assertNotIn("Sending: not set", ws["connections"], done)   # the lines come after the fields
+            self.assertEqual(w.upgrade_to_1_0_0(ws), w.NEW_PROPERTIES[done:], done)
+            self.assertEqual(ws["version"], "1.0.0", done)
+            self.assertEqual(ws["connections"].count("Sending: not set"), 1, done)
+            self.untouched(before, ws)
+
     def test_existing_owners_keep_the_old_sending_behaviour_until_they_answer(self):
         ws = w.old_workspace(); w.upgrade_to_1_0_0(ws)
         self.assertEqual(ws["connections"][-2:], ["Sending: not set", "Work lives in: not set"])
