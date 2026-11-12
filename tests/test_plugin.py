@@ -35,6 +35,20 @@ class Versions(unittest.TestCase):
             self.assertIsNotNone(m, s)
             self.assertEqual(m.group(1), self.version, s)
 
+    def test_the_version_the_owner_is_told_is_this_one(self):
+        """1.1.0 step 15: the self-test and the first-week recap say which version is installed. A skill can't
+        read the manifest, so the number is written in those two skills and has to move with each release."""
+        line = f"You're on AI Workforce {self.version}"
+        self.assertIn(line, read(SKILLS / "team-report" / "SKILL.md"))
+        self.assertIn(line, read(SKILLS / "workforce-self-test" / "SKILL.md"))
+        for p in SKILLS.glob("*/SKILL.md"):
+            if p.parent.name not in ("team-report", "workforce-self-test"):
+                self.assertNotIn("You're on AI Workforce", read(p), p)          # never in a daily briefing
+        recap = read(SKILLS / "team-report" / "SKILL.md").split("## First-week recap")[1]
+        for must in ["Customize → Plugins if you installed it from the marketplace", "upload the new one (a file never updates itself)",
+                     "Said here and in the self-test only, never in a daily briefing"]:
+            self.assertIn(must, recap)
+
     def test_readme_describes_this_version(self):
         self.assertIn(f"What's new in {self.version}", read(PLUGIN / "README.md"))
 

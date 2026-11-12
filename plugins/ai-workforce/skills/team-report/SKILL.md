@@ -46,6 +46,7 @@ On request (the daily briefing mentions it once). Same records as above, from "S
 4. **What the team has learned:** the preferences and corrections saved so far (Brand & Tone, Your Team notes, Priorities). If none, ask the one question that would help most ("How do you usually sign off?").
 5. **One thing to hand off next:** one suggestion grounded in what the team saw, with an offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled).
 6. **In one line:** what the team did this week (counts, from the records).
+7. **Version:** "You're on AI Workforce 1.0.0. To update: Customize → Plugins if you installed it from the marketplace; if you uploaded a file, upload the new one (a file never updates itself)." Said here and in the self-test only, never in a daily briefing.
 Nothing here creates tasks, approvals or notifications; anything the owner agrees to is done by the skill named.
 
 Read-only: this skill changes nothing.
