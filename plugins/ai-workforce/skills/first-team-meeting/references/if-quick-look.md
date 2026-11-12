@@ -1,8 +1,8 @@
-# Quick look (first assignment during setup only)
+# Quick look (on request, and the first assignment during setup)
 
-Read this only when `first-team-meeting` runs from setup and asks for a quick look at the inbox. Sections named below are in `references/inbox-coverage.md`.
+Read this only when the owner asks for a quick look at their newest mail, or `first-team-meeting` runs from setup and asks for one. Sections named below are in `references/inbox-coverage.md`.
 
-A brand-new owner should see a useful result in a few minutes, not wait for a full day's sweep of hundreds of emails. When `first-team-meeting` runs from setup and email is the first job, the team does a **quick look** instead of the full triage:
+A quick look answers "is anyone waiting on me?" in a few minutes, without a full day's sweep. **On request** ("just check my newest 20 emails", "anything new since lunch"), use the number or the time the owner gave in place of 50 threads and 24 hours, and skip "Their voice first" when Brand & Tone already has their style. During setup, when email is the first job, it is:
 - **Search:** the same All Mail search as section 2 for the last 24 hours, but only the **newest 50 threads** (one page, or as many pages as it takes to reach 50).
 - **Their voice first.** Before drafting, read up to 10 of the owner's most recent sent replies to people (Gmail: a search for `in:sent`, newest first; Microsoft 365: Sent items; skip automatic and forwarded mail). Note how they write in at most five short lines: how they greet, how they sign off, how long and how formal their replies are, a phrase or two they use. Write the drafts that way, sign-off included, and keep the lines for the setup summary, which saves them to Brand & Tone once the owner confirms (`setup-workforce`, Stage 3). Style only: never copy those emails' contents, names or addresses anywhere. Fewer than three such emails: skip this and draft plainly.
 - **Pick:** from metadata only, the threads where a person is waiting on the owner or something is time-sensitive (section 3's first two buckets, after the owner's corrections). Read at most 10 in full; draft at most 3 replies; queue approvals only for real decisions.

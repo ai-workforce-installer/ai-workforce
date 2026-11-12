@@ -1,6 +1,6 @@
 ---
 name: inbox-triage
-description: This skill should be used when the owner asks to "triage my inbox", "go through my email", "check my email", "what's in my inbox", "anything important in my email?", "what did I miss?", or wants all their email reviewed, sorted and followed up, not only customer messages. Also used by the daily briefing as its inbox check, and by a scheduled extra inbox check.
+description: This skill should be used when the owner asks to "triage my inbox", "go through my email", "check my email", "what's in my inbox", "anything important in my email?", "what did I miss?", or wants all their email reviewed, sorted and followed up, not only customer messages; also for a quick look ("just check my newest 20 emails", "anything new since lunch"). Also used by the daily briefing as its inbox check, and by a scheduled extra inbox check.
 metadata:
   version: "0.9.0"
 ---
@@ -17,7 +17,7 @@ Follow `references/inbox-coverage.md` (how to search, sort and count), `referenc
 
 **Inside the morning run:** when `daily-executive-briefing` runs this skill as its inbox check, do every step below exactly as written (its own run record with an IT Run ID, window, bookmark, Handled list, coverage counts, open-work rows and approvals), with three differences. Reuse the context the briefing already loaded instead of reading it again. Send no notification and write no chat report: the step 9 report goes in the record only, which ends `Notified: not requested (included in <the briefing's Run ID>)`. And hand the briefing a short summary to build on: the coverage line, urgent and needs-you items, what was prepared (with links), worth-knowing items, anything not checked, and the Result.
 
-**Quick look:** when `first-team-meeting` runs during setup and asks for a quick look, follow `references/if-quick-look.md` instead of the full window (newest 50 threads, labelled as a quick look, bookmark not moved). Every other run, attended or scheduled, is the full triage below.
+**Quick look:** when the owner asks for one at any time ("just check my newest 20 emails", "anything new since lunch"), or `first-team-meeting` asks for one during setup, follow `references/if-quick-look.md` instead of the full window: its own record labelled a quick look, bookmark not moved, never said to cover the whole inbox, the full check offered in one line. Every other run, attended or scheduled, is the full triage below.
 
 ## Steps
 

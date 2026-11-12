@@ -58,7 +58,7 @@ Saving follows `manage-team` part A: fetch the page first, replace a placeholder
 ## 6. Draft feedback: fix it now, offer to keep it
 
 1. **Apply it to the current draft right away** and show the changed part (or the whole draft if short). Update the same draft in place: the same Gmail draft, the same Briefings text, the same Approvals row's Draft link. Never create a new approval or a second draft for a wording change.
-2. **Offer once to make it lasting**, quoting the line: "Want me to save 'Write conversationally; sign off with just my first name' to Brand & Tone so every draft does this?" Offer when the feedback is about style, voice, sign-off, words to use or avoid, or a fact that will come up again. Don't offer for a one-off ("make this one shorter").
+2. **Offer once to make it lasting** (unless the owner already said "from now on": then save it and say what was saved), quoting the line: "Want me to save 'Write conversationally; sign off with just my first name' to Brand & Tone so every draft does this?" Offer when the feedback is about style, voice, sign-off, words to use or avoid, or a fact that will come up again. Don't offer for a one-off ("make this one shorter").
 3. **A factual correction** ("that claim isn't accurate", "we don't offer that") is saved where the fact lives (Company Profile, Pricing & Offers, Policies, FAQs) only after the owner gives the right version; until then the claim is simply removed from the draft.
 4. **The owner keeps making the same change** (second time): offer to save it even if it looked like a one-off.
 5. Saved preferences apply from the next draft on, and drafts still waiting under the old rule are offered for a redo (`manage-team` part A, step 4).

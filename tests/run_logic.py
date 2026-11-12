@@ -397,25 +397,28 @@ QUICK_LOOK_THREADS = 50
 QUICK_LOOK_DRAFTS = 3
 
 
-def quick_look(records, mailbox, now, actions=None):
-    """Newest 50 threads of the last 24 hours, at most 3 drafts. A normal IT record that never sets
-    Completed through and is never 'comprehensive', so the bookmark doesn't move."""
+def quick_look(records, mailbox, now, actions=None, threads=QUICK_LOOK_THREADS, since=None):
+    """Newest 50 threads of the last 24 hours, at most 3 drafts: the first job during setup, and since
+    1.0.0 whatever the owner asks for at any time ("my newest 20", "since lunch"). A normal IT record
+    that never sets Completed through and is never 'comprehensive', so the bookmark doesn't move."""
     actions = [] if actions is None else actions
-    rec = Record(make_run_id("IT", now, records), "Inbox triage", now, window=(now - FIRST_RUN_WINDOW, now))
+    start = since or now - FIRST_RUN_WINDOW
+    rec = Record(make_run_id("IT", now, records), "Inbox triage", now, window=(start, now))
     records.append(rec)
     newest, page = [], 0
-    while len(newest) < QUICK_LOOK_THREADS:
-        chunk, more = mailbox.search(now - FIRST_RUN_WINDOW, now, page)
+    while len(newest) < threads:
+        chunk, more = mailbox.search(start, now, page)
         newest += chunk
         if not more:
             break
         page += 1
-    newest = newest[:QUICK_LOOK_THREADS]
+    newest = newest[:threads]
     rec.coverage = f"quick look (newest {len(newest)} threads)"
     rec.reviewed = len(newest)
     for m in [m for m in newest if m.important][:QUICK_LOOK_DRAFTS]:
         key = f"gmail:{m.id}"
-        actions.append(("draft", key))
+        if ("draft", key) not in actions:
+            actions.append(("draft", key))
         rec.handled.add(key)
     rec.finished = now
     rec.completed_through = None             # "Completed through: not moved (quick look)"

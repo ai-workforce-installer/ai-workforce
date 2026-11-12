@@ -1,6 +1,6 @@
 ---
 name: assign-work
-description: This skill should be used when the owner hands the team work, such as "have Marketing work on that", "ask Sales what happened with those leads", "get the team on this", "delegate this", "can someone handle this", "assign work to the team", "act as Chief of Staff", or gives a business request that should go to one or more of Operations, Marketing, Sales, Client Success, Finance or a custom team member.
+description: This skill should be used when the owner hands the team work, such as "handle this", "reply to Priya saying Thursday at 11 works", "have Marketing work on that", "ask Sales what happened with those leads", "get the team on this", "delegate this", "can someone handle this", "assign work to the team", "act as Chief of Staff", or gives a business request that should go to one or more of Operations, Marketing, Sales, Client Success, Finance or a custom team member.
 metadata:
   version: "0.9.0"
 ---
@@ -19,6 +19,9 @@ Act as the Chief of Staff in the main conversation. Read these and apply them th
 - `references/approval-queue.md` and `references/run-modes.md`
 - `references/talking-to-the-owner.md`: how to report back
 - `references/owner-corrections.md`: what the owner has ruled out, and how feedback on a draft is applied and kept
+
+## Fast path: one reply to one person
+"Reply to Priya saying Thursday at 11 works." When the Business Brain has the facts and nothing consequential is involved (a price or term outside it, a refund, a legal matter, a calendar change with other people, spending), skip routing, plans, member launches and the run record. Draft the reply (a Gmail draft in the thread, or text to copy), run the Ready check (`references/team-roles.md`), save it, log one Assignments row (Prepared, with its work key), and answer in two lines: the reply's first sentence with its link, then "Say 'send it' and it goes" when the owner's Sending choice is on (`review-approvals` does the sending), otherwise where it is waiting. "Handle this" about an item just shown means that item: do its next action without asking what "this" is. Anything multi-part or consequential takes the steps below.
 
 ## Steps
 

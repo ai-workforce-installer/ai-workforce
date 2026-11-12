@@ -1,6 +1,6 @@
 ---
 name: review-approvals
-description: This skill should be used when the user says "clear my desk", "go", "what's waiting for me", "what needs me", "review my approvals", "clear my approvals", "approve AP-12", "send all ready", "finish yesterday's queue", "what does the team need from me", answers the team's items in plain words ("two is fine", "send it", "look into three", "one isn't my problem", "decline those invitations"), or wants to go through everything the AI team has waiting on them and decide on each item. Load it before acting on any reply to those items, however short.
+description: This skill should be used when the user says "clear my desk", "go", "what's waiting for me", "what needs me", "review my approvals", "clear my approvals", "approve AP-12", "send all ready", "finish yesterday's queue", "what does the team need from me", answers or steers the team's items in plain words ("two is fine", "send it", "look into three", "one isn't my problem", "decline those invitations", "that's already done", "snooze it until Tuesday", "I'm waiting on Dana until Friday", "remind me if they haven't replied", "stop tracking this"), or wants to go through everything the AI team has waiting on them and decide on each item. Load it before acting on any reply to those items, however short.
 metadata:
   version: "0.9.0"
 ---
@@ -49,7 +49,7 @@ Everything waiting on the owner, one card at a time: replies to send, decisions,
 ## Understanding replies
 Owners answer in their own words, often several items at once. Map every part of the reply to an item and a meaning before doing anything.
 
-**Which item.** Read numbers the way the owner was just shown them: if the last list in this chat numbered items 1, 2, 3, "two" is the second item; if it showed AP numbers, "12" is AP-12. If the list showed both positions and AP numbers and a number could mean either, pointing to different items, ask. "Those invitations", "the Stripe one", "the last two" count only when exactly the items you'd act on fit the description; otherwise ask. Items the reply doesn't mention stay as they are.
+**Which item.** Read numbers the way the owner was just shown them: if the last list in this chat numbered items 1, 2, 3, "two" is the second item; if it showed AP numbers, "12" is AP-12. If the list showed both positions and AP numbers and a number could mean either, pointing to different items, ask. "Those invitations", "the Stripe one", "the last two" count only when exactly the items you'd act on fit the description; otherwise ask. "It", "this" or "that one" is the item just shown or just discussed: resolve it directly, update that same item, and confirm in one line ("Snoozed until Tuesday 9 AM: the reply to your landlord"). Ask only when several items fit and the choice would change the result. Items the reply doesn't mention stay as they are.
 
 **What it means.** Each answer is exactly one of these:
 
@@ -65,6 +65,9 @@ Owners answer in their own words, often several items at once. Map every part of
 | "reject 4", "no", "don't" | **Rejected** | Rejected; nothing done |
 | "drop them", "drop the promo drafts", "I used the brief", "redo it: shorter" (about drafts or prepared pieces, not approvals) | **Waiting work** | Used: Done, Completed. Dropped: Done, Dismissed, with the owner's words; a Gmail draft stays where it is, never deleted. Redo: change the same piece and show it again. If they say why they're dropping it, offer once to remember that (`references/if-owner-corrects.md`) |
 | "change 6: shorter" | **Change** | Edit the same draft as asked, show it again, wait for a yes |
+| "snooze it until Tuesday", "not today" | **Snooze** | The same row keeps its status and gets Next check Tuesday (no day given: 3 days); it returns then, and not before |
+| "I'm waiting on Dana until Friday", "remind me if they haven't replied" | **Waiting on someone** | The same row (or one new row, Work type Waiting on someone): Blocked, Waiting on Dana, Next check Friday, or the suggested check when no day was given, said as suggested. The morning run looks then, and prepares a nudge only if no reply has come |
+| "stop tracking this" | **Cancelled** | Done, Cancelled, with their words. It stays closed; nothing is sent, deleted or unsubscribed because of it |
 | "handle them", "do whatever makes sense", "sure" for several items, or anything you can't map | **Ambiguous** | **No action on any item it might cover.** Ask one short question naming the items and the options ("For 2 and 4: send both replies as drafted, or hold them?") |
 
 Rules:

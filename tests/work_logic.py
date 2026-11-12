@@ -570,3 +570,66 @@ def missed_runs(expected, records, clock, already_said=()):
         if (last is None or last < window_began) and job not in already_said:
             out.append("Your %s hasn't left a record since %s" % (job, clock.local(last).strftime("%A") if last else "it was set up"))
     return out
+
+
+# ---- 1.0.0 step 4: plain-language control and the one-reply fast path ----
+
+CONSEQUENTIAL = ("price outside the Business Brain", "refund", "legal matter", "calendar change with others", "spending")
+
+
+def route_request(people=1, parts=1, facts_in_brain=True, involves=()):
+    """"Reply to Priya saying Thursday at 11 works" is one reply to one person: no routing, no plan."""
+    if people == 1 and parts == 1 and facts_in_brain and not set(involves) & set(CONSEQUENTIAL):
+        return {"path": "fast", "plan table": False, "members launched": 0, "drafts": 1, "ready check": True,
+                "assignments rows": 1, "lines in the answer": 2}
+    return {"path": "full procedure", "plan table": parts > 1, "ready check": True}
+
+
+def fast_path_answer(first_sentence, link, settings):
+    """Two lines. The offer to send appears only when the owner chose to have approved replies sent."""
+    second = "Say 'send it' and it goes." if sending_choice(settings) == SEND else "It's waiting in your drafts."
+    return ["%s %s" % (first_sentence, link), second]
+
+
+def resolve_reference(phrase, in_view, would_differ=True):
+    """"It", "this", "that one": the item just shown. Ask only when several targets would change the result."""
+    if len(in_view) == 1:
+        return in_view[0]
+    if len(in_view) > 1 and not would_differ:
+        return in_view[0]
+    return None                                      # ask which
+
+
+def steer(row, words, clock, until=None, who=None):
+    """The owner steers one item in plain words: the same row is updated, and one line confirms it."""
+    said = words.lower()
+    if "snooze" in said or "not today" in said:
+        snooze(row, until or clock.working_days_from_now(3))
+        return "Snoozed until %s: %s" % (clock.local(row.next_check).strftime("%A %I %p").replace(" 0", " "), row.title)
+    if "waiting on" in said or "remind me" in said:
+        wait_on(row, who or "them", clock, until)
+        note = " (a suggested check)" if row.check_is_suggested else ""
+        return "Waiting on %s; I'll look %s%s: %s" % (row.waiting_on, clock.local(row.next_check).strftime("%A"), note, row.title)
+    if "already done" in said or "i sent it" in said or "already handled" in said:
+        _close(row, "Completed", clock.now(), words=words)
+        return "Closed, as you said: " + row.title
+    if "stop tracking" in said:
+        owner_cancels(row, clock, words)
+        return "Stopped tracking: " + row.title
+    return None                                      # not a steering phrase
+
+
+PREFERENCE_KINDS = {
+    "style": "save now, confirm after",              # "use this shorter style from now on"
+    "working": "save now, confirm after",            # "finish what's waiting before starting something new"
+    "hides items": "confirm first",                  # "stop flagging X", "not mine anymore": a wrong one buries mail
+    "price or policy": "confirm first",
+    "inferred": "confirm first",
+    "sending or spending": "never saved: offer what the policy allows",
+}
+
+
+def save_preference(kind, stated_outright=True):
+    if kind in ("style", "working") and not stated_outright:
+        return "confirm first"                       # something the team noticed is offered, not saved
+    return PREFERENCE_KINDS[kind]

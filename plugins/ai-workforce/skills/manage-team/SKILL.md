@@ -13,7 +13,7 @@ The owner should never have to rebuild a team member. They say how they want the
 
 ## A. "From now on…" (how the work should be done)
 
-0. **Check it's safe.** No saved rule can loosen the team's safety rules (`references/approval-policy.md`): the team still never sends, spends, publishes, deletes or changes financial records without the owner. If the request would loosen one, say so kindly, offer the closest safe version, and save only that.
+0. **Check it's safe.** No saved rule can loosen the team's safety rules (`references/approval-policy.md`), and a preference never grants new permission to send or spend: never infer one. If the request would loosen a rule, say so kindly, offer what the policy allows (for "just send the FAQ replies": the Sending setting, on the owner's yes, never in a run nobody is watching), and save only that.
 1. **Work out where it belongs**, using the narrowest place that covers it:
 
    | The owner is changing | Save to |
@@ -30,11 +30,9 @@ The owner should never have to rebuild a team member. They say how they want the
    | Which members take part in briefings | Workforce Settings → Active departments |
    | A one-off change to a single draft | Nowhere: just change that draft |
 
-2. **Confirm in one line**, quoting the exact words you'll save: "Got it. I'll save this for Client Success: 'Keep replies under five sentences, warm and friendly.' OK?" Save only after they say yes.
+2. **Say the exact words you'll save.** A style or working preference the owner states outright ("use this shorter style from now on", "finish what's waiting before starting something new") is saved straight away, with no second "Save this?": confirm in one line what was saved and where, and that "undo" takes it back. Everything else is confirmed first and saved only after their yes: a price, a policy, a fact, anything you inferred, and above all a rule that hides items (part A2), because a wrong one silently buries mail. "Got it. I'll save this for Client Success: 'Keep replies under five sentences, warm and friendly.' OK?"
 3. **Save it**, add-only where possible: replace a placeholder line, or add a bullet. Fetch the page first. Placeholders read back in italics (`<i>none yet</i>`, `<i>not set</i>`) and repeat under every heading, so match the heading together with its placeholder, for example `### Client Success\n\n- <i>none yet</i>`. When a section already has bullets, add yours after the last one. When the new rule contradicts an old one, show both and ask which wins; then replace the old line, except on Priorities' correction sections, where the old line gets " · no longer applies <date>" instead (`references/owner-corrections.md`). Never delete anything else.
 4. **Say how it applies:** "Done. Client Success will follow this from the next reply on." If drafts made under the old rule are still waiting (pending approvals, Replies ready to copy), offer to redo them.
-
-The team also learns this way from the review step: when the owner keeps changing drafts the same way, `review-approvals` offers to save the change here.
 
 ## A2. "That's not mine anymore" / "stop bringing this up"
 The owner is correcting what the team thinks matters. Follow `references/if-owner-corrects.md`: decide whether it's about this item only, this thread, a lasting rule or a temporary one; for a lasting rule, confirm the exact line (and the related open items you'd close) in one message, save it on Priorities, close the related items with their history kept, and say how it applies: "Done. The team won't raise the old Northwind automations again. A new security problem on your own accounts would still come to you." Scheduled runs never save rules; they list a possible correction under Questions for you.
@@ -48,9 +46,8 @@ Reuse before expanding. Most new jobs belong to someone already on the team.
 1. **Understand the job:** what work, how often, what a good result looks like, which apps or information it needs.
 2. **Decide, in this order, and stop at the first yes:**
    1. **An existing member, with clearer instructions.** Podcast show notes fit Marketing; vendor follow-ups fit Operations. Offer: "Marketing can take this on. I'll add 'Podcast: research, show notes, repurposing' to Marketing's responsibilities on Your Team." Save it there (part A).
-   2. **Something the owner already has.** If another installed plugin covers it, point the owner to it and let them use it themselves. The team doesn't hand its work to tools outside these rules.
-   3. **A trusted outside source.** Don't search the web for agents and don't install anything. If the owner wants to look, they can browse Customize → Plugins → Discover; plugins in Anthropic's directory are reviewed by Anthropic, others are not. Anything from elsewhere needs the owner to check where it came from first.
-   4. **A new custom team member**, only if the work recurs, has its own deliverables, and would crowd an existing member's job. More than three custom members usually means some should merge: say so.
+   2. **Something the owner already has.** If another installed plugin covers it, point the owner to it. Don't search the web for agents and don't install anything: the owner can browse Customize → Plugins themselves, and should check where anything from elsewhere came from.
+   3. **A new custom team member**, only if the work recurs, has its own deliverables, and would crowd an existing member's job. More than three custom members usually means some should merge: say so.
 3. **Draft the new member** and show it in plain language:
    - **Name and job** (one sentence)
    - **Responsibilities** (3-5 bullets)
@@ -69,5 +66,5 @@ Reuse before expanding. Most new jobs belong to someone already on the team.
 - **Retire one:** set Status to "Retired" (never delete the block), and offer to pause any recurring responsibility it had.
 - **Core members** can't be removed, but they can sit out. Under Active departments, no ticks means the default set (`references/run-modes.md`); once anything is ticked, only ticked members take part. So to turn one off, tick every other member the owner wants and leave that one unticked; to turn one back on, tick it. Check the result, then say what changes: "Finance won't appear in your briefings until you turn it back on."
 
-## Proactive suggestions (used by the daily briefing)
-At most once a week, the Chief of Staff may suggest one new responsibility or one new team member in the briefing, only when it rests on something the team actually saw. Examples: the same customer question answered three or more times; the owner changing drafts the same way repeatedly; one member repeatedly doing work outside its job. Record each suggestion under "Suggestions from your Chief of Staff" on Your Team with the date and "open". Mark it "accepted" or "declined" when the owner answers, and never repeat a declined one.
+## Proactive suggestions
+The daily briefing may add one suggestion a week (its rule is there). When the owner answers one, mark it "accepted" or "declined" under "Suggestions from your Chief of Staff" on Your Team, and never repeat a declined one.

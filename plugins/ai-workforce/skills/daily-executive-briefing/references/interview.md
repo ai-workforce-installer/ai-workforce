@@ -18,7 +18,7 @@ Goal: every field in the Business Brain is either answered by the owner or delib
 
 ## Saving
 
-- Fetch the page before writing. Unanswered fields read back as `<i>not set</i>` (or `<i>paste one here</i>`, `<i>none yet</i>`, and similar italics on FAQs and Extra rules). The same marker appears many times, so always replace the **whole line including its label** (`- Name: <i>not set</i>` → `- Name: Dana Lee`), or the **heading plus marker** for paragraph fields (`## Refunds\n\n<i>not set</i>`).
+- Fetch the page before writing. Unanswered fields read back in italics (`<i>not set</i>`, `<i>none yet</i>`), many times over, so always replace the **whole line including its label** (`- Name: <i>not set</i>` → `- Name: Dana Lee`), or the **heading plus marker** for paragraph fields.
 - Lists (goals, words we use, FAQs, extra rules): replace the placeholder line with one bullet or numbered line per item.
 - Database rows (Pricing & Offers, Customers & Leads): create one row per item with the exact property names below.
 - If a write is refused, re-fetch the page, match the text as it now stands, and retry once. If it still fails, tell the owner which field didn't save and keep going.

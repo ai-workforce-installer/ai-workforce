@@ -478,5 +478,57 @@ class TheBriefing(unittest.TestCase):
                          ["Your weekly marketing plan hasn't left a record since it was set up"])
 
 
+class PlainLanguageControl(unittest.TestCase):
+    def setUp(self):
+        self.clock = monday_morning()
+        self.row = w.Row("gmail-thread:t9:reply-landlord", "the reply to your landlord", work_type="Reply", status="Prepared")
+
+    def test_one_reply_to_one_person_takes_the_fast_path(self):
+        fast = w.route_request()
+        self.assertEqual((fast["path"], fast["plan table"], fast["members launched"], fast["drafts"], fast["assignments rows"]),
+                         ("fast", False, 0, 1, 1))
+        self.assertTrue(fast["ready check"])                                       # the draft is still checked
+        for involves in w.CONSEQUENTIAL:
+            self.assertEqual(w.route_request(involves=(involves,))["path"], "full procedure", involves)
+        self.assertEqual(w.route_request(parts=3)["path"], "full procedure")
+        self.assertEqual(w.route_request(people=4)["path"], "full procedure")
+        self.assertEqual(w.route_request(facts_in_brain=False)["path"], "full procedure")
+
+    def test_the_answer_is_two_lines_and_offers_to_send_only_when_the_setting_is_on(self):
+        on = w.fast_path_answer("Hi Priya, Thursday at 11 works.", "(draft link)", {"Sending": w.SEND})
+        self.assertEqual((len(on), on[1]), (2, "Say 'send it' and it goes."))
+        for settings in [{}, {"Sending": w.LEAVE}]:
+            self.assertNotIn("send it", w.fast_path_answer("Hi Priya, Thursday at 11 works.", "(draft link)", settings)[1])
+
+    def test_a_clear_reference_is_resolved_directly(self):
+        other = w.Row("gmail-thread:t3:reply-sam", "the reply to Sam")
+        self.assertIs(w.resolve_reference("it", [self.row]), self.row)
+        self.assertIsNone(w.resolve_reference("it", [self.row, other]))            # several, and it matters: ask
+        self.assertIs(w.resolve_reference("this", [self.row, other], would_differ=False), self.row)
+
+    def test_the_same_item_is_updated_and_confirmed_in_one_line(self):
+        line = w.steer(self.row, "Snooze it until Tuesday", self.clock, until=self.clock.local_time(2026, 3, 3, 9, 0))
+        self.assertEqual(line, "Snoozed until Tuesday 9 AM: the reply to your landlord")
+        self.assertEqual(self.row.status, "Prepared")
+        line = w.steer(self.row, "I'm waiting on Dana until Friday", self.clock, who="Dana", until=self.clock.local_time(2026, 3, 6, 9, 0))
+        self.assertEqual((self.row.status, self.row.waiting_on), ("Blocked", "Dana"))
+        self.assertIn("Friday", line); self.assertNotIn("suggested", line)
+        line = w.steer(self.row, "Remind me if they haven't replied", self.clock, who="Dana")
+        self.assertIn("a suggested check", line)                                   # no day was given, and it says so
+        w.steer(self.row, "That's already done", self.clock)
+        self.assertEqual(self.row.closed_as, "Completed")
+        again = w.Row("alert:oldco:sync", "the OldCo sync alerts")
+        self.assertEqual(w.steer(again, "Stop tracking this", self.clock), "Stopped tracking: the OldCo sync alerts")
+        self.assertEqual(again.closed_as, "Cancelled")
+
+    def test_a_style_preference_is_saved_without_a_second_ask_but_a_hiding_rule_is_confirmed(self):
+        self.assertEqual(w.save_preference("style"), "save now, confirm after")
+        self.assertEqual(w.save_preference("working"), "save now, confirm after")
+        self.assertEqual(w.save_preference("hides items"), "confirm first")
+        self.assertEqual(w.save_preference("price or policy"), "confirm first")
+        self.assertEqual(w.save_preference("style", stated_outright=False), "confirm first")
+        self.assertTrue(w.save_preference("sending or spending").startswith("never saved"))   # a preference grants no permission
+
+
 if __name__ == "__main__":
     unittest.main()

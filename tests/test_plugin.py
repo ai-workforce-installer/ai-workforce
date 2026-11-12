@@ -593,6 +593,62 @@ class DraftsAreNotApprovals(unittest.TestCase):
         self.assertIn("a Gmail draft stays where it is, never deleted", ra)
 
 
+class PlainLanguageControl(unittest.TestCase):
+    """1.0.0: the owner steers work in plain words, through the skills that already exist."""
+    def test_each_phrase_reaches_a_skill_that_exists(self):
+        desk = read(SKILLS / "review-approvals" / "SKILL.md").split("---", 2)[1]
+        for phrase in ["that's already done", "snooze it until Tuesday", "I'm waiting on Dana until Friday",
+                       "remind me if they haven't replied", "stop tracking this"]:
+            self.assertIn(phrase, desk)
+        work = read(SKILLS / "assign-work" / "SKILL.md").split("---", 2)[1]
+        for phrase in ['"handle this"', '"reply to Priya saying Thursday at 11 works"']:
+            self.assertIn(phrase, work)
+        self.assertIn('"from now on…"', read(SKILLS / "manage-team" / "SKILL.md").split("---", 2)[1])
+        inbox = read(SKILLS / "inbox-triage" / "SKILL.md").split("---", 2)[1]
+        for phrase in ['"just check my newest 20 emails"', '"anything new since lunch"']:
+            self.assertIn(phrase, inbox)
+        self.assertEqual(len(list(SKILLS.glob("*/SKILL.md"))), 13)                  # no new skill, no parallel task system
+
+    def test_the_same_item_is_updated_and_confirmed_in_one_line(self):
+        ra = read(SKILLS / "review-approvals" / "SKILL.md")
+        for must in ["resolve it directly, update that same item, and confirm in one line",
+                     "Ask only when several items fit and the choice would change the result",
+                     "| **Snooze** |", "| **Waiting on someone** |", "| **Cancelled** |",
+                     "it returns then, and not before", "said as suggested",
+                     "nothing is sent, deleted or unsubscribed because of it"]:
+            self.assertIn(must, ra)
+
+    def test_a_style_preference_is_saved_at_once_and_a_hiding_rule_is_still_confirmed(self):
+        mt = read(SKILLS / "manage-team" / "SKILL.md")
+        for must in ['is saved straight away, with no second "Save this?"', "confirm in one line what was saved and where",
+                     "above all a rule that hides items (part A2), because a wrong one silently buries mail",
+                     "a preference never grants new permission to send or spend: never infer one"]:
+            self.assertIn(must, mt)
+        self.assertIn("for a lasting rule, confirm the exact line", mt)                   # part A2 is as it was
+        self.assertIn("One yes covers the rule and the related items you listed. Save nothing before that yes.", read(REFS / "if-owner-corrects.md"))
+        self.assertIn('unless the owner already said "from now on"', read(REFS / "if-owner-corrects.md"))
+
+    def test_the_fast_path(self):
+        aw = read(SKILLS / "assign-work" / "SKILL.md")
+        for must in ["## Fast path: one reply to one person", "the Business Brain has the facts and nothing consequential is involved",
+                     "a price or term outside it, a refund, a legal matter, a calendar change with other people, spending",
+                     "skip routing, plans, member launches and the run record", "run the Ready check",
+                     "log one Assignments row", "answer in two lines", "when the owner's Sending choice is on",
+                     "Anything multi-part or consequential takes the steps below"]:
+            self.assertIn(must, aw)
+        self.assertLess(aw.index("## Fast path"), aw.index("## Steps"))
+
+    def test_a_quick_look_can_be_asked_for_at_any_time(self):
+        i = read(SKILLS / "inbox-triage" / "SKILL.md")
+        for must in ["when the owner asks for one at any time", "its own record labelled a quick look, bookmark not moved",
+                     "never said to cover the whole inbox, the full check offered in one line"]:
+            self.assertIn(must, i)
+        q = read(SizeBudget.ref("if-quick-look.md"))
+        for must in ["# Quick look (on request, and the first assignment during setup)", "**On request**",
+                     "use the number or the time the owner gave in place of 50 threads and 24 hours"]:
+            self.assertIn(must, q)
+
+
 class BriefingLeadsWithWhatMatters(unittest.TestCase):
     """1.0.0: on one live account a morning run read 287 threads and produced one reply, eleven items
     were waiting on the owner and the briefing said "Needs you: 0 decisions"."""
@@ -630,7 +686,8 @@ class BriefingLeadsWithWhatMatters(unittest.TestCase):
     def test_no_nagging_and_clear_first(self):
         for must in ["**Don't nag.**", "named in at most two briefings", '"Still want this? Send / Drop / Snooze 3 days"',
                      "Dropped means closed with the owner's words (Dismissed; an approval: Expired), never deleted",
-                     "**Clear first.**", "With more than five, this run makes no new optional work",
+                     "**Clear first.**", "this run makes no new optional work (no priority piece, no research, no suggestion)",
+                     "or any at all, when Extra rules say to finish what's waiting first",
                      "5 to start, 8 the day after they cleared them all, 3 while more is waiting than at the last briefing",
                      '"Still waiting from yesterday: 7, the oldest a reply to Dana (3 days)."']:
             self.assertIn(must, self.b)

@@ -1,5 +1,5 @@
 ---
-description: A lasting correction is confirmed in one line, kept as narrow as what the owner said, and never hides security or money.
+description: A rule that hides items ('stop flagging X', 'not mine anymore') is still confirmed in one line before it is saved (a wrong one silently buries mail), kept as narrow as what the owner said, and never hides security or money. Since 1.0.0 only an outright style preference is saved without that step (see style-preference-is-saved-without-a-second-ask).
 tags: [learning, attended]
 max_turns: 15
 timeout_seconds: 600

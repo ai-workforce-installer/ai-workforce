@@ -278,16 +278,54 @@ class FirstAssignmentQuickLook(unittest.TestCase):
         self.assertEqual(full.window[0], now - timedelta(hours=24))       # reaches back: no mail skipped
 
 
+class QuickLookOnDemand(unittest.TestCase):
+    """1.0.0: "just check my newest 20 emails" or "anything new since lunch" runs the same quick look at
+    any time: its own record, labelled, and the bookmark stays exactly where the last full check left it."""
+    def setUp(self):
+        self.morning = datetime(2026, 11, 6, 7, 30)
+        msgs = [Message(f"m{i}", self.morning + timedelta(minutes=9 * i - 300), important=(i % 9 == 0)) for i in range(90)]
+        self.box, self.records, self.actions = Mailbox(msgs), [], []
+        self.full = triage(self.records, self.box, self.morning, actions=self.actions)
+        self.bookmark = last_checkpoint(self.records)
+        self.assertEqual(self.bookmark, self.morning)
+
+    def test_newest_20_makes_its_own_record_and_leaves_the_bookmark(self):
+        now = self.morning + timedelta(hours=6)
+        rec = quick_look(self.records, self.box, now, self.actions, threads=20)
+        self.assertEqual((rec.reviewed, rec.coverage), (20, "quick look (newest 20 threads)"))
+        self.assertIsNot(rec, self.full)
+        self.assertEqual(len(self.records), 2)                             # its own record
+        self.assertIsNone(rec.completed_through)
+        self.assertEqual(last_checkpoint(self.records), self.bookmark)     # not moved
+        self.assertIn("haven't gone through the rest", owner_summary(rec, 60))
+        self.assertNotIn("all", owner_summary(rec, 60).lower())            # never claims the whole inbox
+
+    def test_since_lunch_looks_only_at_that_window(self):
+        now = self.morning + timedelta(hours=6)
+        lunch = now.replace(hour=12, minute=0)
+        rec = quick_look(self.records, self.box, now, self.actions, since=lunch)
+        self.assertEqual(rec.window, (lunch, now))
+        self.assertEqual(last_checkpoint(self.records), self.bookmark)
+
+    def test_the_next_full_check_still_starts_from_the_bookmark_and_drafts_nothing_twice(self):
+        now = self.morning + timedelta(hours=6)
+        quick_look(self.records, self.box, now, self.actions, threads=20)
+        later = triage(self.records, self.box, now + timedelta(hours=2), actions=self.actions)
+        self.assertEqual(later.window[0], self.bookmark - timedelta(minutes=15))
+        keys = [k for _, k in self.actions]
+        self.assertEqual(len(keys), len(set(keys)))
+
+
 class LearningTheBusiness(unittest.TestCase):
-    FACTS = [("What we do", "Software for affiliate marketers", "description"),
-             ("Who we serve", "Affiliate marketers", "description"),
+    FACTS = [("What we do", "Workshops for first-time managers", "description"),
+             ("Who we serve", "New team leads", "description"),
              ("Pro plan", 49, "price"),
              ("Refunds", "30-day money-back guarantee", "policy")]
 
     def test_website_facts_are_not_confirmed_pricing_or_policy(self):
         b = Brain()
         save_website_summary(b, self.FACTS, summary_yes=True)
-        self.assertEqual(b.profile["What we do"], "Software for affiliate marketers")
+        self.assertEqual(b.profile["What we do"], "Workshops for first-time managers")
         self.assertEqual(b.pricing, {})
         self.assertEqual(b.policies, {})
         self.assertEqual(ready_check("Get Pro for $49 today.", b), ["unconfirmed price: $49"])
