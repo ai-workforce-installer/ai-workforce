@@ -3,7 +3,7 @@
 Read this only when a run started by a recurring task finds that the task's stored text names a skill other than the one that fits the job, when that skill can't be loaded, or when the owner asks what a task's stored text means for what it does.
 
 ## Which job a recurring task does (scheduled runs)
-A recurring task stores short instructions: which job to do, the safety rules, which skill to use, and what to do if the plugin isn't loaded. Everything else a run does comes from the installed plugin: the skill and the rules for scheduled runs (`scheduled-run-rules.md` in the skill's references). So when AI Workforce is updated, every recurring task does the job the new way on its next run, whatever its stored text says, and an older stored text never makes a run do less.
+A recurring task stores only short instructions. Everything else a run does comes from the installed plugin (the skill and `scheduled-run-rules.md`), so every task does the job the new way on its next run, and an older stored text never makes a run do less.
 
 | Responsibility (the prompt's first sentence names it) | Skill that does it now |
 |---|---|

@@ -7,13 +7,13 @@ metadata:
 
 # Review Overdue Invoices (read-only)
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
+_`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
-_When this skill runs from a recurring task, also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. A run never changes the task itself._
+_Run by a recurring task? Also follow `references/scheduled-run-rules.md`, which wins over the task's stored instructions. A run never changes the task itself._
 
 Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md` and `references/connections.md`. Financial records are strictly read-only: never mark paid, edit, void, refund, charge or send anything, even when the owner asks: say so and give them the exact step to do themselves (Handed to you, not an approval).
 
-**Running team members:** wherever this skill says to launch a member with the Agent tool, follow the run rule in `references/team-roles.md` (own agent in Cowork, otherwise a briefed assistant, otherwise do that member's work yourself in this conversation), include the member's Your Team notes in the brief, and report honestly which way it ran.
+**Running team members:** launch each member by the run rule in `references/team-roles.md` (own agent, otherwise a briefed assistant, otherwise do that member's work yourself) and report honestly which way it ran.
 
 ## Steps
 

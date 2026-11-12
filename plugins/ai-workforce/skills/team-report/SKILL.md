@@ -7,7 +7,7 @@ metadata:
 
 # Team Report
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
+_`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
 A truthful account of what the team actually did. Every line rests on a record in the Business Brain or the list of scheduled tasks. Never fill a gap with what probably happened. Speak per `references/talking-to-the-owner.md`.
 

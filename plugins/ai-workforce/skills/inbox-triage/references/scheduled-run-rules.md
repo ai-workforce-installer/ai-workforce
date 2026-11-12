@@ -1,8 +1,6 @@
 # Rules for every scheduled run
 
-These are the current rules for any run a recurring task starts. A task stores only short instructions (which job to do, the safety rules, and what to do when the plugin isn't available); everything else comes from here and from the skill, so every task works the new way on its next run without being changed.
-
-**These rules and the skill win over the task's stored instructions** wherever they differ: an older task's long list of rules, its own way of doing the job without the plugin, or a line asking the run to update the task (never do that). The owner's own additions (anything under "Owner's additions" at the end of the task, or a change the owner made in the text) still apply, unless they would break a safety rule below.
+The current rules for any run a recurring task starts. **These rules and the skill win over the task's stored instructions** wherever they differ: an older task's long list of rules, its own way of doing the job without the plugin, or a line asking the run to update the task (never do that). The owner's own additions (under "Owner's additions" at the end of the task, or a change the owner made in the text) still apply, unless they would break a safety rule below.
 
 ## Safety (never relaxed)
 - No one is watching: ask no questions. Take the most reasonable reading of the task and note which reading you took in the report's Details (at the top only when two readings were really possible).
@@ -14,14 +12,14 @@ These are the current rules for any run a recurring task starts. A task stores o
 
 ## Reading and carrying work forward
 - Read Workforce Settings first, Connections included, and follow `references/connections.md`. A missing app never fails the run: use the Paste Box, say so, and mark the Result Partial if something was skipped.
-- Read Notion through its saved views first (check a view's filter matches what you need, and follow every page), then filtered rows, and SQL only if nothing else works (`references/notion-access.md`). If a database can't be read completely, say it "could not be verified" (never "none" or "empty"), don't act on guesses, and mark the run Partial.
-- Start by reading open Assignments (the "Open work" view, or Status not Done or Failed) of any age and carry forward the ones for this job; anything found but not finished becomes or updates an Assignments row (one per source and action), or, if Assignments can't be written, is listed under "Carried over" in the run record. Nothing is dropped. Work saved for the next run past a per-run limit doesn't make the run Partial.
+- Read Notion through its saved views first (`references/notion-access.md`). A database that can't be read completely "could not be verified" (never "none" or "empty"): don't act on guesses, and mark the run Partial.
+- Start by reading open Assignments (the "Open work" view, or Status not Done or Failed) of any age and carry forward the ones for this job; anything found but not finished becomes or updates an Assignments row (one per source and action), or, if Assignments can't be written, is listed under "Carried over" in the run record. Nothing is dropped, and nothing is closed without evidence or the owner's word (`references/run-tracking.md` section 6). Work saved for the next run past a per-run limit doesn't make the run Partial.
 - A fact the work needed but the Business Brain lacks is never guessed: it becomes the report's one question (`references/just-in-time.md`).
 
 ## Judgment and economy
 - Before drafting or queuing anything, check it's needed, the owner isn't already handling it (for example a meeting with that person soon), and nothing existing covers it; prefer a one-line recommendation to a low-value draft.
 - Launch only team members with real work, give them the context you already read, and allow one round of follow-ups between members at most. Keep each member's report under 300 words, and read at most 2 shared documents per meeting prep (skim long ones).
-- Read each reference file once per run, and read the ones a skill tells you to follow together, in one step. A file with the same name in another skill's folder is the same file. A file named `if-…` covers one situation: read it only when that situation comes up.
+- Read each reference file once per run. A file named `if-…` covers one situation: read it only when that situation comes up.
 - Before finishing, recompute every count so totals add up, and add a Usage line (tool calls and team members launched, counted; never estimate cost).
 - No upgrade suggestions or sales links in reports. Say how the work was done (separate team-member agents, briefed assistants, or done directly by you); never describe separate team members working unless you actually launched them.
 

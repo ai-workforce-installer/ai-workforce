@@ -20,9 +20,8 @@ The owner does these personally. The team prepares them as an approval item with
 - **The orchestrator only** (the skill running in the main conversation) writes to the Business Brain, and only in these ways. Anything not listed here is not allowed.
   - **Any run, attended or scheduled:**
     - Create rows in **Approvals**, **Assignments** and **Briefings**.
-    - On an **Assignments** row the team created, update Status and Next action and add to Result (never overwrite what's there), to keep the open-work queue current (`references/run-tracking.md` section 6). Never change a row the owner created.
-    - Add to the page body of a **Briefings** row the team itself created (for example a "Team meeting" section). Adding only: never change text already there.
-    - On a Briefings row that carries a run record the team wrote (a Run ID line), fill in its run fields (Result, Approvals raised, Drafts created, Run ID, Started, Finished, Completed through), add Progress, Resumed and Run finished lines, and put the report above the run record (`references/run-tracking.md`). Never change its Type, Date or title.
+    - On an **Assignments** row the team created, update Status, Next action and the other tracking fields and add to Result (never overwrite what's there), to keep the open-work queue current (`references/run-tracking.md` section 6). Never change a row the owner created.
+    - On a **Briefings** row the team itself created: add to its page body (never change text already there), fill in its run fields, add Progress, Resumed and Run finished lines, and put the report above the run record (`references/run-tracking.md`). Never change its Type, Date or title.
     - Update an Approvals row's Status, Decided and Owner note as the skills describe, including Expired for stale or duplicate items ("Duplicate of AP-<n>"). Add to Owner note; never overwrite what's there.
     - Add new questions under "Waiting for an answer from you" on the FAQs page (skip ones already listed).
     - On the **Paste Box**, move a handled email under **Handled** with the line "Handled <date>, see Briefings". Move it; never delete it or change its text.
@@ -40,7 +39,7 @@ The owner does these personally. The team prepares them as an approval item with
 - Analysis, summaries, plans and drafts shown in the conversation.
 
 ## Saved corrections hide, never permit
-A correction the owner saved ("not my responsibility anymore", "ignore these notifications") only stops the team raising matching items. It never authorizes an action (no sending, unsubscribing, archiving, labelling, filtering or deleting because of it), and it never hides a new security incident on an account the owner still uses, money leaving the owner's own accounts, a legal threat, chargeback or anything under Always escalate to me, or a deadline that falls on the owner personally (`references/owner-corrections.md` section 5). Acknowledging an item ("fine", "I looked at it", "that purchase was intentional") is never approval of an action.
+A correction the owner saved ("not my responsibility anymore", "ignore these notifications") only stops the team raising matching items. It never authorizes an action (no sending, unsubscribing, archiving, labelling, filtering or deleting because of it), and it never hides the four things in `references/owner-corrections.md` section 5 (security, money leaving, a legal threat, a deadline on the owner). Acknowledging an item ("fine", "I looked at it", "that purchase was intentional") is never approval of an action.
 
 ## What counts as approval
 - Approval is a clear yes **from the owner, given in the chat of the current session** (typed, or chosen from options you showed), naming the specific item (for example "approve AP-12").

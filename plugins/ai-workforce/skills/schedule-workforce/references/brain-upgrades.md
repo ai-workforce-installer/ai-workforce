@@ -32,35 +32,35 @@ A version line of "setup in progress", or a missing line, means the upgrades and
 1. **Your Team page.** If the Business Brain has no child page titled "Your Team", create it (icon 👥) from the Your Team template.
 2. **Work to hand off.** If Priorities has no "Work I'd like to hand off" heading, append that section from the Priorities template at the end of the page.
 3. **Handed to you.** If the Approvals Status property has no "Handed to you" option, add it (blue), keeping every existing option.
-4. **Version line.** If Workforce Settings has no "About this workspace" heading, append it from the Workforce Settings template. Otherwise replace the existing `Business Brain version` line. Either way it ends as `- Business Brain version: 0.4.0` (then continue with 0.5.0).
+4. **Version line.** If Workforce Settings has no "About this workspace" heading, append it from the Workforce Settings template; otherwise replace the existing `Business Brain version` line. It ends as `- Business Brain version: 0.4.0`.
 
-## Upgrade to 0.5.0
-Adds run tracking fields so the team can tell retries from new runs and keep its inbox bookmark. Nothing existing changes; runs work without these fields too (they keep the same information in each record's text).
-1. **Briefings properties.** Fetch the Briefings data source. Add any that are missing: `Run ID` (text), `Started` (date), `Finished` (date), `Completed through` (date).
-2. **Briefings options.** Add `Unknown` (gray) to Run type and `Running` (blue) to Result if missing, sending every existing option with them.
-3. **Assignments option.** Add `Unknown` (gray) to its Run type if missing, sending every existing option with it.
-4. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.0`.
+## Upgrade to 0.5.0 (run tracking fields; runs work without them)
+1. **Briefings properties.** Add any that are missing: `Run ID` (text), `Started`, `Finished` and `Completed through` (dates).
+2. **Options.** Add `Unknown` (gray) to Run type in Briefings and in Assignments, and `Running` (blue) to Briefings' Result, if missing, sending every existing option with them.
+3. **Version line:** `- Business Brain version: 0.5.0`.
 
-## Upgrade to 0.5.1
-Lets the Assignments database hold the team's open work so nothing found is forgotten between runs. Nothing existing changes; runs work without it (they keep the same details in each row's text). Safe to repeat: each step only adds what's missing.
+## Upgrade to 0.5.1 (open work in Assignments; runs work without it)
 1. **Assignments options.** Add `Prepared` (purple), `Handed to you` (orange) and `Blocked` (brown) to Status if missing, sending every existing option with them.
 2. **Assignments properties.** Add `Source` (text) and `Next action` (text) if missing.
-3. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.1`.
+3. **Version line:** `- Business Brain version: 0.5.1`.
 
-## Upgrade to 0.5.2
-Adds saved views, which keep working on Notion's free plan after its query allowance runs out. Nothing existing changes: no records are edited and no existing view is changed. Safe to repeat.
+## Upgrade to 0.5.2 (saved views, which keep working on Notion's free plan when its query allowance runs out)
 1. Fetch each database to see its views. For each view below that **doesn't exist yet by that name**, create it as a table view with the notion-create-view tool (`database_id` = the database, `data_source_id` = its collection, `configure` = the line below). If one with that name exists, leave it as it is, even if its filter differs (runs check a view's filter before using it). After creating, fetch the database again and check each new view is there with that filter and sort.
    - Approvals → "Active approvals": `FILTER "Status" IN ("Pending", "Approved", "Handed to you"); SORT BY "AP" ASC`. On a workspace without the "Handed to you" option, leave that value out.
    - Assignments → "Open work": `FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC`, leaving out options the database doesn't have.
    - Briefings → "Newest first": `SORT BY "Date" DESC` (only if missing).
    - Pricing & Offers → "Active offers": `FILTER "Active" = TRUE; SORT BY "Offer" ASC`.
    - Customers & Leads → "All contacts": `SORT BY "Last contact" DESC`.
-2. **Version line.** Only when every view above exists (created now or already there), replace the `Business Brain version` line with `- Business Brain version: 0.5.2`. If any step failed (a view couldn't be created, the database couldn't be read), leave the version line as it was, say which step failed, and the upgrade can simply be run again.
+2. **Version line.** Only when every view above exists (created now or already there), set `- Business Brain version: 0.5.2`. If any step failed, leave the version line as it was, say which step failed, and the upgrade can simply be run again.
 
-## Upgrade to 0.6.0
-Gives the team a place to keep the owner's corrections about what matters, so they apply to every later run (`references/owner-corrections.md`). Nothing existing changes and no records are edited; runs work without it (corrections go under "Things to ignore for now" until then). Safe to repeat: each step only adds what's missing.
+## Upgrade to 0.6.0 (a place for the owner's corrections, `references/owner-corrections.md`)
 1. **Priorities sections.** Fetch Priorities. If it has no "Always worth my attention" heading, append that section from the Priorities template at the end of the page. Then, if it has no "Not my responsibility anymore" heading, append that section the same way.
-2. **Version line.** Only when both headings are there, replace the `Business Brain version` line with `- Business Brain version: 0.6.0`. If Priorities couldn't be read or written, leave the version line as it was and say which step didn't finish.
+2. **Version line.** Only when both headings are there, set `- Business Brain version: 0.6.0`. If Priorities couldn't be read or written, leave the version line as it was and say which step didn't finish.
+
+## Upgrade to 1.0.0 (open work tracked to a verified outcome)
+Nothing existing changes: no status option, view, row or schedule is touched, and runs work without these fields (they keep the same facts in each row's text). Every step adds only what is missing, so an interrupted upgrade simply carries on when it is run again.
+1. **Assignments properties.** Fetch the Assignments data source and add each of these that is missing, checking it is there before the next: `Work type` (select: Task, Reply, Commitment, Waiting on someone, Customer case, Deliverable, Monitored issue), `Due` and `Next check` (dates), `Waiting on`, `Blocker`, `Done when` and `Work key` (text), `Evidence` (URL), `Closed as` (select: Completed, Sent, Cancelled, Dismissed, Superseded, Unverified). A property of the owner's with one of these names stays as it is: say so once.
+2. **Version line.** Only when all nine are there, set `- Business Brain version: 1.0.0`. Otherwise leave the line as it was and say which are still to add.
 
 Later versions add their own section here, below this one, and run in order.
 

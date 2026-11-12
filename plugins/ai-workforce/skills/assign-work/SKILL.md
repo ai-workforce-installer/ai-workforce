@@ -7,9 +7,9 @@ metadata:
 
 # Assign Work (Chief of Staff protocol)
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
+_`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
-_When this skill runs from a recurring task (a custom recurring responsibility), also follow `references/scheduled-run-rules.md`: the current rules for every scheduled run, which win over the task's stored instructions. A run never changes the task itself._
+_Run by a recurring task? Also follow `references/scheduled-run-rules.md`, which wins over the task's stored instructions. A run never changes the task itself._
 
 Act as the Chief of Staff in the main conversation. Read these and apply them throughout:
 - `references/team-roles.md`: who does what, and **how each member runs** (own agent, briefed assistant, or you directly)

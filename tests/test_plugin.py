@@ -578,13 +578,73 @@ class DraftsAreNotApprovals(unittest.TestCase):
 
     def test_drafts_and_prepared_pieces_wait_in_open_work_and_close_themselves(self):
         rt = read(REFS / "run-tracking.md")
-        for must in ["**Reply drafts and prepared pieces wait here, not in Approvals.**", "sent or discarded by the owner",
-                     "meeting held", "never draft by draft", "They are never closed for age alone",
+        for must in ["**Reply drafts and prepared pieces wait here, not in Approvals.**",
+                     "never draft by draft", "They are never closed for age alone",
                      "Updating a row, re-checking or carrying something forward is not closing it"]:
             self.assertIn(must, rt)
+        for gone in ["sent or discarded by the owner", "meeting held"]:        # 1.0.0: weak evidence no longer closes work
+            self.assertNotIn(gone, rt)
         ra = read(SKILLS / "review-approvals" / "SKILL.md")
         self.assertIn("**Waiting work**", ra)
         self.assertIn("a Gmail draft stays where it is, never deleted", ra)
+
+
+class WorkClosesHonestly(unittest.TestCase):
+    """1.0.0: the queue tracks obligations until a verified outcome. A vanished draft used to count as
+    "sent or discarded" and a past meeting as "held"; a failing automation was re-logged daily."""
+    FIELDS = ["Work type", "Due", "Next check", "Waiting on", "Blocker", "Done when", "Evidence", "Closed as", "Work key"]
+
+    def test_the_schema_and_the_upgrade_name_the_same_nine_fields(self):
+        schema = read(SKILLS / "setup-workforce" / "references" / "notion-schema.md")
+        up = read(REFS / "brain-upgrades.md").split("## Upgrade to 1.0.0")[1].split("Later versions")[0]
+        for f in self.FIELDS:
+            self.assertIn(f'"{f}" ', schema, f)
+            self.assertIn(f"`{f}`", up, f)
+        for option in ["Task", "Reply", "Commitment", "Waiting on someone", "Customer case", "Deliverable", "Monitored issue",
+                       "Completed", "Sent", "Cancelled", "Dismissed", "Superseded", "Unverified"]:
+            self.assertIn(f"'{option}'", schema, option)
+            self.assertIn(option, up, option)
+        sys.path.insert(0, str(ROOT / "tests"))
+        import work_logic
+        self.assertEqual(sorted(work_logic.NEW_PROPERTIES), sorted(self.FIELDS))
+        self.assertEqual(sorted(work_logic.CLOSED_AS), sorted(["Completed", "Sent", "Cancelled", "Dismissed", "Superseded", "Unverified"]))
+
+    def test_the_upgrade_is_add_only_and_resumable(self):
+        up = read(REFS / "brain-upgrades.md").split("## Upgrade to 1.0.0")[1].split("Later versions")[0]
+        for must in ["Nothing existing changes: no status option, view, row or schedule is touched",
+                     "an interrupted upgrade simply carries on when it is run again", "Only when all nine are there",
+                     "A property of the owner's with one of these names stays as it is"]:
+            self.assertIn(must, up)
+        schema = read(SKILLS / "setup-workforce" / "references" / "notion-schema.md")      # statuses and the owner's view are as they were
+        self.assertIn("\"Status\" SELECT('Planned':gray, 'In progress':blue, 'Prepared':purple, 'Handed to you':orange, 'Blocked':brown, 'Done':green, 'Failed':red)", schema)
+        self.assertIn('"Open work": `FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC`', schema)
+
+    def test_one_obligation_is_one_row(self):
+        rt = read(REFS / "run-tracking.md")
+        for must in ["One row is one **obligation**", "**Work key: what is owed, not which message or run mentioned it.**",
+                     "a Run ID is never an obligation's only identity", "**updates that row**",
+                     "separate promises in one thread are separate rows", "the same work key (section 6)"]:
+            self.assertIn(must, rt)
+
+    def test_who_has_the_next_move_and_when_it_is_checked(self):
+        rt = read(REFS / "run-tracking.md")
+        for must in ["**Status says who has the next move.**", "the team can do it now", "waiting on the owner",
+                     "waiting on someone else or a missing input", "**Nothing waits without a next action and a next check.**",
+                     "use a suggested check time and call it that", "in the owner's time zone and working days",
+                     "never through a scheduled task per item", "only a deadline someone stated, never an invented one",
+                     "put a Blocked row whose input has arrived back to Planned"]:
+            self.assertIn(must, rt)
+
+    def test_closing_needs_evidence_or_the_owners_word(self):
+        rt = read(REFS / "run-tracking.md")
+        for must in ["**Closing needs evidence or the owner's word.**", "A draft that vanished proves nothing",
+                     "close it as Unverified, never as sent", "A sent reply proves sending, not that a customer case is resolved",
+                     "A meeting's time passing proves neither that it was held nor that its actions were done",
+                     "An alert going quiet doesn't prove a repair", "only something materially new reopens it, never a repeat",
+                     "say so once", "don't raise it again each day"]:
+            self.assertIn(must, rt)
+        self.assertIn("nothing is closed without evidence or the owner's word",
+                      read(SKILLS / "schedule-workforce" / "references" / "scheduled-run-rules.md"))
 
 
 class PriorityPiece(unittest.TestCase):
