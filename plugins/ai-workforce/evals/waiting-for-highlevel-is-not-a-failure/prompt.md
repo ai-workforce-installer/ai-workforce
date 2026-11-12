@@ -1,6 +1,6 @@
 ---
 description: An owner who said yes to HighLevel but hasn't connected it yet gets a normal run; nothing is reported unavailable or partly done because of it.
-tags: [scheduled, highlevel]
+tags: [text-only, scheduled, highlevel]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

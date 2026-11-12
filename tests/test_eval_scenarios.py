@@ -48,6 +48,13 @@ class GeneratedCasesAreInStep(unittest.TestCase):
         self.assertEqual([c.name for c in generated()], sorted(gen.CASES))
         self.assertGreaterEqual(len(gen.CASES), 20)
 
+    def test_every_case_is_either_text_only_or_backed_by_stand_ins(self):
+        """So each kind can be run on its own: --tag text-only (cheap, no tools) or --tag mocks."""
+        for c in sorted(p.parent for p in EVALS.glob("*/prompt.md")):
+            tags = front(c / "prompt.md")[0]["tags"].strip("[]").split(", ")
+            self.assertEqual(("mocks" in tags), c in generated(), c.name)
+            self.assertEqual(("text-only" in tags), c not in generated(), c.name)
+
     def test_the_text_only_cases_are_untouched_by_stand_ins(self):
         """A suite-wide evals/mocks/ would give tools to the cases written for none, and change what they measure."""
         self.assertFalse((EVALS / "mocks").exists())

@@ -2,7 +2,7 @@
 name: review-approvals
 description: This skill should be used when the user says "clear my desk", "go", "what's waiting for me", "what needs me", "review my approvals", "clear my approvals", "approve AP-12", "send all ready", "finish yesterday's queue", "what does the team need from me", answers or steers the team's items in plain words ("two is fine", "send it", "look into three", "one isn't my problem", "decline those invitations", "that's already done", "snooze it until Tuesday", "I'm waiting on Dana until Friday", "remind me if they haven't replied", "stop tracking this"), or wants to go through everything the AI team has waiting on them and decide on each item. Load it before acting on any reply to those items, however short.
 metadata:
-  version: "0.9.0"
+  version: "1.0.0"
 ---
 
 # The Desk (the owner's two minutes a day)

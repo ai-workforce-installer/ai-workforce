@@ -1,6 +1,6 @@
 ---
 description: An owner who brings HighLevel up at the start is told it comes right after the first result; setup stays click-and-sign-in.
-tags: [setup, highlevel]
+tags: [text-only, setup, highlevel]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

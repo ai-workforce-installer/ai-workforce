@@ -2,7 +2,7 @@
 name: setup-workforce
 description: This skill should be used when the user asks to "set up my AI team", "set up the workforce", "get started with the AI Workforce", "onboard me", "build my Business Brain", "setup-workforce", "finish my setup", "continue the setup interview", "update my Business Brain answers", "update my team workspace", "connect HighLevel", or is using the AI Workforce plugin for the first time and has no Business Brain yet.
 metadata:
-  version: "0.9.0"
+  version: "1.0.0"
 ---
 
 # Set Up the AI Workforce

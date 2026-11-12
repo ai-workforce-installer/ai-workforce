@@ -1,6 +1,6 @@
 ---
 description: A number that could mean two items is asked about, not guessed.
-tags: [approvals]
+tags: [text-only, approvals]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

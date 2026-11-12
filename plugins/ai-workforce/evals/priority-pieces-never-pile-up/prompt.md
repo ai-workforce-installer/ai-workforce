@@ -1,6 +1,6 @@
 ---
 description: When earlier priority pieces are still waiting on the owner, the team makes no more and asks what to do with them.
-tags: [priorities, scheduled]
+tags: [text-only, priorities, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

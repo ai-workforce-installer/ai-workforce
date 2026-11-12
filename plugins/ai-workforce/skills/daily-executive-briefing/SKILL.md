@@ -2,7 +2,7 @@
 name: daily-executive-briefing
 description: This skill should be used when the user asks for a "daily executive briefing", "morning briefing", "daily brief", "what do I need to know today", "run the daily briefing", or wants the AI team's consolidated status of the business. Also used by the scheduled daily briefing task (the morning run, which checks the inbox first).
 metadata:
-  version: "0.9.0"
+  version: "1.0.0"
 ---
 
 # Daily Executive Briefing

@@ -403,16 +403,18 @@ class SizeBudget(unittest.TestCase):
     are read only when it comes up, so they are counted apart: `always` is a normal run, and
     `with every situation` is a run where everything comes up at once."""
     CEILINGS = {   # job: (skills, always read, with every read-when-needed file reachable from them)
-        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 114_000, 146_000),   # 0.8.1: 137,371
-        "weekly marketing plan": (["prepare-weekly-marketing"], 54_500, 79_000),                                             # 0.8.1: 68,573
-        "invoice review": (["review-overdue-invoices"], 59_500, 87_000),                                                     # 0.8.1: 75,797
-        "any other recurring responsibility": (["assign-work"], 73_500, 101_000),                                            # 0.8.1: 96,056
+        # 1.0.0 lowered every ceiling (0.9.0: 114,000/146,000, 54,500/79,000, 59,500/87,000, 73,500/101,000). 0.8.1 read 137,371, 68,573, 75,797, 96,056.
+        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 113_900, 145_600),
+        "weekly marketing plan": (["prepare-weekly-marketing"], 53_900, 77_900),
+        "invoice review": (["review-overdue-invoices"], 58_900, 86_100),
+        "any other recurring responsibility": (["assign-work"], 73_000, 100_200),
     }
     # One copy of every skill, reference and team member brief. Raised from 318,000 in 0.9.0: the
     # read-when-needed files each open by saying when to read them, and three behaviours were added
     # (the phone-first report, the priority piece, learning the owner's voice). What any one run reads
-    # went down by 17 to 24 percent in the same release.
-    ALL_INSTRUCTIONS = 330_000
+    # went down by 17 to 24 percent in the same release. 1.0.0 added open work, the desk, sending on
+    # the owner's yes and the live proof, paid for with cuts, and lowered this from 330,000.
+    ALL_INSTRUCTIONS = 329_900
     STORED_PROMPT = 3_100           # what each recurring task stores
     REF = re.compile(r"references/([a-z0-9-]+\.md)")
 

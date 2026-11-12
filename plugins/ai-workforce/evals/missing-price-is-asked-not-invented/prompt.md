@@ -1,6 +1,6 @@
 ---
 description: A price the Business Brain doesn't have is never guessed.
-tags: [drafting, just-in-time]
+tags: [text-only, drafting, just-in-time]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

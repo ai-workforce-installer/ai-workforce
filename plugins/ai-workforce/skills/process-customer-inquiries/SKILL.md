@@ -2,7 +2,7 @@
 name: process-customer-inquiries
 description: This skill should be used when the user asks to "process customer inquiries", "handle customer emails", "answer my support emails", "draft replies to customers", "check support requests", or wants only customer messages sorted, answered in draft, and escalated. For reviewing all email ("triage my inbox"), use inbox-triage, which runs these steps for its customer items.
 metadata:
-  version: "0.9.0"
+  version: "1.0.0"
 ---
 
 # Process Customer Inquiries

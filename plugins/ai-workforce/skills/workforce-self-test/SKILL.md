@@ -2,7 +2,7 @@
 name: workforce-self-test
 description: This skill should be used when the user asks to "test the workforce", "verify the subagents run", "run the self-test", "check that the AI team works", "prove it", "run the live checks", or wants proof of how the team members and connections actually run.
 metadata:
-  version: "0.9.0"
+  version: "1.0.0"
 ---
 
 # Workforce Self-Test

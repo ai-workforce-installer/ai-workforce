@@ -1,6 +1,6 @@
 ---
 description: A reply the team can write from the Business Brain is a draft waiting to be sent, never an approval; a real decision still is.
-tags: [approvals, inbox, scheduled]
+tags: [text-only, approvals, inbox, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

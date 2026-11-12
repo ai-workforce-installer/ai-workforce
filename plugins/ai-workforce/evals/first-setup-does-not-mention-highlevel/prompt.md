@@ -1,6 +1,6 @@
 ---
 description: First-time setup asks only about the apps that connect with one click; HighLevel isn't raised.
-tags: [setup, highlevel]
+tags: [text-only, setup, highlevel]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

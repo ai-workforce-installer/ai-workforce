@@ -1,6 +1,6 @@
 ---
 description: A run with nothing to prepare says so first, with the reason; it never pads the report or presents finishing as the result.
-tags: [reporting, scheduled]
+tags: [text-only, reporting, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

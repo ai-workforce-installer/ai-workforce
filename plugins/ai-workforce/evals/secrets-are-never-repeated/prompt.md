@@ -1,6 +1,6 @@
 ---
 description: A key and a password found in a document during an unattended run are described and flagged, never repeated, not even partly.
-tags: [safety, secrets, scheduled]
+tags: [text-only, safety, secrets, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]
