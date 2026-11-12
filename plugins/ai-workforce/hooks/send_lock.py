@@ -30,6 +30,9 @@ What is refused (by tool name; see `decide`):
   operation's name has to begin with a reading word ("search-conversation", "get-messages"),
   so a reading word used as a noun ("set-task-home-list") doesn't pass;
 - anything else but a plain read in HighLevel;
+- label tools, by what the call would do rather than by their name: adding the Trash or Spam
+  label (Gmail's "apply sensitive label" tools do only that), and removing the Inbox label,
+  which archives the mail. Ordinary labels, marking as read and un-archiving pass;
 - creating, changing or starting a scheduled task: a run never changes a recurring task.
 Creating drafts and writing to the Business Brain in Notion are never refused.
 
@@ -99,6 +102,12 @@ NAMES_THE_OPERATION = ("operation", "action", "tool", "function", "endpoint", "m
 NOTIFY = frozenset(["notification", "notifications", "notify"])
 OWNER_REPORT = re.compile(r"^send[_-]?user[_-]?(message|file)$", re.I)
 READ_ONLY_APPS = ("highlevel", "leadconnector")
+# Label tools ("label_thread", "unlabel_thread", "update_message_labels") are named harmlessly:
+# what they do depends on which label the call names. Trash and Spam added, or Inbox removed,
+# is deleting or archiving by another name.
+LABEL_WORDS = frozenset(["label", "labels", "unlabel", "relabel"])
+BIN_LABELS = {"trash": "Trash", "spam": "Spam", "junk": "Spam", "bin": "Trash", "deleteditems": "Trash"}
+TAKES_AWAY = ("remove", "unlabel", "delete", "clear", "strip")
 
 
 def split_tool(tool_name):
@@ -200,6 +209,47 @@ def operation_is_a_plain_read(tool_input):
     return True, None
 
 
+def _labels_named(value, removing, found, key="", depth=0):
+    """Collect (label, removing?) for every label a call's input names. A value counts as a label
+    when it sits under a key that mentions labels; a key that says "remove" turns it into a removal."""
+    if depth > 6:
+        return
+    if isinstance(value, dict):
+        for k, v in value.items():
+            k = re.sub(r"[^a-z0-9]", "", str(k).lower())
+            _labels_named(v, removing or any(t in k for t in TAKES_AWAY), found,
+                          k if "label" in k else key, depth + 1)
+    elif isinstance(value, (list, tuple)):
+        for v in value:
+            _labels_named(v, removing, found, key, depth + 1)
+    elif isinstance(value, str) and key:
+        found.append((re.sub(r"[^a-z]", "", value.lower()), removing))
+
+
+def label_change(ws, tool_input):
+    """For a call that adds or removes labels: the reason it is refused, or None for ordinary labels.
+
+    Refused: adding Trash or Spam (deleting, by another name) and removing Inbox (archiving).
+    Not refused: user labels, Starred, marking read by removing Unread, putting mail back in the
+    inbox, and taking mail back out of Trash or Spam."""
+    named = []
+    _labels_named(tool_input, False, named)
+    if not (LABEL_WORDS.intersection(ws) or named):
+        return None
+    if ws and ws[0] in READ:
+        return None                                   # list_labels, get_label
+    if "sensitive" in ws:
+        return "it would move mail to Trash or Spam"  # Gmail's "sensitive" labels are only those two
+    unlabels = any(w.startswith("unlabel") for w in ws)
+    for label, removing in named:
+        removing = removing or unlabels
+        if label in BIN_LABELS and not removing:
+            return "it would move mail to %s" % BIN_LABELS[label]
+        if label == "inbox" and removing:
+            return "it would archive mail (take it out of the inbox)"
+    return None
+
+
 def decide(tool_name, tool_input=None):
     """Return a short reason if this tool call is one the lock refuses, else None."""
     server, tool = split_tool(tool_name)
@@ -235,7 +285,7 @@ def decide(tool_name, tool_input=None):
         return "it would create or change a calendar event"
     if MONEY_THINGS.intersection(ws) and _first(ws, MONEY_CHANGE) < read_at:
         return "it would create or change a financial record or budget"
-    return None
+    return label_change(ws, tool_input)
 
 
 # ---- is this an unattended team run? ----
