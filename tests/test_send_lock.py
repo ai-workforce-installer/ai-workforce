@@ -348,6 +348,42 @@ class Hook(unittest.TestCase):
         t = self.transcript("check my scheduled tasks")       # the helper adds a tool result containing the tag
         self.assertEqual(self.pre("mcp__Gmail__send_message", transcript_path=t)[0], 0)
 
+    def loaded_skill(self, owner_says, body, name="k.jsonl"):
+        """A transcript as Claude records it when a skill is opened: what the owner typed, then the skill's whole
+        text as a user-side message of its own (copied from the eval traces of 1.1.0)."""
+        p = self.dir / name
+        lines = [json.dumps({"type": "queue-operation"}),
+                 json.dumps({"type": "user", "isSidechain": False, "message": {"role": "user", "content": owner_says}}),
+                 json.dumps({"type": "user", "isSidechain": False, "isMeta": True, "sourceToolUseID": "toolu_x",
+                             "message": {"role": "user", "content": [
+                                 {"type": "text", "text": "Base directory for this skill: /x\n\n" + body}]}})]
+        p.write_text("\n".join(lines) + "\n")
+        return str(p)
+
+    def test_opening_a_skill_or_command_never_makes_the_owners_chat_look_unattended(self):
+        """Found by the first eval run with stand-ins (1.1.0): the desk's and the scheduling skill's own text quoted
+        the task tag, Claude records an opened skill as a user-side message, and the lock then took the owner's chat
+        for a recurring task's run. No reply could go on a yes, no routine mail could be archived, and no recurring
+        task could be created. The lock is unchanged: no skill or command may contain the tag."""
+        plugin = HOOKS.parent
+        files = sorted(plugin.glob("skills/*/SKILL.md")) + sorted(plugin.glob("commands/*.md"))
+        self.assertGreaterEqual(len(files), 16)
+        for i, f in enumerate(files):
+            body = f.read_text(encoding="utf-8").split("---", 2)[2]
+            self.assertNotIn("[AI Workforce task:", body, f)
+            t = self.loaded_skill("clear my desk", body, name="k%d.jsonl" % i)
+            for tool, tool_input in [("mcp__Gmail__reply", {}), ("mcp__scheduled-tasks__create_scheduled_task", {}),
+                                     ("mcp__Gmail__unlabel_thread", {"threadId": "t1", "labelIds": ["INBOX"]})]:
+                code, err, _ = self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=tool_input,
+                                             session_id="k%d" % i, transcript_path=t)
+                self.assertEqual(code, 0, "%s after opening %s: %s" % (tool, f.parent.name + "/" + f.name, err))
+
+    def test_the_lock_does_not_tell_skill_text_from_a_typed_prompt(self):
+        """Why the rule above is needed: a user-side message carrying the tag locks the conversation whoever put it
+        there. That errs on the safe side, and it stays that way."""
+        t = self.loaded_skill("clear my desk", "Stored instructions begin with\n" + TAG_PROMPT)
+        self.assertEqual(self.pre("mcp__Gmail__reply", session="k-tag", transcript_path=t)[0], 2)
+
     def test_prompt_submit_marks_the_session_and_prints_nothing(self):
         code, err, out = self.run_hook(hook_event_name="UserPromptSubmit", session_id="s9", prompt=TAG_PROMPT)
         self.assertEqual((code, out), (0, ""))

@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'Nothing finished or prepared'
+pattern: 'Nothing (was |is )?finished or prepared'
 flags: i
 match: contains
 ---

@@ -7,7 +7,7 @@ metadata:
 
 # Prepare Weekly Marketing
 
-_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together; a file named `if-….md` covers one situation: read it only then._
 
 _Run by a recurring task? Also follow `references/scheduled-run-rules.md`, which wins over the task's stored instructions. A run never changes the task itself._
 

@@ -550,7 +550,7 @@ class ReadWhenNeeded(unittest.TestCase):
 
     def test_every_skill_is_told_how_these_files_work(self):
         for s in SKILLS.glob("*/SKILL.md"):
-            self.assertIn("A file named `references/if-….md` covers one situation: read it only when", read(s), s)
+            self.assertIn("a file named `if-….md` covers one situation: read it only then", read(s), s)
         self.assertIn("A file named `if-…` covers one situation", read(SizeBudget.ref("scheduled-run-rules.md")))
 
     def test_what_must_never_wait_for_a_second_file_stays_in_the_first(self):
@@ -585,7 +585,10 @@ class OwnerFirstReports(unittest.TestCase):
                  "7. **Worth knowing:**", "8. **Links and the desk:**", "9. **Details** (one toggle"]      # 1.0.0: four parts
         places = [b.index(o) for o in order]
         self.assertEqual(places, sorted(places))
-        for must in ["Outside the toggles the whole briefing stays under about 200 words", "Never the whole list again",
+        for must in ["Outside the toggles the whole briefing stays under about 200 words",
+                     "all the rest gets one line in the whole briefing, its count (\"6 older items are on your desk\"), never a bullet each",      # six week-old items were listed one per line (seen in evals)
+                     "5. **Needs you now:** what is new or due and only the owner can settle",
+                     "With two such lines, or after a week's wait, it is never named again: it is in that count and is one desk card",
                      "Leave the heading out when there are none", "at most one question",
                      "is said here the first time and when it changes", "the first screen has to be enough",
                      "never signed with the owner's own sign-off",       # a briefing to Maya signed "Talk soon, Maya" (seen in evals)
@@ -834,7 +837,9 @@ class CommitmentsAndWaitingOn(unittest.TestCase):
         self.assertIn("- Commitments review: _not set_", read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
         self.assertIn("Add `- Commitments review: _not set_` if there is no such line", read(REFS / "brain-upgrades.md"))
         sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
-        self.assertIn("On the owner's yes, save `- Commitments review: on` under Schedule; the morning run does it from then on", sw)
+        self.assertIn("On the owner's yes, save `- Commitments review: on` under Schedule; the morning run does it.", sw)
+        # seen in an eval: two promises the owner named were saved as bullets under that settings line, not as open work
+        self.assertIn("A promise the owner names now is an open-work row (`references/run-tracking.md` section 6), never a line here", sw)
         self.assertIn("not a task.", sw)                                          # no scheduled task per commitment, and none for the review
         self.assertIn("Keep track of what you promised and what you're waiting on", read(SKILLS / "first-team-meeting" / "SKILL.md"))
         self.assertIn("Checks happen in the morning run, never through a scheduled task per item", read(REFS / "run-tracking.md"))
@@ -1104,7 +1109,7 @@ class PlainLanguageControl(unittest.TestCase):
                      "a preference never grants new permission to send or spend: never infer one"]:
             self.assertIn(must, mt)
         self.assertIn("the exact line confirmed before anything is saved", mt)                   # part A2 is as it was
-        self.assertIn("One yes covers the rule and the related items you listed. Save nothing before that yes.", read(REFS / "if-owner-corrects.md"))
+        self.assertIn("One yes covers the rule and the related items you listed by name, never \"anything else about it\". Save nothing before that yes.", read(REFS / "if-owner-corrects.md"))
         self.assertIn('unless the owner already said "from now on"', read(REFS / "if-owner-corrects.md"))
 
     def test_the_fast_path(self):

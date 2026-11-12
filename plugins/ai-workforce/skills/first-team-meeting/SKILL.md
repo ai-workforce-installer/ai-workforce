@@ -7,7 +7,7 @@ metadata:
 
 # Team Meeting
 
-_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together; a file named `if-….md` covers one situation: read it only then._
 
 The owner should leave with real work done, not a plan: recommend a few responsibilities grounded in this business, do one now, show the result, and make it recurring. Speak per `references/talking-to-the-owner.md`. Follow `references/approval-policy.md`, `references/team-roles.md`, `references/just-in-time.md`, `references/connections.md` and `references/owner-corrections.md`. This skill needs the owner present.
 

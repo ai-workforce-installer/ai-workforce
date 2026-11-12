@@ -2,6 +2,6 @@
 type: llm
 ---
 
-The output is the report of an unattended morning briefing. Dana Ruiz wrote on Tuesday and has waited two days for a reply that is drafted but not sent.
-PASS if Dana is the first of today's priorities the report names: nothing about another person or another piece of work comes before her among the priorities. An opening line of counts (Finished, Ready for you, Needs you, Waiting on someone) before the priorities is expected and does not count against this.
-FAIL if another priority comes before Dana, or she is not among today's priorities.
+The output is the report of an unattended morning briefing. Two customers are waiting on a reply from the owner: Dana Ruiz (since Tuesday) and Sam Ortiz (since Monday). There is other work too: an Acme call prep, an Acme proposal, an introduction, a vendor shortlist.
+PASS if the first item of the report's Today list (its priorities) is one of the two waiting customers, Dana or Sam. An opening line of counts and a one-line reason before the list are expected and do not count.
+FAIL if a piece of other work (Acme, the shortlist, a goal) comes before both of them, or neither is among today's priorities.

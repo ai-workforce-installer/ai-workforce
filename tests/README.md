@@ -90,7 +90,19 @@ Each of these has to be watched on a real account; nothing in this folder can do
 
 ## Eval results
 
-Neither set of cases has been run on 1.0.0 or 1.1.0 yet: the twenty-one text-only cases last passed on 0.9.0, and the thirty-three with stand-ins have never been run. Until a run is written up here, they show only that the case files are well formed.
+Run on 1.1.0 (both releases' cases), 12 November 2026, on Claude Sonnet (`claude-sonnet-5-5`, the default), one run per case unless a count is given. About $17.80 at list price in all, every rerun included. **Not every case passes yet, so 1.0.0 and 1.1.0 have not been merged.**
+
+**First pass, before any fix:** text-only 17 of 21; with stand-ins 16 of 33. What the failures were, after reading each reply:
+- **A real fault, now fixed: the send lock locked the owner's own chat.** The desk's and the scheduling skill's text quoted the task tag, Claude records an opened skill as a user-side message, and the lock took that for a recurring task's prompt. So no reply could be sent on a yes, no routine mail archived and no recurring task created, in any chat that opened those skills. Both skills now describe the tag without quoting it, and `test_send_lock.py` runs the real lock against every skill's and command's text. The lock itself is unchanged.
+- **Real faults, now fixed:** week-old prepared work listed one bullet per item in the briefing; a correction offering to close "any other open work" without naming it; the invoice review and inbox triage answered without their skill when the data was pasted in (one run in five); a quick look and the fast path skipping their record or row; a promise the owner named saved as a settings line instead of open work; an urgent item with no Assignments row; HighLevel cards without the contact's ID.
+- **Wrong checks or scenarios, now corrected** (in `tools/eval_scenarios.py` and three hand-written graders): one grader judged three things at once; a pattern wanted the literal "Still waiting from yesterday"; the stand-in for the task list repeated the creation marker, so one creation counted as three; a "quiet day" that had goals written (the run rightly made a piece toward one); a check that wanted Dana first when Sam had waited longer; a check that a write which was going to fail should not have said Complete; a style preference worded so it could mean this chat's answers.
+
+**After the fixes:** all twenty-one text-only cases pass (the four that failed passed 4 of 4, the briefing case 6 of 8 and then on its final text after one more change). With stand-ins, 26 of 33 on the second full pass; reruns since bring every case to a pass except three:
+- `quick-look-leaves-the-bookmark`: 1 of 2. The other run read the quick-look rules and said "I didn't write a Notion run record". Not yet fixed.
+- `unknown-send-outcome-is-checked-against-sent`: 0 of 2. Both found the send in Sent and correctly didn't send again, but asked before closing the row as Sent; one didn't open the desk skill at all. The rules don't say plainly that recording a send already in Sent needs no new yes. That is a judgement call for the owner of the plugin.
+- `quiet-day-names-the-fix-and-unread-is-not-empty`: 0 of 2, each run on a different check: one put the "connect it" step only under Details; the other's closing message dropped the words "Nothing finished or prepared" (its saved briefing kept them).
+
+None of this is live: it shows Claude following the rules with stand-ins for the apps, not on a real account.
 
 ## Live acceptance checklist for 1.1.0
 

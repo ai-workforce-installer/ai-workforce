@@ -20,7 +20,7 @@ When it's not clear whether the owner means this item or a lasting rule, ask **o
 
 Quote the exact words you'll save, what still gets through, and the related items you'd close: "I'll save: 'Not my responsibility anymore: Northwind Studio, including its automations and their failure alerts (since Nov 6).' I'll still tell you about a new security problem or money leaving your accounts. I'll also close AP-4 and AP-9. OK?"
 
-One yes covers the rule and the related items you listed. Save nothing before that yes.
+One yes covers the rule and the related items you listed by name, never "anything else about it". Save nothing before that yes.
 
 Make the rule as narrow as what the owner said: a business, an account, an automation, a sender, a kind of notification. Never widen "the old Make automation" into "all Make emails" or "all automation alerts".
 

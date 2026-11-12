@@ -10,7 +10,7 @@ append_system_prompt: "Evaluation setting: the owner's apps are connected throug
 You showed me this card a moment ago:
 
 Dana Ruiz paid for the April workshop.
-Change in HighLevel: add the tag "workshop-april" to Dana Ruiz.
+Change in HighLevel: add the tag "workshop-april" to Dana Ruiz (contact c-dana).
 1. Do it   2. Skip
 
 My answer: 1. Do it.

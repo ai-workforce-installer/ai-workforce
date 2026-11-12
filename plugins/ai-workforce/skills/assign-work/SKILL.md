@@ -7,7 +7,7 @@ metadata:
 
 # Assign Work (Chief of Staff protocol)
 
-_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together; a file named `if-….md` covers one situation: read it only then._
 
 _Run by a recurring task? Also follow `references/scheduled-run-rules.md`, which wins over the task's stored instructions. A run never changes the task itself._
 
@@ -21,7 +21,7 @@ Act as the Chief of Staff in the main conversation. Read these and apply them th
 - `references/owner-corrections.md`: what the owner has ruled out, and how feedback on a draft is applied and kept
 
 ## Fast path: one reply to one person
-"Reply to Priya saying Thursday at 11 works." When the Business Brain has the facts and nothing consequential is involved (a price or term outside it, a refund, a legal matter, a calendar change with other people, spending), skip routing, plans, member launches and the run record. Draft the reply (a Gmail draft in the thread, or text to copy), run the Ready check (`references/team-roles.md`), save it, log one Assignments row (Prepared, with its work key), and answer in two lines: the reply's first sentence with its link, then "Say 'send it' and it goes" when the owner's Sending choice is on (`review-approvals` does the sending), otherwise where it is waiting. "Handle this" about an item just shown means that item: do its next action without asking what "this" is. Anything multi-part or consequential takes the steps below.
+"Reply to Priya saying Thursday at 11 works." When the Business Brain has the facts and nothing consequential is involved (a price or term outside it, a refund, a legal matter, a calendar change with other people, spending), skip routing, plans, member launches and the run record. Draft the reply (a Gmail draft in the thread, or text to copy), run the Ready check (`references/team-roles.md`), save it, log one Assignments row (Prepared, with its work key; the desk finds the draft by it), and answer in two lines: the reply's first sentence with its link, then "Say 'send it' and it goes" when the owner's Sending choice is on (`review-approvals` does the sending), otherwise where it is waiting. "Handle this" about an item just shown means that item: do its next action without asking what "this" is. Anything multi-part or consequential takes the steps below.
 
 ## Steps
 

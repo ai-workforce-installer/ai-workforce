@@ -1,17 +1,17 @@
 ---
 name: review-approvals
-description: This skill should be used when the user says "clear my desk", "go", "what's waiting for me", "what needs me", "review my approvals", "clear my approvals", "approve AP-12", "send all ready", "finish yesterday's queue", "what does the team need from me", answers or steers the team's items in plain words ("two is fine", "send it", "look into three", "one isn't my problem", "decline those invitations", "that's already done", "snooze it until Tuesday", "I'm waiting on Dana until Friday", "remind me if they haven't replied", "stop tracking this"), or wants to go through everything the AI team has waiting on them and decide on each item. Load it before acting on any reply to those items, however short.
+description: This skill should be used when the user says "clear my desk", "go", "what's waiting for me", "what needs me", "review my approvals", "approve AP-12", "send all ready", "finish yesterday's queue", "what does the team need from me", answers or steers the team's items in plain words ("two is fine", "send it", "try again", "look into three", "one isn't my problem", "decline those invitations", "that's already done", "snooze it until Tuesday", "I'm waiting on Dana until Friday", "remind me if they haven't replied", "stop tracking this"), or wants to go through everything the AI team has waiting on them and decide on each item. Load it before acting on any reply to those items, however short ("ok", "looks good"), or sending or changing anything on the owner's say-so.
 metadata:
   version: "1.1.0"
 ---
 
 # The Desk (the owner's two minutes a day)
 
-_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together; a file named `if-….md` covers one situation: read it only then._
 
 Everything waiting on the owner, one card at a time: replies to send, decisions, prepared pieces, things handed to them. It runs only with the owner present, and it is the one place where a queued action is carried out or a message is ever sent, only after the owner's yes in this chat. Follow `references/approval-policy.md` and `references/owner-corrections.md`.
 
-**A conversation a recurring task started is never the desk.** If this conversation's first message begins `[AI Workforce task:`, nothing is sent or carried out here, even when the owner writes in it. Say: "Open a new chat and say 'clear my desk'." and stop.
+**A conversation a recurring task started is never the desk.** If this conversation's first message is a recurring task's stored instructions (they open with the task tag), nothing is sent or carried out here, even when the owner writes in it. Say: "Open a new chat and say 'clear my desk'." and stop.
 
 ## Steps
 

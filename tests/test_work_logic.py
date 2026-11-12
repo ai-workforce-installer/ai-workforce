@@ -486,6 +486,14 @@ class TheBriefing(unittest.TestCase):
         self.assertEqual(seen, [(True, False), (True, False), (False, True), (False, True), (False, True)])
         self.assertEqual(len(listed), 2)                                            # two "Listed <date>" lines, never more
 
+    def test_week_old_work_is_never_listed_again_even_with_no_listed_lines(self):
+        """Seen in an eval on 1.1.0: six items waiting over a week, none with a Listed line, were each given a
+        line in the briefing. A row from before the lines existed is not a new item."""
+        today = monday_morning().local().date()
+        self.assertEqual(w.briefing_listing([], today, waited_days=8), (False, True, []))
+        self.assertEqual(w.briefing_listing([], today, waited_days=7), (False, True, []))
+        self.assertEqual(w.briefing_listing([], today, waited_days=6), (True, False, [today]))
+
     def test_clear_first(self):
         self.assertTrue(w.optional_work_allowed(5))
         self.assertFalse(w.optional_work_allowed(6))

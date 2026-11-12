@@ -7,7 +7,7 @@ metadata:
 
 # Workforce Self-Test
 
-_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together; a file named `if-….md` covers one situation: read it only then._
 
 Prove what actually works, and never claim more. Do not simulate anything. **Proof mode:** when the owner says "prove it" or "run the live checks", do steps 1 and 2, then follow `references/if-proving-live.md` instead of the rest: it checks, on the owner's real account, each thing this release hasn't yet been seen doing, with test records only. Follow `references/approval-policy.md`, `references/connections.md`, `references/run-tracking.md` and the run rule in `references/team-roles.md`. The test never sends anything, never changes real business records, and never deletes; every test record it creates is marked "Self-test" and left as history.
 

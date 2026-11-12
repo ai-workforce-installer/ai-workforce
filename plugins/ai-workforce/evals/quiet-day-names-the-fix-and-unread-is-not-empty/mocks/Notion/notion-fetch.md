@@ -48,8 +48,7 @@ Brightpath Coaching runs group workshops for first-time managers. Website: brigh
 
 ## Priorities
 ### This quarter's goals
-1. Fill the March 26 New Manager Workshop (40 seats)
-2. Find a bookkeeper
+- none yet
 ### Not my responsibility anymore
 - none yet
 ### Things to ignore for now

@@ -555,10 +555,12 @@ def needs_you_count(approvals_pending, ready_replies, prepared_pieces, handed_to
     return approvals_pending + ready_replies + prepared_pieces + handed_to_owner
 
 
-def briefing_listing(row_listed_dates, today):
+def briefing_listing(row_listed_dates, today, waited_days=0):
     """Don't nag: an untouched item is named in at most two briefings; then it leaves the daily list
-    and becomes one card on the desk. Returns (name it today?, desk card?, the row's Listed lines)."""
-    if len(row_listed_dates) >= 2:
+    and becomes one card on the desk. An item that has already waited a week leaves it too, whatever
+    its Listed lines say (rows from before the lines existed have none).
+    Returns (name it today?, desk card?, the row's Listed lines)."""
+    if len(row_listed_dates) >= 2 or waited_days >= 7:
         return False, True, row_listed_dates
     return True, False, row_listed_dates + [today]
 
