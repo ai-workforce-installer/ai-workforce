@@ -707,3 +707,54 @@ def morning_run_in_setup(reply, tasks, default_time="7:30 AM", tool_available=Tr
 
 def setup_finished(first_job_done, schedule_state):
     return first_job_done and schedule_state in ("scheduled, confirmed", "scheduled", "declined", "not available on this account")
+
+
+# ---- 1.1.0 step 8: setup starts from what the owner wants off their plate (skills/setup-workforce/SKILL.md) ----
+
+FIRST_JOBS = [   # (words in the owner's hand-off answer, the first job, the one source it needs)
+    (("inbox", "email", "replies", "customers", "leads", "follow"), "the quick look", "email"),
+    (("meeting", "schedul", "calendar"), "the next 48 hours and one meeting prep", "calendar"),
+    (("invoice", "paid", "owed", "collect"), "the overdue review", "invoices"),
+    (("marketing", "content", "newsletter", "posts"), "one finished piece for the main offer", "website"),
+]
+
+
+def first_job(hand_off, available):
+    """One responsibility and the one source it needs. No answer, or nothing the team can do yet: the quick look
+    (calendar if there is no email; pasted emails otherwise). Returns (job, source, said_it_cannot_do_the_ask)."""
+    said = (hand_off or "").lower()
+    for words, job, source in FIRST_JOBS:
+        if any(w in said for w in words) and source in available:
+            return job, source, False
+    fallback = ("the quick look", "email") if "email" in available else \
+               ("the next 48 hours and one meeting prep", "calendar") if "calendar" in available else \
+               ("pasted emails", "paste")
+    return fallback + (bool(said),)
+
+
+def connect_checklist(chosen, connected, needed):
+    """Every card still needed goes in one message, under one line that says what each app is for."""
+    cards = [a for a in chosen if a not in connected]
+    cards.sort(key=lambda a: (a != "Notion", a != needed))                 # Notion first, then the first job's source
+    notes = ["%s: %s" % (a, "needed for your first job" if a in ("Notion", needed) else "optional, skip") for a in cards]
+    line = "%d of %d connected" % (len([a for a in chosen if a in connected]), len(chosen))
+    return cards, " · ".join([line] + notes)
+
+
+def can_start_first_job(connected, needed):
+    """The first job starts as soon as Notion and its one source work, without waiting for anything else."""
+    return "Notion" in connected and (needed in connected or needed in ("paste", "website"))
+
+
+def setup_opening(brain):
+    """An existing Business Brain opens with where things stand, not with the questions again."""
+    if not brain:
+        return "questions"
+    apps = len([v for v in brain.get("connections", {}).values() if v not in ("None", "not set", "")])
+    job = "first job done" if brain.get("finished_runs") else "first job not done yet"
+    return "Found your Business Brain: %d apps connected, %s. Carry on from here?" % (apps, job)
+
+
+def first_success(result):
+    """A connection check or an empty report is never the first success."""
+    return result.get("kind") == "job" and result.get("saved_and_fetched_back") and result.get("items", 0) > 0

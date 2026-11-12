@@ -622,5 +622,44 @@ class MorningRunByDefault(unittest.TestCase):
         self.assertFalse(w.setup_finished(False, "scheduled, confirmed"))
 
 
+class SetupStartsFromTheHandOff(unittest.TestCase):
+    """1.1.0 step 8."""
+    def test_one_responsibility_and_the_one_source_it_needs(self):
+        self.assertEqual(w.first_job("answering customer emails", {"email", "calendar"}), ("the quick look", "email", False))
+        self.assertEqual(w.first_job("scheduling meetings", {"email", "calendar"})[:2], ("the next 48 hours and one meeting prep", "calendar"))
+        self.assertEqual(w.first_job("chasing invoices", {"email", "invoices"})[1], "invoices")
+
+    def test_no_answer_or_nothing_the_team_can_do_yet_falls_back_and_says_so(self):
+        self.assertEqual(w.first_job("", {"email"}), ("the quick look", "email", False))
+        self.assertEqual(w.first_job("chasing invoices", {"email"}), ("the quick look", "email", True))     # no invoice source yet: say so
+        self.assertEqual(w.first_job("doing my taxes", {"calendar"}), ("the next 48 hours and one meeting prep", "calendar", True))
+        self.assertEqual(w.first_job("", set())[:2], ("pasted emails", "paste"))
+
+    def test_every_card_in_one_message_under_one_checklist(self):
+        chosen = ["Notion", "Gmail", "Google Calendar", "Google Drive"]
+        cards, line = w.connect_checklist(chosen, {"Notion", "Google Calendar"}, needed="Gmail")
+        self.assertEqual(cards, ["Gmail", "Google Drive"])                           # both at once, the needed one first
+        self.assertEqual(line, "2 of 4 connected · Gmail: needed for your first job · Google Drive: optional, skip")
+        cards, line = w.connect_checklist(chosen, set(), needed="Gmail")
+        self.assertEqual(cards[:2], ["Notion", "Gmail"])
+        self.assertEqual(w.connect_checklist(chosen, set(chosen), "Gmail")[0], [])   # nothing left to show
+
+    def test_the_first_job_does_not_wait_for_optional_apps(self):
+        self.assertTrue(w.can_start_first_job({"Notion", "Gmail"}, "Gmail"))         # calendar and files still waiting
+        self.assertFalse(w.can_start_first_job({"Gmail"}, "Gmail"))                  # nowhere to save it yet
+        self.assertFalse(w.can_start_first_job({"Notion", "Google Calendar"}, "Gmail"))
+
+    def test_an_existing_workspace_opens_with_where_things_stand(self):
+        brain = {"connections": {"Email": "Gmail", "Calendar": "Google Calendar", "Files": "None", "Notion": "Notion"}, "finished_runs": 1}
+        self.assertEqual(w.setup_opening(brain), "Found your Business Brain: 3 apps connected, first job done. Carry on from here?")
+        self.assertEqual(w.setup_opening(None), "questions")
+
+    def test_a_connection_check_or_an_empty_report_is_never_the_first_success(self):
+        self.assertFalse(w.first_success({"kind": "connection check", "saved_and_fetched_back": True, "items": 4}))
+        self.assertFalse(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 0}))
+        self.assertFalse(w.first_success({"kind": "job", "saved_and_fetched_back": False, "items": 2}))
+        self.assertTrue(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 2}))
+
+
 if __name__ == "__main__":
     unittest.main()

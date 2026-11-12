@@ -152,11 +152,11 @@ class SetupKeepsWorking(unittest.TestCase):
 
     def test_team_works_while_the_owner_connects(self):
         s = read(SKILLS / "setup-workforce" / "SKILL.md")
-        for must in ["Setup jobs (the team works while the owner connects the next app)",
+        for must in ["Setup jobs (the team works while the owner connects)",
                      "Never sit idle waiting for a connection", "**In the background:**", "**In the same message:**",
                      "only once the Notion job's structure check has passed", "one run record per job, never twice",
                      "never moves the inbox bookmark", "They ask the owner nothing",
-                     "Notion first (everything is saved there), then email (its job takes longest, so it starts earliest)",
+                     "the quick look as soon as Notion and email work, without waiting for calendar or files",   # 1.1.0
                      "A job that fails never holds setup up"]:
             self.assertIn(must, s)
         fm = read(SKILLS / "first-team-meeting" / "SKILL.md")
@@ -688,6 +688,51 @@ class ReachTheWorkAndKeepRunning(unittest.TestCase):
         self.assertIn("the Daily briefing line under Schedule says scheduled and confirmed, declined, or not available on this account", self.s)
 
 
+class SetupStartsFromTheHandOff(unittest.TestCase):
+    """1.1.0 step 8: setup starts from what the owner wants off their plate, connects apps in one round,
+    and its first success is one small real job, never a connection check or an empty report."""
+    def setUp(self):
+        self.s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.ftm = read(SKILLS / "first-team-meeting" / "SKILL.md")
+
+    def test_the_hand_off_question_comes_before_any_job(self):
+        stage0 = self.s.split("## Stage 0", 1)[1].split("## Stage 1", 1)[0]
+        q = "\"What's one thing you spend too much time on every week that you'd love to hand off?\""
+        self.assertIn(q, stage0)
+        self.assertLess(stage0.index(q), stage0.index('"Which email do you use for your business?"'))
+        self.assertIn("The first one decides the team's first job, so it comes before any job starts", stage0)
+        self.assertNotIn(q, self.s.split("## Stage 3", 1)[1])                      # asked once, not again later
+
+    def test_one_responsibility_one_source_and_what_done_means(self):
+        for must in ["**The first job, in plain words.**", "choose one responsibility the team can start today and the one source it needs",
+                     "Done means <what they will have at the end>", "For that I need <app>; everything else can wait",
+                     "One responsibility: unrelated connections and questions wait.",
+                     "Other connected apps get no job of their own during setup"]:
+            self.assertIn(must, self.s)
+
+    def test_all_cards_in_one_message_with_one_checklist(self):
+        for must in ["**All the cards in one message.**", "show every connect card still needed in that one message",
+                     '"2 of 4 connected · Gmail: needed for your first job · Drive: optional, skip"',
+                     "so they never have to connect one per message", "try the harmless read for every app still waiting",
+                     "Don't wait for an optional app"]:
+            self.assertIn(must, self.s)
+        self.assertNotIn("one at a time** with the connect loop", self.s)        # the per-message loop is gone
+
+    def test_the_first_success_is_real_work(self):
+        self.assertIn("A connection check, an install or an empty report is never the first success", self.s)
+        self.assertIn("ask only what the first job needs", self.s)
+        for must in ["fetch the saved result back and give its link", "A job that found nothing to do is not a first result",
+                     "**Otherwise do the first job setup named** from the owner's hand-off answer"]:
+            self.assertIn(must, self.ftm)
+        self.assertIn("The meeting checks where the result was saved, shows it with its link, and offers it as recurring", self.s)
+
+    def test_an_existing_workspace_opens_with_where_things_stand(self):
+        resuming = self.s.split("- **Resuming:**", 1)[1].split("\n", 1)[0]
+        for must in ["Open with where things stand, from its own pages, instead of restarting the questions",
+                     '"Found your Business Brain: 3 apps connected, first job done. Carry on from here?"', "Then do only what is missing"]:
+            self.assertIn(must, resuming)
+
+
 class PlainLanguageControl(unittest.TestCase):
     """1.0.0: the owner steers work in plain words, through the skills that already exist."""
     def test_each_phrase_reaches_a_skill_that_exists(self):
@@ -1085,17 +1130,22 @@ class HighLevelComesAfterTheFirstResult(unittest.TestCase):
         self.before, self.later = self.s.split("## Connecting HighLevel", 1)
         self.later = self.later.split("## If something goes wrong", 1)[0]
 
-    def test_first_time_setup_asks_three_questions_and_none_about_highlevel(self):
+    def test_first_time_setup_asks_the_hand_off_and_three_app_questions_and_none_about_highlevel(self):
+        """1.1.0 put the hand-off question first, ahead of the three one-click app questions. Still nothing about HighLevel."""
         stage0 = self.s.split("## Stage 0", 1)[1].split("## Stage 1", 1)[0]
-        self.assertEqual(len(re.findall(r'^- "', stage0, re.M)), 3)
-        self.assertIn("ask these three questions together", stage0)
+        asked = re.findall(r'^- "([^"]+)"', stage0, re.M)
+        self.assertEqual(len(asked), 4)
+        self.assertIn("hand off", asked[0])
+        self.assertEqual([q.split()[0] for q in asked[1:]], ["Which", "Which", "Where"])
+        self.assertIn("ask these four questions together", stage0)
         self.assertIn("**HighLevel is not part of first-time setup.**", stage0)
         self.assertIn("Don't ask about it or mention it here", stage0)
         self.assertIn("right after their first result", stage0)
         for banned in ["Do customers message you through HighLevel?", "leadconnectorhq", "Add custom connector"]:
             self.assertNotIn(banned, self.before, "first-time setup must stay click-and-sign-in")
-        self.assertNotIn("HighLevel", self.s.split("**Order:**", 1)[1].split("\n", 1)[0])
-        self.assertIn("HighLevel is never asked about or connected in this stage", self.s)
+        cards = self.s.split("**All the cards in one message.**", 1)[1].split("\n", 1)[0]
+        self.assertNotIn("HighLevel", cards.split("HighLevel is never asked about or connected in this stage")[0])
+        self.assertIn("HighLevel is never asked about or connected in this stage", cards)
 
     def test_it_is_mentioned_once_after_the_first_result_without_a_question(self):
         finish = self.s.split("## Finish", 1)[1]
