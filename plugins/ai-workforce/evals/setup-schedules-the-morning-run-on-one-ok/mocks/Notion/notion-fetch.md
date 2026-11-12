@@ -18,17 +18,19 @@
 ### Schedule
 - Daily briefing: _not set_
 - Inbox triage: _not set_
+- Commitments review: _not set_
 - Check-in frequency: every day
 - Send lock: built in
 ### Where things live
 - Customer email inbox: Gmail
 - Invoices are kept in: not set
 - Marketing performance data: not set
+- Team work: _not set_
 ### Extra rules for my team
 - none yet
 ### About this workspace
 - Set up on: 2026-02-10
-- Business Brain version: 1.0.0
+- Business Brain version: 1.1.0
 
 ## Paste Box
 (empty)
