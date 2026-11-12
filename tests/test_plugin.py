@@ -191,7 +191,7 @@ class InstallLinks(unittest.TestCase):
             for ref in re.findall(r"--marketplace (\S+?)`", t):
                 self.assertEqual(ref, self.REPO, p)
             self.assertIn(f"https://github.com/{self.REPO}/raw/main/download/ai-workforce.plugin", t, p)
-            self.assertIn("**Access:** the repository is private.", t, p)
+            self.assertNotIn("repository is private", t, p)
 
 
 class Evals(unittest.TestCase):
