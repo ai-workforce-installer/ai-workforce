@@ -661,6 +661,32 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         self.assertTrue(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 2}))
 
 
+class ASmallerInbox(unittest.TestCase):
+    """1.1.0 step 9."""
+    def test_labels_follow_the_row_and_come_off_when_it_closes(self):
+        clock = monday_morning()
+        row = w.Row("gmail-thread:t1:reply", "Reply to Dana", work_type="Reply", status="Prepared")
+        self.assertEqual(w.relabel({"INBOX", "Clients"}, row, has_saved_draft=True), {"INBOX", "Clients", w.NEEDS_YOU, w.DRAFT_READY})
+        handed = w.Row("alert:bank:failed-payment", "Update the card", status="Handed to you")
+        self.assertEqual(w.team_labels(handed), {w.NEEDS_YOU})
+        w._close(row, "Sent", clock.now(), evidence="m-sent-1")
+        self.assertEqual(w.relabel({"INBOX", "Clients", w.NEEDS_YOU, w.DRAFT_READY}, row), {"INBOX", "Clients"})   # the owner's own labels stay
+        waiting_on_someone = w.Row("k", "Waiting on Sam", status="Blocked", waiting_on="Sam")
+        self.assertEqual(w.team_labels(waiting_on_someone), set())                                                  # not the owner's move
+
+    def test_the_archive_card_holds_only_what_the_inbox_check_sorted_routine(self):
+        routine = [("t1", "newsletters"), ("t2", "newsletters"), ("t3", "promotions"), ("t4", "receipts"), ("t5", "promotions")]
+        card, ids = w.archive_card(routine, in_inbox={"t1", "t2", "t3", "t4", "t9"}, open_row_threads={"t4"})
+        self.assertEqual(ids, ["t1", "t2", "t3"])                    # t5 already archived, t4 has open work, t9 was never routine
+        self.assertEqual(card, "Archive the 3 routine emails from yesterday? 2 newsletters, 1 promotions.")
+        self.assertEqual(w.archive_card([], in_inbox={"t9"}), (None, []))               # nothing routine: no card at all
+
+    def test_nothing_is_archived_without_the_tap_or_without_the_owner(self):
+        self.assertEqual(w.archive_on_tap(["t1", "t2"], tapped=False), [])
+        self.assertEqual(w.archive_on_tap(["t1", "t2"], tapped=True, owner_present=False), [])
+        self.assertEqual(w.archive_on_tap(["t1", "t2"], tapped=True), ["t1", "t2"])
+
+
 class HighLevelBeyondReading(unittest.TestCase):
     """1.1.0 step 11."""
     def test_a_tag_or_stage_change_happens_only_on_a_yes(self):

@@ -770,6 +770,37 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
             self.assertIn(must, resuming)
 
 
+class ASmallerInbox(unittest.TestCase):
+    """1.1.0 step 9: on one account 246 of 287 threads were promotions and newsletters, counted every morning and
+    never reduced. Two labels show the owner what needs them, and one desk card clears yesterday's routine mail."""
+    def test_two_labels_kept_true(self):
+        ic = read(SizeBudget.ref("inbox-coverage.md"))
+        for must in ["**Two labels, kept true (Gmail).**", "`Team/Needs you` goes on a thread with an open row waiting on the owner",
+                     "`Team/Draft ready` on one whose reply draft is saved", "takes a label off when its row closes",
+                     "A run adds or removes no other label, and never archives, trashes or marks anything",
+                     "- Routine thread IDs: <ids> (kept here for the desk's archive card)"]:
+            self.assertIn(must, ic)
+        self.assertIn("and take the thread's Team label off", read(SKILLS / "review-approvals" / "SKILL.md"))
+
+    def test_archive_only_on_the_tap_and_only_what_was_sorted_routine(self):
+        desk = read(SKILLS / "review-approvals" / "SKILL.md")
+        for must in ["**Yesterday's routine mail (Gmail).**", "Archive on that tap only",
+                     "only threads the inbox check listed as routine (the Routine thread IDs in its record)",
+                     "still in the inbox and have no open row", "never mail from a person, about money, or personal",
+                     "Never unsubscribe, delete or create a filter"]:
+            self.assertIn(must, desk)
+        for sk in ["daily-executive-briefing", "inbox-triage", "assign-work", "process-customer-inquiries"]:
+            self.assertNotIn("Archive on that tap", read(SKILLS / sk / "SKILL.md"), sk)      # a run never offers or does it
+
+    def test_the_policy_allows_exactly_these_two_things(self):
+        ap = read(REFS / "approval-policy.md")
+        allowed = ap.split("## Allowed without approval")[1].split("## Saved corrections")[0]
+        self.assertIn("Adding and removing the team's two Gmail labels (`references/inbox-coverage.md` section 4). No other label.", allowed)
+        on_a_yes = ap.split("## Done only after the owner's yes in the chat")[1].split("## Allowed without approval")[0]
+        self.assertIn("9. **Archive routine mail** - at the desk, on the owner's tap, only threads the inbox check sorted as routine. Never unsubscribing, deleting or filters.", on_a_yes)
+        self.assertIn("no sending, unsubscribing, archiving, labelling, filtering or deleting because of it", ap)   # a saved rule still permits nothing
+
+
 class HighLevelBeyondReadingAttendedOnly(unittest.TestCase):
     """1.1.0 step 11: with the owner present and a yes per item, the Chief of Staff may change a contact's tags
     or move an opportunity's stage. Nothing else, never in a run nobody is watching, and the lock is unchanged."""

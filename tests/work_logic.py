@@ -840,3 +840,38 @@ def highlevel_change(kind, answer, owner_present=True, who="Chief of Staff", con
     if not connection_allows:
         return False, "" if said_before else "To let me do that, reconnect HighLevel and allow editing contacts and opportunities."
     return True, "done"
+
+
+# ---- 1.1.0 step 9: a smaller inbox (references/inbox-coverage.md section 4; skills/review-approvals/SKILL.md) ----
+
+NEEDS_YOU, DRAFT_READY = "Team/Needs you", "Team/Draft ready"
+
+
+def team_labels(row, has_saved_draft=False):
+    """The labels a thread should carry for one open-work row. A closed row carries none."""
+    if not row.open or row.next_move != "owner":
+        return set()
+    return {NEEDS_YOU} | ({DRAFT_READY} if has_saved_draft else set())
+
+
+def relabel(thread_labels, row, has_saved_draft=False):
+    """Only the team's two labels are ever added or removed; whatever else is on the thread stays."""
+    return (set(thread_labels) - {NEEDS_YOU, DRAFT_READY}) | team_labels(row, has_saved_draft)
+
+
+def archive_card(routine, in_inbox, open_row_threads=()):
+    """The desk's one card for yesterday's routine mail. `routine` is the inbox record's own list:
+    (thread id, kind). Returns (the card's sentence, the ids a tap would archive), or (None, [])."""
+    ids = [(t, kind) for t, kind in routine if t in in_inbox and t not in open_row_threads]
+    if not ids:
+        return None, []
+    kinds = {}
+    for _, kind in ids:
+        kinds[kind] = kinds.get(kind, 0) + 1
+    parts = ", ".join("%d %s" % (n, k) for k, n in sorted(kinds.items(), key=lambda kv: -kv[1]))
+    return "Archive the %d routine emails from yesterday? %s." % (len(ids), parts), [t for t, _ in ids]
+
+
+def archive_on_tap(card_ids, tapped, owner_present=True):
+    """Archived only on that tap, only with the owner there, and only the ids the card held."""
+    return list(card_ids) if (tapped and owner_present) else []

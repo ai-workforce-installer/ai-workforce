@@ -85,6 +85,8 @@ For each item in the first five buckets, the assigned member does the next usefu
 
 **Limits per run:** read at most 30 messages in full and draft at most 5 replies (the morning run sets its own limit by how fast the owner clears them: `daily-executive-briefing`, "Clear first"). Anything beyond becomes a row in the open-work queue (`references/run-tracking.md` section 6), so nothing silently drops and the next run picks it up first.
 
+**Two labels, kept true (Gmail).** `Team/Needs you` goes on a thread with an open row waiting on the owner, `Team/Draft ready` on one whose reply draft is saved; the Chief of Staff adds them when it logs the rows, creating the two labels once if they're missing, and takes a label off when its row closes. A run adds or removes no other label, and never archives, trashes or marks anything.
+
 ## 5. Coverage section (every report)
 
 ```
@@ -97,6 +99,7 @@ Coverage: comprehensive (all mail in the window) | narrow (say what was left out
 - Processed: <n> with follow-up done; <n> queued in open work
 - Prioritized: <n> (urgent <n>, needs reply <n>, opportunities <n>, money and accounts <n>, meetings and projects <n>, customer <n>)
 - Filtered out as routine: <n> (promotions <n>, newsletters <n>, webinar or event pitches <n>, notifications <n>, receipts <n>, your rules <n>); personal or family: <n>
+- Routine thread IDs: <ids> (kept here for the desk's archive card)
 - Not checked: <every mailbox under Where things live the team can't reach>, or "nothing"
 - Search: complete | incomplete (<why>)
 - Follow-up: <n> done, <n> queued in open work

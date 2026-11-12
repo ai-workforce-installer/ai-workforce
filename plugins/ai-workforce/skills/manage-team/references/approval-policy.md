@@ -14,10 +14,12 @@ The owner does these personally. The team prepares them as an approval item with
 6. **Create or change calendar events involving other people.**
 7. **Quote a price, discount or term that is not in the Business Brain** (Pricing & Offers, Policies).
 8. **Change a HighLevel contact's tags or an opportunity's pipeline stage** - on the desk only, one yes per item. Nothing else is ever changed in HighLevel.
+9. **Archive routine mail** - at the desk, on the owner's tap, only threads the inbox check sorted as routine. Never unsubscribing, deleting or filters.
 
 ## Allowed without approval
 - Reading and searching connected apps.
 - Creating drafts: Gmail drafts, or reply text saved in a Briefings page (never sending).
+- Adding and removing the team's two Gmail labels (`references/inbox-coverage.md` section 4). No other label.
 - **The orchestrator only** (the skill running in the main conversation) writes to the Business Brain, and only in these ways. Anything not listed here is not allowed.
   - **Any run, attended or scheduled:**
     - Create rows in **Approvals**, **Assignments** and **Briefings**.
