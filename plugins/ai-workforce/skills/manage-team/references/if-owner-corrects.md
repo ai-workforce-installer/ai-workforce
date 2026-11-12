@@ -21,18 +21,13 @@ When it's not clear whether the owner means this item or a lasting rule, ask **o
 
 Quote the exact words you'll save, what still gets through, and the related items you'd close: "I'll save: 'Not my responsibility anymore: Northwind Studio, including its automations and their failure alerts (since Nov 6).' I'll still tell you about a new security problem or money leaving your accounts. I'll also close AP-4 and AP-9. OK?"
 
-One yes covers the rule and the related items you listed. Save nothing before that yes. Scheduled runs never create or change rules: they apply the rules already saved and list anything that looks like a new correction under Questions for you.
+One yes covers the rule and the related items you listed. Save nothing before that yes.
 
 Make the rule as narrow as what the owner said: a business, an account, an automation, a sender, a kind of notification. Never widen "the old Make automation" into "all Make emails" or "all automation alerts".
 
 ## 3. Where it's saved (existing pages only)
 
-Priorities holds what deserves attention and what doesn't:
-- **Not my responsibility anymore** → Priorities, "Not my responsibility anymore" (businesses, clients, accounts, automations the owner no longer looks after).
-- **What to ignore** → Priorities, "Things to ignore for now".
-- **What matters** → Priorities, "Always worth my attention".
-- **Writing preferences** → Brand & Tone (or that member's section on Your Team if it's about one member's work), per `manage-team` part A.
-- **Rules for everyone** ("never raise anything about my old agency") can go in Workforce Settings → Extra rules for my team if the owner prefers.
+Priorities holds what deserves attention and what doesn't, under three headings: "Not my responsibility anymore" (businesses, clients, accounts, automations the owner no longer looks after), "Things to ignore for now" and "Always worth my attention". Writing preferences go to Brand & Tone (or that member's section on Your Team), per `manage-team` part A. A rule for everyone ("never raise anything about my old agency") can go under Extra rules for my team if the owner prefers.
 
 One bullet per rule, in this shape:
 `- <what it covers, in the owner's words> · since <date>` (add ` · until <date>` for a temporary rule).

@@ -897,7 +897,7 @@ class PlainLanguageControl(unittest.TestCase):
                      "above all a rule that hides items (part A2), because a wrong one silently buries mail",
                      "a preference never grants new permission to send or spend: never infer one"]:
             self.assertIn(must, mt)
-        self.assertIn("for a lasting rule, confirm the exact line", mt)                   # part A2 is as it was
+        self.assertIn("the exact line confirmed before anything is saved", mt)                   # part A2 is as it was
         self.assertIn("One yes covers the rule and the related items you listed. Save nothing before that yes.", read(REFS / "if-owner-corrects.md"))
         self.assertIn('unless the owner already said "from now on"', read(REFS / "if-owner-corrects.md"))
 

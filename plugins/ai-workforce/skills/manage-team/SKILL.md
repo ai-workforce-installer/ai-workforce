@@ -35,7 +35,7 @@ The owner should never have to rebuild a team member. They say how they want the
 4. **Say how it applies:** "Done. Client Success will follow this from the next reply on." If drafts made under the old rule are still waiting (pending approvals, Replies ready to copy), offer to redo them.
 
 ## A2. "That's not mine anymore" / "stop bringing this up"
-The owner is correcting what the team thinks matters. Follow `references/if-owner-corrects.md`: decide whether it's about this item only, this thread, a lasting rule or a temporary one; for a lasting rule, confirm the exact line (and the related open items you'd close) in one message, save it on Priorities, close the related items with their history kept, and say how it applies: "Done. The team won't raise the old Northwind automations again. A new security problem on your own accounts would still come to you." Scheduled runs never save rules; they list a possible correction under Questions for you.
+The owner is correcting what the team thinks matters. Follow `references/if-owner-corrects.md` (this item only, this thread, a lasting rule or a temporary one; the exact line confirmed before anything is saved; related items closed with their history kept), then say how it applies: "Done. The team won't raise the old Northwind automations again. A new security problem on your own accounts would still come to you."
 
 To take a rule back ("actually, do tell me about Northwind"), add " · no longer applies <date>" to its line after the owner confirms; never delete it.
 
