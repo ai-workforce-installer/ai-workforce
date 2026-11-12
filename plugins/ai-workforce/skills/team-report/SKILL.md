@@ -2,7 +2,7 @@
 name: team-report
 description: This skill should be used when the owner asks "what's my team been working on?", "what did the team do this week?", "did the morning briefing run?", "what's scheduled?", "is the team working?", "any problems?", "how's my first week going?", or wants a truthful summary of the team's actual activity, results, failures and pending decisions.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Team Report
@@ -46,7 +46,7 @@ On request (the daily briefing mentions it once). Same records as above, from "S
 4. **What the team has learned:** the preferences and corrections saved so far (Brand & Tone, Your Team notes, Priorities). If none, ask the one question that would help most ("How do you usually sign off?").
 5. **One thing to hand off next:** one suggestion grounded in what the team saw, with an offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled). If the records show an urgent item that arrived after a morning run, offer once instead (noted under Suggestions on Your Team, so it isn't offered twice): "Want a quick afternoon check for emergencies only? It reads subjects, drafts nothing and stays quiet unless something is urgent."
 6. **In one line:** what the team did this week (counts, from the records).
-7. **Version:** "You're on AI Workforce 1.0.0. To update: Customize → Plugins if you installed it from the marketplace; if you uploaded a file, upload the new one (a file never updates itself)." Said here and in the self-test only, never in a daily briefing.
+7. **Version:** "You're on AI Workforce 1.1.0. To update: Customize → Plugins if you installed it from the marketplace; if you uploaded a file, upload the new one (a file never updates itself)." Said here and in the self-test only, never in a daily briefing.
 Nothing here creates tasks, approvals or notifications; anything the owner agrees to is done by the skill named.
 
 Read-only: this skill changes nothing.

@@ -57,8 +57,10 @@ class Versions(unittest.TestCase):
         packed = json.loads(z.read(".claude-plugin/plugin.json"))
         self.assertEqual(packed["version"], self.version)
         repo_files = {str(p.relative_to(PLUGIN)) for p in PLUGIN.rglob("*")
-                      if p.is_file() and p.relative_to(PLUGIN).parts[0] != "evals"}   # evals are for the maintainer
+                      if p.is_file() and p.relative_to(PLUGIN).parts[0] != "evals"    # evals are for the maintainer
+                      and "__pycache__" not in p.parts}                               # left behind by running the tests
         zip_files = {n for n in z.namelist() if not n.endswith("/")}
+        self.assertFalse([n for n in z.namelist() if "__pycache__" in n or n.endswith(".pyc")], "compiled files in the download")
         self.assertEqual(repo_files, zip_files)
         for n in zip_files:
             self.assertEqual(z.read(n), (PLUGIN / n).read_bytes(), f"stale in download: {n}")
@@ -427,17 +429,20 @@ class SizeBudget(unittest.TestCase):
     are read only when it comes up, so they are counted apart: `always` is a normal run, and
     `with every situation` is a run where everything comes up at once."""
     CEILINGS = {   # job: (skills, always read, with every read-when-needed file reachable from them)
-        # 1.0.0 lowered every ceiling (0.9.0: 114,000/146,000, 54,500/79,000, 59,500/87,000, 73,500/101,000). 0.8.1 read 137,371, 68,573, 75,797, 96,056.
-        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 113_900, 145_600),
-        "weekly marketing plan": (["prepare-weekly-marketing"], 53_900, 77_900),
-        "invoice review": (["review-overdue-invoices"], 58_900, 86_100),
-        "any other recurring responsibility": (["assign-work"], 73_000, 100_200),
+        # 1.1.0 lowered every ceiling again (1.0.0: 113,900/145,600, 53,900/77,900, 58,900/86,100, 73,000/100,200;
+        # 0.9.0: 114,000/146,000, 54,500/79,000, 59,500/87,000, 73,500/101,000). 0.8.1 read 137,371, 68,573, 75,797, 96,056.
+        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 113_700, 141_900),
+        "weekly marketing plan": (["prepare-weekly-marketing"], 52_600, 70_000),
+        "invoice review": (["review-overdue-invoices"], 57_600, 78_300),
+        "any other recurring responsibility": (["assign-work"], 71_300, 91_800),
     }
     # One copy of every skill, reference and team member brief. Raised from 318,000 in 0.9.0: the
     # read-when-needed files each open by saying when to read them, and three behaviours were added
     # (the phone-first report, the priority piece, learning the owner's voice). What any one run reads
     # went down by 17 to 24 percent in the same release. 1.0.0 added open work, the desk, sending on
-    # the owner's yes and the live proof, paid for with cuts, and lowered this from 330,000.
+    # the owner's yes and the live proof, paid for with cuts, and lowered this from 330,000. 1.1.0 added
+    # commitments, cases, the Team work area, labels, the archive card and the urgent-only check under the
+    # same ceiling (329,890 against 1.0.0's 329,858), and now counts the three command files as well.
     ALL_INSTRUCTIONS = 329_900
     STORED_PROMPT = 3_100           # what each recurring task stores
     MORNING_WITH_COMMITMENTS_ON = 115_700   # 1.1.0, new: a morning run for an owner who turned the commitments review on

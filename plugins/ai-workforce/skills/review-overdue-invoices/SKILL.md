@@ -2,7 +2,7 @@
 name: review-overdue-invoices
 description: This skill should be used when the user asks to "review overdue invoices", "check receivables", "who owes us money", "accounts receivable aging", "draft payment reminders", or wants an overdue invoice report. Also used by the scheduled invoice review task.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Review Overdue Invoices (read-only)
