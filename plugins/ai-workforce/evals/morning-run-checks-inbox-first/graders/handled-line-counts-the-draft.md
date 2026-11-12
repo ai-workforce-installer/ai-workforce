@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'Handled:[^\n]{0,80}\b(1|one) (reply|draft)'
+pattern: 'Ready for you:[^\n]{0,40}\b(1|one)\b'
 flags: i
 match: contains
 ---

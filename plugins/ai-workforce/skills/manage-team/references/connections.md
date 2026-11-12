@@ -51,9 +51,6 @@ Google Drive: search and read Drive. OneDrive: Microsoft 365 search (`sharepoint
 
 Some owners talk to customers through HighLevel. If the Customer messages line is plain `HighLevel`, or HighLevel tools are connected and working while that line is still not set, follow `references/if-highlevel.md`. In short: runs only read HighLevel (the one thing ever sent there is a reply the owner said yes to on the desk), its replies go under Replies ready to copy, and a HighLevel that was connected but can't be reached is reported as "HighLevel unavailable" with the Result Partial.
 
-## Saying what's visible
-When reporting "no emails", "no leads" or similar, say where you looked: "none visible in Gmail". If Where things live names a place the team can't reach (for example the owner's CRM), say so in the same line, so the owner never mistakes "not visible" for "none".
-
 ## When the chosen app is unavailable at run time
 
 Try the owner's chosen app first. If its tools are missing or a call fails twice, use the paste-mode row for that job, report "<app> unavailable, used Paste Box" under Verification, and set the run's Result to Partial (not Failed) if anything was skipped.

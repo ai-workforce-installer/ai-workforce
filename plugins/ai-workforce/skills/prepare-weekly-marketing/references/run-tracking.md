@@ -18,7 +18,7 @@ Status: Running
 Window: <start> – <end>            (inbox triage only)
 ```
 
-**The owner's report goes above it.** Create the page with the run record inside a collapsed section (a toggle titled "Run record"; `references/notion-access.md` section 4). When the run ends, put the report at the top of the page, above that toggle, and add the finishing lines inside it (or just below it, if the tool can't add inside a toggle). Whoever opens the page sees what was handled first, never Run IDs or "Status: Running". This holds even when an older recurring task's stored text says the body starts with the Run ID. Records from before 0.9.0 begin with the run record instead; both are read the same way.
+**The owner's report goes above it.** Create the page with the run record inside a collapsed section (a toggle titled "Run record"; `references/notion-access.md` section 4). When the run ends, put the report at the top of the page, above that toggle, and add the finishing lines inside it (or just below it, if the tool can't add inside a toggle). Whoever opens the page sees what was handled first, never Run IDs or "Status: Running". Records from before 0.9.0 begin with the run record instead; both are read the same way.
 
 If the Briefings database has the newer properties (`Run ID`, `Started`, `Finished`, `Completed through`; added by the 0.5.0 upgrade in `references/brain-upgrades.md`), fill them too. If it doesn't, the run record alone is enough; never fail a run over a missing property.
 
@@ -38,7 +38,7 @@ Run finished: 2026-11-05 11:58 CT
 Status: Finished
 Result: Complete | Partial | Failed
 Completed through: <time>          (inbox triage only, see references/inbox-coverage.md)
-Handled: <n> reply drafts, <n> approvals raised, <n> items closed, <n> prepared | nothing: <the plain reason>
+Handled: <n> finished, <n> reply drafts ready, <n> prepared, <n> decisions raised | nothing: <the plain reason>
 Usage: <n> tool calls, <n> team members launched, <n> emails or records processed, <n> minutes
 Notified: pending
 ```
@@ -47,11 +47,12 @@ and set the Result, Approvals raised, Drafts created (and Finished, if present) 
 
 Count tool calls and launches yourself; add model or token usage only if the platform shows it. Never estimate credits or cost. A run that can't finish properly still writes these lines with Result Partial or Failed and says what was left undone.
 
-**Work handled** is how the owner judges a run, so it is counted honestly and said first.
-- **What counts:** only what exists and was checked in this run: reply drafts saved (or reply text ready to copy), approvals raised (real decisions; a draft waiting to be sent is not one), open items closed, and prepared pieces the owner can use as they are (a meeting prep, the priority piece, a plan, a reconciliation, a research note); a record counts only its own work. Updating a row, re-checking or carrying something forward is not closing it.
+**Work handled** is how the owner judges a run: four counts, said first and never added into one number.
+- **Finished:** verified outcomes only: open items closed on evidence or the owner's word (section 6). Updating a row, re-checking or carrying something forward is not closing it.
+- **Ready for you:** what this run made and checked that now waits on the owner: reply drafts (a reply drafted but not sent is Ready, never Finished) and prepared pieces usable as they are (a meeting prep, the priority piece, a plan, a reconciliation, a research note).
+- **Needs you:** everything waiting on the owner, new and old: decisions, ready replies and pieces, things handed to them. **Waiting on someone:** open rows whose next move is someone else's.
 - **What never counts:** reading, searching, sorting, counting, re-checking and "nothing needed". A run that reviewed 148 emails and prepared nothing handled nothing.
-- **Nothing handled** is written `Handled: nothing`, with the plain reason: nobody is waiting on a reply, or the place the work lives can't be reached (name it). Never pad the line or create work to fill it.
-- **Said first:** the owner's summary and the notification open with this line, then what needs them: "Handled: 3 reply drafts, 1 meeting prep, 2 items closed. Needs you: 2 decisions." Result and Handled are separate: a run can be Complete and have handled nothing.
+- The record's **Handled** line holds this run's own counts (a record counts only its own work), or `Handled: nothing` with the plain reason when nothing was finished, made ready or raised. Never pad it or create work to fill it. Result and Handled are separate: a run can be Complete and have handled nothing.
 
 **Result means the same everywhere:** Complete = the whole job was done, every source it needed was read, and the checks above passed. Work saved in the open-work queue because it was past a per-run limit counts as done for this purpose (it's tracked, not dropped); work that couldn't be saved anywhere does not. Partial = useful work was done but something was skipped, unreadable, incomplete or unchecked (name it). Failed = nothing useful was produced. Never claim nothing was missed when a source, a page of results or a check could not be verified.
 
@@ -114,7 +115,7 @@ Work the team found but hasn't finished lives in the **Assignments** database, n
 - **Nothing waits without a next action and a next check.** A stated deadline sets Next check. With none, use a suggested check time and call it that: the next working day for a person waiting on the owner, 2 working days for someone the owner is waiting on, 5 for a monitored issue, in the owner's time zone and working days. A snoozed row keeps its status and returns at its Next check. Checks happen in the morning run, never through a scheduled task per item.
 - **Every run starts with the queue:** read open Assignments (the "Open work" view if its filter matches, otherwise filtered rows where Status isn't Done or Failed; `references/notion-access.md`), whatever their age. Each run works only the rows for its own job (inbox triage: rows whose Source is an email; a recurring member task: that member's rows); the daily briefing lists the rest under what's waiting, without redoing them. Finish what can be finished now, put a Blocked row whose input has arrived back to Planned, and leave the rest with an up-to-date Next action.
 - **If the queue can't be read or written**, don't create rows that might duplicate it. List the unfinished items under **Carried over** in the run record instead (work key, owner, next action); the next run moves them into the queue once it's readable.
-- **Older rows:** unfinished rows are never closed because of their age. Rows from before 0.5.1 (no Source) that look like old logs are listed once, in the daily briefing, under "Please check: old open tasks" with their links, for the owner to say which to close. Rows the owner created are never changed without their say-so.
+- **Older rows:** unfinished rows are never closed because of their age. Rows the owner created are never changed without their say-so.
 - **Reply drafts and prepared pieces wait here, not in Approvals.** Each gets a Prepared row with its link in Next action (the checked Gmail draft, or the page that holds it), so later briefings can say what is still waiting without raising it again.
 - **Closing needs evidence or the owner's word.** Set Done with Closed as, and the Evidence link or the owner's words in Result:
   - **Sent:** a matching message is in Sent, or the thread shows the owner's own reply. A draft that vanished proves nothing: look in Sent, and with no match ask once ("Did the reply to Dana go out?"); still unknown at the next check, close it as Unverified, never as sent.
@@ -122,4 +123,4 @@ Work the team found but hasn't finished lives in the **Assignments** database, n
   - **Cancelled** or **Dismissed:** the owner said so (their words), and it stays closed: only something materially new reopens it, never a repeat. **Superseded:** another row replaced it (name it).
   - **No connected app can show the outcome:** say so once ("I can't see whether that invoice was paid"), keep the row open with its Next check, and don't raise it again each day.
   Check all of this in one look at Drafts, Sent and the calendar per run, never draft by draft.
-- **Waiting too long.** When prepared pieces or drafts have waited 7 days, the briefing asks once, in one line, whether to drop them (`daily-executive-briefing`); on "drop them" they are closed as Dismissed with the owner's words. They are never closed for age alone.
+- **Waiting too long.** A waiting item the owner hasn't touched is named in at most two briefings, then becomes one card on the desk (`daily-executive-briefing`, "Don't nag"). They are never closed for age alone.

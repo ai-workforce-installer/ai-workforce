@@ -9,6 +9,8 @@ overlaps, partial scans, pagination failures and duplicate actions.
 Passing these tests shows the written procedure is sound. It does not show that
 Claude follows it in a live run; that needs the live self-test (see tests/README.md).
 """
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -470,8 +472,10 @@ def morning_run(records, mailbox, now, has_inbox=True, actions=None, queue=None)
     return briefing, inbox, sent
 
 
-# ---- run-tracking.md "Work handled": what counts, what never does, and saying it first ----
-COUNTS_AS_HANDLED = ("reply drafts", "approvals raised", "items closed", "prepared")
+# ---- run-tracking.md "Work handled": four counts, never one number ----
+# 1.0.0: what a run made is no longer one "handled" list. Finished means a verified outcome; a reply
+# that is drafted but not sent is ready, never finished.
+COUNTS_AS_HANDLED = ("finished", "reply drafts ready", "prepared", "decisions raised")
 
 
 def handled_nothing(work):
@@ -479,18 +483,27 @@ def handled_nothing(work):
 
 
 def handled_line(work, reason=None):
-    """work: counts of what a run did. Only the four kinds above count; reading, sorting and
-    checking (whatever else is in the dict) never do."""
+    """The record's own line. work: counts of what a run did. Only the four kinds above count;
+    reading, sorting and checking (whatever else is in the dict) never do."""
     if handled_nothing(work):
         return "Handled: nothing" + (f": {reason}" if reason else "")
     return "Handled: " + ", ".join(f"{work[k]} {k}" for k in COUNTS_AS_HANDLED if work.get(k))
 
 
-def morning_opening(briefing_work, inbox_work=None, needs_you=0, reason=None):
-    """The owner's opening line adds the inbox check's work to the briefing's. Each record still
-    keeps only its own counts, so adding up records never counts anything twice."""
+def morning_opening(briefing_work, inbox_work=None, needs_you=0, waiting_on_someone=0, reason=None,
+                    prepared_waiting=0, oldest=None):
+    """The owner's opening line: four counts, never added together. It adds the inbox check's work
+    to the briefing's (each record still keeps only its own counts). Needs you is everything
+    waiting on the owner. With more than five prepared items waiting, it opens with those instead."""
     total = {k: briefing_work.get(k, 0) + (inbox_work or {}).get(k, 0) for k in COUNTS_AS_HANDLED}
-    return handled_line(total, reason) + (f". Needs you: {needs_you} decisions" if needs_you else "")
+    if prepared_waiting > 5:
+        return "Still waiting from yesterday: %d" % prepared_waiting + (f", the oldest {oldest}" if oldest else "")
+    ready = [f"{total[k]} {k.replace(' ready', '')}" for k in ("reply drafts ready", "prepared") if total[k]]
+    if not total["finished"] and not ready:
+        line = "Nothing finished or prepared today" + (f": {reason}" if reason else "")
+        return line + (f". Needs you: {needs_you}" if needs_you else "")
+    return "Finished: %s. Ready for you: %s. Needs you: %d. Waiting on someone: %d." % (
+        total["finished"] or "nothing", ", ".join(ready) or "nothing new", needs_you, waiting_on_someone)
 
 
 def quiet_streak_notice(recent_briefings, today, last_said=None):
@@ -563,17 +576,24 @@ def where_it_waits(kind, needs_a_decision=False):
     return ["Open work (Prepared)"] + (["Approvals"] if needs_a_decision else [])
 
 
-# ---- run-tracking.md section 6: prepared work closes itself once the owner has used it ----
-def prepared_row(kind, still_in_drafts=True, owner_replied=False, meeting_passed=False,
-                 days_waiting=0, owner_said=None, asked_before=False):
-    """Returns (status, reason, ask the owner whether to drop it?). Never closed for age alone."""
-    if owner_said in ("used", "dropped"):
-        return "Done", "owner: " + owner_said, False
-    if kind == "reply draft" and (not still_in_drafts or owner_replied):
-        return "Done", "sent or discarded by the owner", False
+# ---- run-tracking.md section 6: prepared work closes on evidence or the owner's word ----
+def prepared_row(kind, still_in_drafts=True, sent_match=False, owner_replied=False, meeting_passed=False,
+                 notes_found=False, times_listed=0, owner_said=None, asked_before=False):
+    """Returns (status, closed as or what to do, becomes a desk card?). 1.0.0: a vanished draft is not
+    proof of sending and a passed meeting is not proof it was held; nothing is closed for age alone;
+    and an untouched item is named in at most two briefings, then becomes one card on the desk."""
+    if owner_said == "used":
+        return "Done", "Completed", False
+    if owner_said == "dropped":
+        return "Done", "Dismissed", False
+    if kind == "reply draft":
+        if sent_match or owner_replied:
+            return "Done", "Sent", False
+        if not still_in_drafts:
+            return ("Done", "Unverified", False) if asked_before else ("Prepared", "ask once: did it go out?", False)
     if kind == "meeting prep" and meeting_passed:
-        return "Done", "meeting held", False
-    return "Prepared", None, days_waiting >= 7 and not asked_before
+        return "Done", "Completed" if notes_found else "Unverified", False
+    return "Prepared", None, times_listed >= 2
 
 
 # ---- daily-executive-briefing step 4: one finished piece toward the top priority, never a pile ----
@@ -590,19 +610,21 @@ def priority_piece(goals, waiting_goals, told_not_to=False, prepared_left=1):
     return "make", goals[0]
 
 
-# ---- daily-executive-briefing step 8: what is on the owner's first screen ----
-def first_screen(finished_now=0, new_decisions=0, older_decisions=0, older_waiting=0, worth_knowing=0, questions=0):
-    """The sections outside the collapsed ones, in order. Empty sections are left out; older
-    waiting work is one line however long the list is; Details and the run record are always
-    folded away at the bottom."""
+# ---- daily-executive-briefing step 9: what is on the owner's first screen ----
+def first_screen(finished=0, ready=0, needs_you=0, needs_you_older=0, waiting_on_someone=0, worth_knowing=0, questions=0):
+    """The sections outside the collapsed ones, in order. Empty sections are left out; older waiting
+    work is counted in the opening line, never listed again; the links and the line that starts the
+    desk close the screen; Details and the run record are always folded away at the bottom."""
     out = ["work handled", "today"]
-    if finished_now:
+    if finished:
+        out.append("finished")
+    if ready:
         out.append("ready for you")
-    if new_decisions or older_decisions:
-        out.append("decisions for you (%d cards, %d lines)" % (new_decisions, min(older_decisions, 5)))
-    if older_waiting:
-        out.append("still waiting on you (1 line)")
+    if needs_you:
+        out.append("needs you now (%d named, %d only counted)" % (needs_you, needs_you_older))
+    if waiting_on_someone:
+        out.append("waiting on someone (%s)" % ("%d lines" % waiting_on_someone if waiting_on_someone <= 3 else "a count"))
     if worth_knowing or questions:
         out.append("worth knowing (%d items, %d question)" % (min(worth_knowing, 3), min(questions, 1)))
+    out.append("links and the desk")
     return out, ["details", "run record"]
-

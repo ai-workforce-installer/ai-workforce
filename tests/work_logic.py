@@ -498,3 +498,75 @@ def send_all_ready(listed, outbox, settings, clock, answer="send all", invoice_u
         outcome = send_on_yes(card, outbox, settings, clock, invoice_unpaid=unpaid, **where)
         (went if outcome == "sent" else did_not).append(card.who if outcome == "sent" else (card.who, outcome))
     return {"went": went, "did not": did_not}
+
+
+# ---- 1.0.0 step 3: a briefing that leads with what matters (skills/daily-executive-briefing/SKILL.md) ----
+
+def working_days_waited(clock, since_utc):
+    """Whole working days between when someone wrote and now, in the owner's own days."""
+    day, today, n = clock.local(since_utc).date(), clock.local().date(), 0
+    while day < today:
+        day += timedelta(days=1)
+        if day.weekday() in clock.working_days:
+            n += 1
+    return n
+
+
+def today_lines(cards, clock, other_priorities=()):
+    """Up to three lines for Today. A person who has waited more than one working day comes first,
+    with their wait; if they wrote again since the draft was made, the line says so."""
+    waiting = [(working_days_waited(clock, c.waiting_since), c) for c in cards if c.kind == "reply" and c.waiting_since]
+    lines = []
+    for days, c in sorted([x for x in waiting if x[0] > 1], key=lambda x: -x[0]):
+        again = "followed up again" if getattr(c, "followed_up", False) else "has waited %d days" % days
+        lines.append("%s %s; reply ready" % (c.who, again))
+    return (lines + list(other_priorities))[:3]
+
+
+def follow_up_arrived(card, new_message_text):
+    """Someone wrote again while their reply sat unsent: the same draft is refreshed to answer the new
+    message. It stays a ready reply: no Approvals row is created for it."""
+    card.followed_up = True
+    card.text = card.text + "\n(answers: %s)" % new_message_text
+    return {"drafts": 1, "approvals rows created": 0, "kind": card.kind}
+
+
+def needs_you_count(approvals_pending, ready_replies, prepared_pieces, handed_to_owner):
+    """Everything waiting on the owner, not only Approvals rows."""
+    return approvals_pending + ready_replies + prepared_pieces + handed_to_owner
+
+
+def briefing_listing(row_listed_dates, today):
+    """Don't nag: an untouched item is named in at most two briefings; then it leaves the daily list
+    and becomes one card on the desk. Returns (name it today?, desk card?, the row's Listed lines)."""
+    if len(row_listed_dates) >= 2:
+        return False, True, row_listed_dates
+    return True, False, row_listed_dates + [today]
+
+
+def optional_work_allowed(prepared_waiting):
+    """Clear first: with more than five prepared items waiting, the morning run makes no new optional work."""
+    return prepared_waiting <= 5
+
+
+def reply_draft_limit(waiting_now, waiting_at_last_briefing, cleared_all_yesterday):
+    """The cap follows how fast the owner clears them: 5 to start, 8 after a day they cleared the
+    queue, 3 while it grows."""
+    if cleared_all_yesterday:
+        return 8
+    if waiting_at_last_briefing is not None and waiting_now > waiting_at_last_briefing:
+        return 3
+    return 5
+
+
+def missed_runs(expected, records, clock, already_said=()):
+    """expected: {responsibility: when the window of its last expected run began}.
+    records: {responsibility: time of its newest record, or None}. A job with no record since that
+    window began is said once until fixed, and only ever by a run that did happen: nothing here
+    claims an alert the failed scheduler couldn't send."""
+    out = []
+    for job, window_began in sorted(expected.items()):
+        last = records.get(job)
+        if (last is None or last < window_began) and job not in already_said:
+            out.append("Your %s hasn't left a record since %s" % (job, clock.local(last).strftime("%A") if last else "it was set up"))
+    return out

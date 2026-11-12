@@ -470,22 +470,39 @@ class WorkHandled(unittest.TestCase):
                          "Handled: nothing: nobody is waiting on a reply")
 
     def test_real_work_is_counted_in_a_fixed_order(self):
-        self.assertEqual(handled_line({"prepared": 1, "reply drafts": 3, "items closed": 2}),
-                         "Handled: 3 reply drafts, 2 items closed, 1 prepared")
+        self.assertEqual(handled_line({"prepared": 1, "reply drafts ready": 3, "finished": 2}),
+                         "Handled: 2 finished, 3 reply drafts ready, 1 prepared")
 
-    def test_morning_opening_adds_the_inbox_work_and_nothing_is_counted_twice(self):
-        briefing, inbox = {"prepared": 1}, {"reply drafts": 3, "approvals raised": 2}
-        self.assertEqual(morning_opening(briefing, inbox, needs_you=2),
-                         "Handled: 3 reply drafts, 2 approvals raised, 1 prepared. Needs you: 2 decisions")
+    def test_morning_opening_is_four_counts_and_adds_the_inbox_work_once(self):
+        """1.0.0: finished, ready, needs you and waiting are said apart, never as one success number."""
+        briefing, inbox = {"prepared": 1, "finished": 2}, {"reply drafts ready": 3, "decisions raised": 2}
+        self.assertEqual(morning_opening(briefing, inbox, needs_you=6, waiting_on_someone=2),
+                         "Finished: 2. Ready for you: 3 reply drafts, 1 prepared. Needs you: 6. Waiting on someone: 2.")
         per_record = sum(sum(w.values()) for w in (briefing, inbox))    # what a team report adds up
-        self.assertEqual(per_record, 6)
+        self.assertEqual(per_record, 8)
+
+    def test_a_drafted_but_unsent_reply_is_ready_never_finished(self):
+        line = morning_opening({}, {"reply drafts ready": 1}, needs_you=1)
+        self.assertTrue(line.startswith("Finished: nothing. Ready for you: 1 reply drafts."), line)
+
+    def test_needs_you_counts_everything_waiting_not_only_approvals(self):
+        """The live account: eleven items waiting on the owner, and the briefing said "Needs you: 0 decisions"."""
+        approvals_pending, drafts_waiting, pieces_waiting, handed = 0, 6, 3, 2
+        line = morning_opening({}, {"reply drafts ready": 1}, needs_you=approvals_pending + drafts_waiting + pieces_waiting + handed)
+        self.assertIn("Needs you: 11.", line)
+
+    def test_more_than_five_prepared_items_open_the_screen(self):
+        self.assertEqual(morning_opening({"finished": 1}, {}, needs_you=9, prepared_waiting=7, oldest="a reply to Dana (3 days)"),
+                         "Still waiting from yesterday: 7, the oldest a reply to Dana (3 days)")
+        self.assertTrue(morning_opening({"finished": 1}, {}, needs_you=5, prepared_waiting=5).startswith("Finished: 1."))
 
     def test_a_complete_run_can_still_have_handled_nothing(self):
         self.assertEqual(morning_opening({}, {"emails reviewed": 148}, reason="your customer messages are somewhere the team can't reach"),
-                         "Handled: nothing: your customer messages are somewhere the team can't reach")
+                         "Nothing finished or prepared today: your customer messages are somewhere the team can't reach")
+        self.assertEqual(handled_line({"emails reviewed": 148}), "Handled: nothing")
 
     def test_three_quiet_briefings_lead_with_the_fix_at_most_weekly(self):
-        quiet, busy = {"emails reviewed": 90}, {"reply drafts": 2}
+        quiet, busy = {"emails reviewed": 90}, {"reply drafts ready": 2}
         today = T0.date()
         self.assertFalse(quiet_streak_notice([quiet, quiet], today))
         self.assertFalse(quiet_streak_notice([quiet, busy, quiet], today))
@@ -557,20 +574,27 @@ class DraftsAndDecisions(unittest.TestCase):
         self.assertEqual(where_it_waits("decision"), ["Approvals"])
         self.assertEqual(where_it_waits("reply draft", needs_a_decision=True), ["Open work (Prepared)", "Approvals"])
 
-    def test_a_sent_or_discarded_draft_closes_itself(self):
-        self.assertEqual(prepared_row("reply draft", still_in_drafts=False)[:2], ("Done", "sent or discarded by the owner"))
-        self.assertEqual(prepared_row("reply draft", owner_replied=True)[0], "Done")
+    def test_a_vanished_draft_is_not_proof_of_sending(self):
+        """0.9.0 closed it as "sent or discarded by the owner". 1.0.0 needs evidence."""
+        self.assertEqual(prepared_row("reply draft", still_in_drafts=False)[:2], ("Prepared", "ask once: did it go out?"))
+        self.assertEqual(prepared_row("reply draft", still_in_drafts=False, asked_before=True)[:2], ("Done", "Unverified"))
+        self.assertEqual(prepared_row("reply draft", still_in_drafts=False, sent_match=True)[:2], ("Done", "Sent"))
+        self.assertEqual(prepared_row("reply draft", owner_replied=True)[:2], ("Done", "Sent"))
         self.assertEqual(prepared_row("reply draft")[0], "Prepared")                       # still sitting in drafts
 
-    def test_a_meeting_prep_closes_when_the_meeting_has_happened(self):
-        self.assertEqual(prepared_row("meeting prep", meeting_passed=True)[:2], ("Done", "meeting held"))
+    def test_a_passed_meeting_is_not_proof_it_was_held(self):
+        """0.9.0 closed the prep as "meeting held"."""
+        self.assertEqual(prepared_row("meeting prep", meeting_passed=True)[:2], ("Done", "Unverified"))
+        self.assertEqual(prepared_row("meeting prep", meeting_passed=True, notes_found=True)[:2], ("Done", "Completed"))
         self.assertEqual(prepared_row("meeting prep")[0], "Prepared")
 
-    def test_nothing_is_closed_for_age_alone_but_the_owner_is_asked_once(self):
-        self.assertEqual(prepared_row("prepared piece", days_waiting=6), ("Prepared", None, False))
-        self.assertEqual(prepared_row("prepared piece", days_waiting=7), ("Prepared", None, True))
-        self.assertEqual(prepared_row("prepared piece", days_waiting=30, asked_before=True), ("Prepared", None, False))
-        self.assertEqual(prepared_row("prepared piece", days_waiting=30, owner_said="dropped")[0], "Done")
+    def test_nothing_is_closed_for_age_alone_and_two_briefings_is_the_limit(self):
+        """0.9.0 asked after 7 days, in the briefing. 1.0.0: named in two briefings, then one desk card."""
+        self.assertEqual(prepared_row("prepared piece", times_listed=1), ("Prepared", None, False))
+        self.assertEqual(prepared_row("prepared piece", times_listed=2), ("Prepared", None, True))
+        self.assertEqual(prepared_row("prepared piece", times_listed=30), ("Prepared", None, True))   # however long: never closed for age
+        self.assertEqual(prepared_row("prepared piece", times_listed=30, owner_said="dropped")[:2], ("Done", "Dismissed"))
+        self.assertEqual(prepared_row("prepared piece", owner_said="used")[:2], ("Done", "Completed"))
 
 
 class PriorityPiece(unittest.TestCase):
@@ -596,26 +620,30 @@ class PriorityPiece(unittest.TestCase):
 
 
 class FirstScreen(unittest.TestCase):
-    """0.9.0: the briefing is read on a phone. Bookkeeping is folded away at the bottom."""
-    def test_a_quiet_day_is_two_sections(self):
+    """0.9.0: the briefing is read on a phone, bookkeeping folded away at the bottom.
+    1.0.0: four parts (finished, ready, needs you, waiting on someone), then the links and the desk."""
+    def test_a_quiet_day_is_short(self):
         shown, folded = first_screen()
-        self.assertEqual(shown, ["work handled", "today"])
+        self.assertEqual(shown, ["work handled", "today", "links and the desk"])
         self.assertEqual(folded, ["details", "run record"])
 
     def test_empty_sections_are_left_out_and_the_order_is_fixed(self):
-        shown, _ = first_screen(finished_now=2, new_decisions=1, older_waiting=6, worth_knowing=2)
+        shown, _ = first_screen(finished=2, ready=3, needs_you=1, waiting_on_someone=2, worth_knowing=2)
         self.assertEqual([s.split(" (")[0] for s in shown],
-                         ["work handled", "today", "ready for you", "decisions for you", "still waiting on you", "worth knowing"])
+                         ["work handled", "today", "finished", "ready for you", "needs you now", "waiting on someone",
+                          "worth knowing", "links and the desk"])
+        self.assertNotIn("finished", first_screen(ready=3)[0])           # a draft is ready, and "finished" stays out
 
-    def test_older_waiting_work_is_one_line_however_long_the_list(self):
+    def test_older_waiting_work_is_counted_never_listed_again(self):
         for n in (1, 6, 40):
-            shown, _ = first_screen(older_waiting=n)
-            self.assertIn("still waiting on you (1 line)", shown)
+            shown, _ = first_screen(needs_you=1, needs_you_older=n)
+            self.assertIn("needs you now (1 named, %d only counted)" % n, shown)
 
     def test_caps(self):
-        shown, _ = first_screen(new_decisions=2, older_decisions=11, worth_knowing=9, questions=4)
-        self.assertIn("decisions for you (2 cards, 5 lines)", shown)
+        shown, _ = first_screen(waiting_on_someone=11, worth_knowing=9, questions=4)
+        self.assertIn("waiting on someone (a count)", shown)
         self.assertIn("worth knowing (3 items, 1 question)", shown)
+        self.assertIn("waiting on someone (3 lines)", first_screen(waiting_on_someone=3)[0])
 
 
 if __name__ == "__main__":

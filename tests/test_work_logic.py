@@ -422,5 +422,61 @@ class SendAllReady(unittest.TestCase):
         self.assertEqual((result["went"], self.out.send_calls), ([], 0))
 
 
+class TheBriefing(unittest.TestCase):
+    def test_a_customer_waiting_two_days_is_the_first_line_of_today(self):
+        clock = w.Clock.at_local(2026, 3, 5, 7, 30)                               # Thursday morning
+        dana = reply_card("Dana", clock); dana.waiting_since = clock.local_time(2026, 3, 3, 8, 0)   # wrote Tuesday
+        sam = reply_card("Sam", clock); sam.waiting_since = clock.local_time(2026, 3, 4, 16, 0)     # wrote yesterday
+        lines = w.today_lines([sam, dana], clock, other_priorities=["Prep for the 2 PM Acme call"])
+        self.assertEqual(lines[0], "Dana has waited 2 days; reply ready")
+        self.assertEqual(lines[1], "Prep for the 2 PM Acme call")                  # one working day is not yet "waiting"
+
+    def test_a_weekend_is_not_counted_as_waiting(self):
+        clock = w.Clock.at_local(2026, 3, 9, 7, 30)                                # Monday
+        self.assertEqual(w.working_days_waited(clock, clock.local_time(2026, 3, 6, 17, 0)), 1)    # wrote Friday evening
+
+    def test_a_customer_who_followed_up_again_leads_today_and_gets_no_approvals_row(self):
+        clock = w.Clock.at_local(2026, 3, 5, 7, 30)
+        dana = reply_card("Dana", clock); dana.waiting_since = clock.local_time(2026, 3, 2, 9, 0)
+        made = w.follow_up_arrived(dana, "Any update on my refund?")
+        self.assertEqual(made, {"drafts": 1, "approvals rows created": 0, "kind": "reply"})        # still one ready reply
+        self.assertIn("Any update on my refund?", dana.text)                       # the same draft, refreshed
+        self.assertEqual(w.today_lines([dana], clock)[0], "Dana followed up again; reply ready")
+
+    def test_needs_you_counts_everything_waiting_on_the_owner(self):
+        self.assertEqual(w.needs_you_count(approvals_pending=0, ready_replies=6, prepared_pieces=3, handed_to_owner=2), 11)
+
+    def test_an_item_named_in_two_briefings_becomes_one_desk_card(self):
+        clock, listed = monday_morning(), []
+        seen = []
+        for _ in range(5):                                                         # five mornings, untouched
+            name_it, desk_card, listed = w.briefing_listing(listed, clock.local().date())
+            seen.append((name_it, desk_card))
+            clock.advance(days=1)
+        self.assertEqual(seen, [(True, False), (True, False), (False, True), (False, True), (False, True)])
+        self.assertEqual(len(listed), 2)                                            # two "Listed <date>" lines, never more
+
+    def test_clear_first(self):
+        self.assertTrue(w.optional_work_allowed(5))
+        self.assertFalse(w.optional_work_allowed(6))
+
+    def test_the_draft_cap_follows_how_fast_the_owner_clears_them(self):
+        self.assertEqual(w.reply_draft_limit(waiting_now=2, waiting_at_last_briefing=None, cleared_all_yesterday=False), 5)
+        self.assertEqual(w.reply_draft_limit(waiting_now=0, waiting_at_last_briefing=4, cleared_all_yesterday=True), 8)
+        self.assertEqual(w.reply_draft_limit(waiting_now=7, waiting_at_last_briefing=4, cleared_all_yesterday=False), 3)
+        self.assertEqual(w.reply_draft_limit(waiting_now=3, waiting_at_last_briefing=4, cleared_all_yesterday=False), 5)
+
+    def test_a_recurring_job_that_left_no_record_is_said_once(self):
+        clock = w.Clock.at_local(2026, 3, 9, 7, 30)                                # Monday
+        expected = {"invoice review": clock.local_time(2026, 3, 6, 8, 0), "daily briefing": clock.local_time(2026, 3, 8, 7, 0)}
+        records = {"invoice review": clock.local_time(2026, 2, 27, 9, 5), "daily briefing": clock.local_time(2026, 3, 8, 7, 31)}
+        self.assertEqual(w.missed_runs(expected, records, clock), ["Your invoice review hasn't left a record since Friday"])
+        self.assertEqual(w.missed_runs(expected, records, clock, already_said=("invoice review",)), [])
+        records["invoice review"] = clock.local_time(2026, 3, 6, 9, 0)             # it ran after all
+        self.assertEqual(w.missed_runs(expected, records, clock), [])
+        self.assertEqual(w.missed_runs({"weekly marketing plan": clock.local_time(2026, 3, 9, 6, 0)}, {}, clock),
+                         ["Your weekly marketing plan hasn't left a record since it was set up"])
+
+
 if __name__ == "__main__":
     unittest.main()

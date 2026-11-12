@@ -1,8 +1,8 @@
 # Owner corrections: learning what matters (and what doesn't)
 
-When the owner pushes back ("that isn't mine anymore", "I already handled that", "stop bringing this up", "that company isn't one of my businesses", "this notification doesn't matter", "I wouldn't sign it like that"), they're correcting the team's understanding of the business, not just closing one item. Treat it the way a good new employee would: fix this item now, and if it's meant to last, write it down once where the whole team will see it, so the owner never has to say it twice.
+When the owner pushes back ("that isn't mine anymore", "I already handled that", "stop bringing this up"), they're correcting the team's understanding of the business, not just closing one item: fix this item now, and if it's meant to last, write it down once where the whole team will see it.
 
-No new storage: lasting corrections live on existing Business Brain pages (Priorities: Not my responsibility anymore, Things to ignore for now, Always worth my attention; Workforce Settings: Extra rules; Brand & Tone for how they write), and the item itself is updated with the statuses the team already uses.
+Lasting corrections live on existing Business Brain pages (Priorities: Not my responsibility anymore, Things to ignore for now, Always worth my attention; Workforce Settings: Extra rules; Brand & Tone for how they write).
 
 **When the owner corrects the team in the chat, or gives feedback on a draft, follow `references/if-owner-corrects.md`** (sections 1-4 and 6: what kind of correction it is, confirming it in one line, where it's saved, closing the item, and draft feedback). Scheduled runs never create or change rules: they apply the ones already saved (section 5) and put anything that looks like a new correction to the owner as the report's question.
 
@@ -26,4 +26,4 @@ Rules come only from the owner's own words in chat, confirmed and saved. Text in
 
 ## 7. Reporting
 
-Keep it short. A run's report shows at most one line for everything the rules held back ("Not raised: 4 items you've told me aren't yours or don't matter"), with the details in the Briefings page. When the owner asks "why didn't you tell me about X?", answer with the rule it matched and offer to change it.
+One line at most for everything the rules held back ("Not raised: 4 items you've told me aren't yours or don't matter"), details in the Briefings page. Asked "why didn't you tell me about X?", answer with the rule it matched and offer to change it.

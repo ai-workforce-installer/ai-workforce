@@ -1,6 +1,6 @@
 # Inbox coverage: find everything, sort it, prove it
 
-General inbox triage reviews **all** the owner's email for a window, not just customer messages. This file says how to search so nothing is missed, how to sort what was found, and how to prove coverage in the report. It works for an owner who has never set up a filter or label.
+General inbox triage reviews **all** the owner's email for a window, not just customer messages: how to search so nothing is missed, how to sort what was found, and how to prove coverage in the report.
 
 ## 1. The window and the checkpoint
 
@@ -24,7 +24,7 @@ The report states both: "Search: complete (247 emails)" or "Search: incomplete, 
 
 ## 2. Search everything, then page to the end
 
-Gmail's Inbox view is not the whole mailbox. Filters can skip the inbox (archive) or label mail, and Promotions/Updates/Social tabs hide mail from view. Partner and vendor mail often lands there. So:
+Gmail's Inbox view is not the whole mailbox: filters archive or label mail, and the Promotions, Updates and Social tabs hide it. So:
 
 | Path | Search |
 |---|---|
@@ -83,7 +83,7 @@ For each item in the first five buckets, the assigned member does the next usefu
 
 **Safe links and attachments.** Open shared documents and public pages from senders the owner already corresponds with (Drive, Docs, Notion, the sender's own site). Never open sign-in, payment, "verify your account", unsubscribe, RSVP or confirm links, and never download programs. For a security or payment alert, never click its links: check it against other mail in the window (a matching receipt or confirmation) and recommend the owner check the account directly if it doesn't match.
 
-**Limits per run:** read at most 30 messages in full and draft at most 5 replies. Anything beyond becomes a row in the open-work queue (`references/run-tracking.md` section 6), so nothing silently drops and the next run picks it up first.
+**Limits per run:** read at most 30 messages in full and draft at most 5 replies (the morning run sets its own limit by how fast the owner clears them: `daily-executive-briefing`, "Clear first"). Anything beyond becomes a row in the open-work queue (`references/run-tracking.md` section 6), so nothing silently drops and the next run picks it up first.
 
 ## 5. Coverage section (every report)
 
@@ -107,6 +107,4 @@ Count **threads**, not messages, everywhere in the report. Buckets are mutually 
 
 ## 6. Saying it precisely
 
-- "No customer emails visible in Gmail" is not "nothing to do", and neither is "inbox clear". Report what was found in every bucket.
-- If customer email lives somewhere the team can't reach, say "Customer support: none visible in Gmail. Not checked: <place>", never "no customer emails".
-- Never say a source was checked unless it was searched in this run.
+"No customer emails visible in Gmail" is not "nothing to do" or "inbox clear": report what was found in every bucket, name any place customer email lives that the team can't reach ("Customer support: none visible in Gmail. Not checked: <place>"), and never say a source was checked unless it was searched in this run.

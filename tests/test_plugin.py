@@ -350,9 +350,12 @@ class WorkHandled(unittest.TestCase):
     """0.8.0: reports open with what the team handled; a run finishing is not the result."""
     def test_run_record_has_a_handled_line_and_an_honest_definition(self):
         rt = read(REFS / "run-tracking.md")
-        for must in ["Handled: <n> reply drafts, <n> approvals raised, <n> items closed, <n> prepared | nothing: <the plain reason>",
+        for must in ["Handled: <n> finished, <n> reply drafts ready, <n> prepared, <n> decisions raised | nothing: <the plain reason>",
                      "**Work handled**", "**What never counts:**", "reading, searching, sorting, counting, re-checking",
-                     "a record counts only its own work", "a run can be Complete and have handled nothing"]:
+                     "a record counts only its own work", "a run can be Complete and have handled nothing",
+                     # 1.0.0: four counts instead of one "handled" list
+                     "four counts, said first and never added into one number", "**Finished:** verified outcomes only",
+                     "a reply drafted but not sent is Ready, never Finished", "everything waiting on the owner, new and old"]:
             self.assertIn(must, rt)
 
     def test_reports_open_with_it(self):
@@ -519,18 +522,19 @@ class OwnerFirstReports(unittest.TestCase):
     own bookkeeping is at the bottom, folded away."""
     def test_the_briefing_is_written_for_a_phone(self):
         b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
-        order = ["8. **Write the briefing for a phone.**", "1. **The opening line: work handled**", "2. **Today:**",
-                 "3. **Ready for you:**", "4. **Decisions for you:**", "5. **Still waiting on you:**",
-                 "6. **Worth knowing:**", "7. **Details** (one toggle"]
+        order = ["9. **Write the briefing for a phone.**", "1. **The opening line: work handled**", "2. **Today:**",
+                 "3. **Finished:**", "4. **Ready for you:**", "5. **Needs you now:**", "6. **Waiting on someone:**",
+                 "7. **Worth knowing:**", "8. **Links and the desk:**", "9. **Details** (one toggle"]      # 1.0.0: four parts
         places = [b.index(o) for o in order]
         self.assertEqual(places, sorted(places))
         for must in ["Outside the toggles the whole briefing stays under about 200 words", "Never the whole list again",
-                     "With nothing to decide, leave this section and that line out", "at most one question",
+                     "Leave the heading out when there are none", "at most one question",
                      "is said here the first time and when it changes", "the first screen has to be enough",
                      "never signed with the owner's own sign-off",       # a briefing to Maya signed "Talk soon, Maya" (seen in evals)
                      "Save** the briefing at the top of this run's record, above its run record"]:
             self.assertIn(must, b)
-        for gone in ["**Your team handled:**", "**Spotted:**", "5. **Spotted", "Reading taken"]:
+        for gone in ["**Your team handled:**", "**Spotted:**", "5. **Spotted", "Reading taken", "**Decisions for you:**",
+                     "**Still waiting on you:**", "Needs you: 2 decisions"]:
             self.assertNotIn(gone, b)
 
     def test_the_run_record_sits_below_the_report(self):
@@ -587,6 +591,58 @@ class DraftsAreNotApprovals(unittest.TestCase):
         ra = read(SKILLS / "review-approvals" / "SKILL.md")
         self.assertIn("**Waiting work**", ra)
         self.assertIn("a Gmail draft stays where it is, never deleted", ra)
+
+
+class BriefingLeadsWithWhatMatters(unittest.TestCase):
+    """1.0.0: on one live account a morning run read 287 threads and produced one reply, eleven items
+    were waiting on the owner and the briefing said "Needs you: 0 decisions"."""
+    def setUp(self):
+        self.b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
+
+    def test_due_work_comes_before_new_work(self):
+        for must in ["4. **Due work before new work.**", "re-read each one's source once: someone may have replied, paid or handled it",
+                     "refresh that same draft to answer the new message. It stays a ready reply, never an Approvals row",
+                     "A missing input goes once to the member whose sources can answer it", "Only then consider a new piece."]:
+            self.assertIn(must, self.b)
+        self.assertLess(self.b.index("4. **Due work before new work.**"), self.b.index("**One finished piece toward the top priority.**"))
+
+    def test_four_counts_and_needs_you_is_everything_waiting(self):
+        for must in ["four counts, never added into one number",
+                     '"Finished: 2. Ready for you: 3 replies, 1 meeting prep. Needs you: 6. Waiting on someone: 2."',
+                     "Needs you counts everything waiting on the owner, new and old",
+                     "a reply drafted but not sent is Ready, never Finished", "**Finished:** verified outcomes only"]:
+            self.assertIn(must, self.b)
+        self.assertIn("four counts, never added into one number", read(SizeBudget.ref("scheduled-run-rules.md")))
+
+    def test_waiting_people_lead_and_ready_replies_can_be_read_on_the_first_screen(self):
+        for must in ["A person who has waited more than one working day comes first, with their wait",
+                     '"Dana followed up again; reply ready"', "each ready reply as recipient, subject and its first sentence, then its link",
+                     "each as a choice with its options and a link to the exact page where it gets done",
+                     "is said once, with the one fix, and again only when it changes",
+                     "named only when it is due, changed or newly blocked", "who, for what, and the next check"]:
+            self.assertIn(must, self.b)
+
+    def test_missed_runs_are_said_once_and_nothing_is_invented(self):
+        for must in ["**A recurring job that left no record:**", "said once, until it is fixed",
+                     "Never say an alert was sent about a run that didn't happen, and never estimate time saved"]:
+            self.assertIn(must, self.b)
+
+    def test_no_nagging_and_clear_first(self):
+        for must in ["**Don't nag.**", "named in at most two briefings", '"Still want this? Send / Drop / Snooze 3 days"',
+                     "Dropped means closed with the owner's words (Dismissed; an approval: Expired), never deleted",
+                     "**Clear first.**", "With more than five, this run makes no new optional work",
+                     "5 to start, 8 the day after they cleared them all, 3 while more is waiting than at the last briefing",
+                     '"Still waiting from yesterday: 7, the oldest a reply to Dana (3 days)."']:
+            self.assertIn(must, self.b)
+        self.assertIn("named in at most two briefings, then becomes one card on the desk", read(REFS / "run-tracking.md"))
+        self.assertNotIn("waited 7 days", self.b + read(REFS / "run-tracking.md"))      # the 0.9.0 weekly "drop them?" line is gone
+        self.assertIn("The desk never searches the inbox", read(SKILLS / "review-approvals" / "SKILL.md"))
+
+    def test_links_and_the_line_that_starts_the_desk(self):
+        for must in ["one line of links (Gmail drafts · today's briefing · open work)", "Say 'clear my desk' in Claude",
+                     "Plain words, not a link that opens Claude: none is documented that opens a chat from a phone"]:
+            self.assertIn(must, self.b)
+        self.assertNotIn("claude://", self.b)
 
 
 class TheDeskAndSending(unittest.TestCase):
