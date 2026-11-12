@@ -7,7 +7,7 @@ metadata:
 
 # The Desk (the owner's two minutes a day)
 
-_`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
 Everything waiting on the owner, one card at a time: replies to send, decisions, prepared pieces, things handed to them. It runs only with the owner present, and it is the one place where a queued action is carried out or a message is ever sent, only after the owner's yes in this chat. Follow `references/approval-policy.md` and `references/owner-corrections.md`.
 

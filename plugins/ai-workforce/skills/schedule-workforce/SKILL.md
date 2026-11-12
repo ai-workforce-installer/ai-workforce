@@ -7,7 +7,7 @@ metadata:
 
 # Schedule the Workforce
 
-_`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
 Give team members recurring responsibilities that run on their own. With the owner, call them recurring responsibilities ("Client Success handles your inbox every day at 10"); in tool calls they are scheduled tasks. Never say triggers, routines or cron jobs.
 

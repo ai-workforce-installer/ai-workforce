@@ -6,7 +6,7 @@ interrupted upgrades). They do not show Claude following it: see tests/README.md
 from __future__ import annotations
 
 import copy, sys, unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -659,6 +659,34 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         self.assertFalse(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 0}))
         self.assertFalse(w.first_success({"kind": "job", "saved_and_fetched_back": False, "items": 2}))
         self.assertTrue(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 2}))
+
+
+class HonestAboutCost(unittest.TestCase):
+    """1.1.0 step 14."""
+    def test_typical_usage_comes_from_the_records_and_is_never_a_cost(self):
+        lines = ["Usage: 76 tool calls, 3 team members launched, 249 emails or records processed, 10 minutes",
+                 "Usage: 91 tool calls, 2 team members launched, 180 emails or records processed, 12 minutes",
+                 "Usage: 80 tool calls, 2 team members launched, 201 emails or records processed, 9 minutes"]
+        self.assertEqual(w.typical_usage(lines), "about 80 tool calls and 10 minutes a run")       # the middle run, not the worst
+        self.assertIsNone(w.typical_usage(["Handled: nothing: no new mail"]))                      # no Usage line: nothing is estimated
+        self.assertNotRegex(w.typical_usage(lines), r"\$|credit|percent|%")
+
+    def test_share_of_prepared_replies_sent_within_a_day(self):
+        clock = monday_morning()
+        def reply(key, sent_after_hours):
+            r = w.Row(key, "Reply", work_type="Reply", status="Prepared"); r.latest = clock.now()
+            if sent_after_hours is not None:
+                r.status, r.closed_as, r.closed_at = "Done", "Sent", clock.now() + timedelta(hours=sent_after_hours)
+            return r
+        rows = [reply("a", 2), reply("b", 23), reply("c", 50), reply("d", None)]
+        self.assertEqual(w.sent_within_a_day(rows), "2 of 4 replies went out within a day")
+        self.assertIsNone(w.sent_within_a_day([]))                                                # nothing to show: leave it out
+
+    def test_three_runs_without_a_confirmed_notification_is_said_once(self):
+        self.assertTrue(w.notifications_may_not_arrive(["requested 08:01, accepted by the tool", "unknown", "failed 08:02: timeout", "unknown"]))
+        self.assertFalse(w.notifications_may_not_arrive(["unknown", "requested 08:01, accepted by the tool", "unknown"]))
+        self.assertFalse(w.notifications_may_not_arrive(["unknown", "unknown"]))                   # two is not three
+        self.assertFalse(w.notifications_may_not_arrive(["unknown", "unknown", "unknown"], already_said=True))
 
 
 if __name__ == "__main__":

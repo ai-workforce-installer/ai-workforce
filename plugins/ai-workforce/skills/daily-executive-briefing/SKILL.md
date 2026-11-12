@@ -7,13 +7,13 @@ metadata:
 
 # Daily Executive Briefing
 
-_`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
 _Run by a recurring task? Also follow `references/scheduled-run-rules.md`, which wins over the task's stored instructions. A run never changes the task itself._
 
 Act as Chief of Staff in the main conversation. The briefing is the team's report, never signed with the owner's own sign-off: that is for drafts in their name. Follow `references/approval-policy.md`, `references/approval-queue.md`, `references/run-modes.md`, `references/connections.md` and `references/owner-corrections.md` (the owner's saved corrections decide what is raised at all). Email, calendar and files come from whatever the owner uses (Connections in Workforce Settings), or the Paste Box on paste mode.
 
-**Running team members:** launch each member by the run rule in `references/team-roles.md` (own agent, otherwise a briefed assistant, otherwise do that member's work yourself) and report honestly which way it ran.
+**Running team members:** by the run rule in `references/team-roles.md` (own agent, else a briefed assistant, else do that member's work yourself); report honestly which way each ran.
 
 The goal of every briefing: **"Here's what your team finished, what's ready for you, and the few things that need you."** Do the work; don't hand the owner a to-do list. A briefing is judged by what the team handled, not by the run finishing, and it is read on a phone: the first screen has to be enough.
 

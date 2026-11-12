@@ -7,7 +7,7 @@ metadata:
 
 # Team Report
 
-_`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
 A truthful account of what the team actually did: every line rests on a record in the Business Brain or the list of scheduled tasks, never on what probably happened. Speak per `references/talking-to-the-owner.md`.
 
@@ -15,7 +15,7 @@ A truthful account of what the team actually did: every line rests on a record i
 
 1. **Pick the period:** what the owner asked for, otherwise the last 7 days.
 2. **Collect the records** from the Business Brain (`references/run-modes.md` says how to find it):
-   - **Briefings** rows in the period: title, type, Source (manual, scheduled, or "started from a recurring task" when unknown), status (finished, still running, Not run because another run was working, Abandoned), Result (Complete, Partial, Failed), its Handled line (older records: approvals raised and drafts created), link.
+   - **Briefings** rows in the period: title, type, Source (manual, scheduled, or "started from a recurring task" when unknown), status (finished, still running, Not run because another run was working, Abandoned), Result (Complete, Partial, Failed), its Handled line (older records: approvals raised and drafts created), its Usage and Notified lines, link.
    - **Assignments** rows in the period: owner, status, verification, and how it ran.
    - **Approvals:** rows still Pending (oldest first), rows marked Handed to you (things only the owner can do), and rows decided in the period.
    - **Workforce Settings → Schedule:** each recurring responsibility and its saved state.
@@ -31,10 +31,10 @@ A truthful account of what the team actually did: every line rests on a record i
    - An Inbox triage record included in a daily briefing is part of that morning run, not a second run; a Schedule line reading "part of the daily briefing" is not a separate task.
    - Runs whose row says the plugin or an app wasn't available → say so, with the fix (reconnect the app, or turn AI Workforce on under Customize → Plugins).
 4. **Report in this order**, short and plain:
-   1. **Handled:** first the period's totals in one line, added up from the records' Handled lines and kept apart ("This week: 6 finished, 14 reply drafts ready, 3 meeting preps, 5 decisions raised"; never one combined number), then what the team finished, grouped by team member, each with a count and link ("Client Success: 12 reply drafts across 3 runs"). Runs finishing is not the measure; work handled is. If the total is zero, or the records show three or more runs in a row with nothing handled, say that first and plainly, with the reason the reports give (usually a place the work lives that isn't connected, named under Blocked or Not checked) and the one step that would change it. Never soften it with a count of runs that completed.
+   1. **Handled:** first the period's totals in one line, added up from the records' Handled lines and kept apart ("This week: 6 finished, 14 reply drafts ready, 3 meeting preps, 5 decisions raised"; never one combined number), then what the team finished, grouped by team member, each with a count and link ("Client Success: 12 reply drafts across 3 runs"). Then, when the records can show it, how many of the replies the team prepared were sent within a day (rows closed as Sent within a day of being prepared: "9 of 14 replies went out within a day"); if they can't, leave it out. Runs finishing is not the measure; work handled is. If the total is zero, or the records show three or more runs in a row with nothing handled, say that first and plainly, with the reason the reports give (usually a place the work lives that isn't connected, named under Blocked or Not checked) and the one step that would change it. Never soften it with a count of runs that completed.
    2. **Needs your decision:** pending approvals (count, oldest AP number and age) and things handed to you that only you can do. Then, in one line, what the team prepared that is still waiting on you (drafts and prepared pieces in open work: how many, and since when).
-   3. **Problems:** failed or partial runs, missing runs, connections that were down, each with one line on what to do.
-   4. **Recurring responsibilities:** each one's state (scheduled, next run, last result; or paused, proposed, not available).
+   3. **Problems:** failed or partial runs, missing runs, connections that were down, each with one line on what to do. If the last three finished runs all end `Notified: unknown` or `Notified: failed`, say once that notifications may not be reaching them, and where to check: notifications for Claude in the app's own settings and in the phone's settings.
+   4. **Recurring responsibilities:** each one's state (scheduled, next run, last result; or paused, proposed, not available) and what it typically takes, from the Usage lines of its last runs ("about 80 tool calls and 10 minutes a run"), so a heavy one can be paused (`schedule-workforce`). Tool calls and minutes only: never credits, cost or a share of their plan.
    5. **Questions the team is waiting on**, if any briefings listed some.
 5. If nothing ran in the period, say exactly that and why, if the records show it. Offer the most useful next step (for example "Want me to run this morning's briefing now?").
 

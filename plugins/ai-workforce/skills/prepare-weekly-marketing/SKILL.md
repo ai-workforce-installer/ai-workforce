@@ -7,13 +7,13 @@ metadata:
 
 # Prepare Weekly Marketing
 
-_`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
 _Run by a recurring task? Also follow `references/scheduled-run-rules.md`, which wins over the task's stored instructions. A run never changes the task itself._
 
 Follow `references/approval-policy.md`, `references/approval-queue.md` and `references/run-modes.md`. Nothing is published, sent or spent; budget changes are proposals.
 
-**Running team members:** launch each member by the run rule in `references/team-roles.md` (own agent, otherwise a briefed assistant, otherwise do that member's work yourself) and report honestly which way it ran.
+**Running team members:** by the run rule in `references/team-roles.md` (own agent, else a briefed assistant, else do that member's work yourself); report honestly which way each ran.
 
 ## Steps
 

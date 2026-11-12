@@ -455,6 +455,7 @@ class SizeBudget(unittest.TestCase):
         names = sorted({p.name for p in SKILLS.glob("*/references/*.md")})
         size = sum(len(p.read_bytes()) for p in SKILLS.glob("*/SKILL.md"))
         size += sum(len(p.read_bytes()) for p in (PLUGIN / "agents").glob("*.md"))
+        size += sum(len(p.read_bytes()) for p in (PLUGIN / "commands").glob("*.md"))      # 1.1.0: the three short commands count too
         size += sum(len(self.ref(n).read_bytes()) for n in names)
         self.assertLessEqual(size, self.ALL_INSTRUCTIONS, f"{size} bytes of instructions in total")
 
@@ -744,6 +745,39 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         for must in ["Open with where things stand, from its own pages, instead of restarting the questions",
                      '"Found your Business Brain: 3 apps connected, first job done. Carry on from here?"', "Then do only what is missing"]:
             self.assertIn(must, resuming)
+
+
+class EasyToCallUpAndHonestAboutCost(unittest.TestCase):
+    """1.1.0 step 14. Anthropic's skills page says a plugin's skills already start with /plugin:skill, and that
+    command files still work; it does not say how "/" behaves outside Claude Code. So three short commands point
+    at the daily skills, and plain words stay the way that always works."""
+    COMMANDS = {"desk": "review-approvals", "briefing": "daily-executive-briefing", "report": "team-report"}
+
+    def test_three_short_commands_point_at_skills_that_exist(self):
+        found = {p.stem: read(p) for p in (PLUGIN / "commands").glob("*.md")}
+        self.assertEqual(sorted(found), sorted(self.COMMANDS))
+        for name, skill in self.COMMANDS.items():
+            text = found[name]
+            self.assertTrue(text.startswith("---\ndescription: "), name)
+            self.assertIn(f"Load the `{skill}` skill", text, name)
+            self.assertTrue((SKILLS / skill / "SKILL.md").exists(), skill)
+            self.assertNotIn("[AI Workforce task:", text, name)                      # a command never looks like a recurring task
+            self.assertLess(len(text.encode()), 400, name)                          # a pointer, not a second copy of the rules
+
+    def test_what_needs_me_opens_the_desk(self):
+        desk = read(SKILLS / "review-approvals" / "SKILL.md").split("---", 2)[1]
+        for phrase in ['"what needs me"', '"clear my desk"']:
+            self.assertIn(phrase, desk)
+
+    def test_the_report_is_honest_about_cost_sending_and_notifications(self):
+        t = read(SKILLS / "team-report" / "SKILL.md")
+        for must in ["what it typically takes, from the Usage lines of its last runs", "so a heavy one can be paused (`schedule-workforce`)",
+                     "Tool calls and minutes only: never credits, cost or a share of their plan",
+                     "how many of the replies the team prepared were sent within a day", "if they can't, leave it out",
+                     "If the last three finished runs all end `Notified: unknown` or `Notified: failed`, say once that notifications may not be reaching them",
+                     "its Usage and Notified lines"]:
+            self.assertIn(must, t)
+        self.assertIn("Read-only: this skill changes nothing.", t)
 
 
 class PlainLanguageControl(unittest.TestCase):

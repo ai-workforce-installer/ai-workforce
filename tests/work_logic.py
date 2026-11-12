@@ -758,3 +758,32 @@ def setup_opening(brain):
 def first_success(result):
     """A connection check or an empty report is never the first success."""
     return result.get("kind") == "job" and result.get("saved_and_fetched_back") and result.get("items", 0) > 0
+
+
+# ---- 1.1.0 step 14: honest about cost (skills/team-report/SKILL.md) ----
+
+def typical_usage(usage_lines):
+    """What a recurring job typically takes, from the Usage lines of its last runs: tool calls and minutes, never cost."""
+    import re
+    runs = [tuple(int(n) for n in m.groups()) for m in
+            (re.search(r"Usage: (\d+) tool calls.*?(\d+) minutes", line) for line in usage_lines) if m]
+    if not runs:
+        return None                                   # nothing recorded: say nothing, never estimate
+    calls, minutes = sorted(c for c, _ in runs), sorted(m for _, m in runs)
+    return "about %d tool calls and %d minutes a run" % (calls[len(calls) // 2], minutes[len(minutes) // 2])
+
+
+def sent_within_a_day(rows):
+    """Of the replies the team prepared, how many went out within a day. None when the records can't show it."""
+    replies = [r for r in rows if r.work_type == "Reply" and r.latest]
+    if not replies:
+        return None
+    quick = [r for r in replies if r.closed_as == "Sent" and r.closed_at and r.closed_at - r.latest <= timedelta(days=1)]
+    return "%d of %d replies went out within a day" % (len(quick), len(replies))
+
+
+def notifications_may_not_arrive(last_notified, already_said=False):
+    """Said once, when the last three finished runs all ended unknown or failed."""
+    last_three = last_notified[-3:]
+    bad = len(last_three) == 3 and all(n.startswith(("unknown", "failed")) for n in last_three)
+    return bad and not already_said
