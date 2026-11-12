@@ -494,6 +494,7 @@ class ReadWhenNeeded(unittest.TestCase):
         "if-inbox-gap.md": ("inbox-coverage.md", "follow `references/if-inbox-gap.md`"),
         "if-quick-look.md": (None, None),               # named by the skills that run a quick look
         "if-proving-live.md": (None, None),             # 1.0.0: named only by the self-test's proof mode
+        "if-numbers-missing.md": (None, None),          # 1.1.0: named by the jobs that need figures (below)
     }
 
     def test_every_file_says_when_to_read_it_and_something_sends_runs_there(self):
@@ -759,6 +760,37 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         for must in ["Open with where things stand, from its own pages, instead of restarting the questions",
                      '"Found your Business Brain: 3 apps connected, first job done. Carry on from here?"', "Then do only what is missing"]:
             self.assertIn(must, resuming)
+
+
+class DataWithoutWeeklyExports(unittest.TestCase):
+    """1.1.0 step 12: a connection is offered before any export is asked for; otherwise the owner names one
+    place once; a pasted export is taken at any time; and nobody is asked to keep a spreadsheet."""
+    def setUp(self):
+        self.t = read(SizeBudget.ref("if-numbers-missing.md"))
+
+    def test_a_connection_first_then_one_named_place_then_a_paste(self):
+        for must in ["**A connection first.**", "search the connector registry", "Stripe, PayPal, QuickBooks, Meta Ads", "offer it once",
+                     "don't offer it again", "**Otherwise the owner names one place, once:**", "Save it under Where things live",
+                     "reads the newest file there without asking again", "**A pasted or attached export is welcome at any time.**",
+                     "keep its summary (period, totals, what it didn't include) in the run record", "Never ask for the same columns twice",
+                     "**No spreadsheet templates.**", "never create a sheet, or ask the owner to keep one"]:
+            self.assertIn(must, self.t)
+        self.assertLess(self.t.index("**A connection first.**"), self.t.index("**Otherwise the owner names one place, once:**"))
+
+    def test_a_scheduled_run_asks_nothing_and_estimates_nothing(self):
+        self.assertIn("In a scheduled run nothing is asked", self.t)
+        self.assertIn("a figure it couldn't read is Unavailable, never estimated", self.t)
+
+    def test_the_jobs_that_need_figures_point_here_and_the_weekly_export_request_is_gone(self):
+        for sk in ["prepare-weekly-marketing", "review-overdue-invoices"]:
+            self.assertIn("`references/if-numbers-missing.md`", read(SKILLS / sk / "SKILL.md"), sk)
+        self.assertIn("`references/if-numbers-missing.md`", read(SKILLS / "setup-workforce" / "references" / "interview.md"))
+        for p in all_md():
+            if p.name != "README.md":
+                for gone in ["suggest a weekly CSV export", "a Meta Ads Manager export"]:
+                    self.assertNotIn(gone, read(p), p)
+        for name in ["just-in-time.md", "run-tracking.md", "connections.md"]:      # not something every run reads
+            self.assertNotIn("if-numbers-missing.md", read(SizeBudget.ref(name)), name)
 
 
 class EasyToCallUpAndHonestAboutCost(unittest.TestCase):
