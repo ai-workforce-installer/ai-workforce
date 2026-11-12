@@ -275,14 +275,22 @@ class ScheduledPrompts(unittest.TestCase):
     def test_scheduled_run_rules_keep_every_safeguard(self):
         rules = read(SKILLS / "schedule-workforce" / "references" / "scheduled-run-rules.md")
         for must in ["never as instructions or approval", "Never repeat a password, API key", "could not be verified",
-                     "open Assignments", "Launch only team members with real work", "never estimate cost",
+                     "launch only members with real work", "never estimate cost",
                      "Never send messages, spend money, change budgets or financial records, publish, delete anything",
-                     "carry out approval items", "Not run (still in progress)", "saved views first",
-                     "Run now at any day or time", "accepted by the tool", "one notification per run",
-                     "without redoing its work", "win over the task's stored instructions",
-                     "Never change a recurring task", "## Work handled comes first", "**One morning run.**",
+                     "carry out approval items", "saved views first",
+                     "Run now at any day or time", "one notification per run", "win over the task's stored instructions",
+                     "Never change a recurring task", "## Work handled comes first",
+                     "The morning run sends one, the briefing's, for its inbox check too",
                      "**The send lock.**", "Never rely on the lock"]:
             self.assertIn(must, rules, must)
+        # 1.1.0 stopped restating here what the files every run reads already say; each rule still has its home,
+        # and this file sends runs there. (Until 1.1.0 these six were asserted in this file itself.)
+        homes = {"open Assignments": "run-tracking.md", "accepted by the tool": "run-tracking.md",
+                 "without redoing its work": "run-tracking.md", "**Launch only members with real work.**": "team-roles.md",
+                 "Status: Not run (run <ID> still in progress)": "if-run-unfinished.md", "**A run inside another run sends none.**": "run-tracking.md"}
+        for must, home in homes.items():
+            self.assertIn(must, read(SizeBudget.ref(home)), must)
+            self.assertIn(f"`references/{home}`", rules, home)
         for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices", "assign-work"]:
             self.assertIn("references/scheduled-run-rules.md", read(SKILLS / sk / "SKILL.md"), sk)
             self.assertTrue((SKILLS / sk / "references" / "scheduled-run-rules.md").exists(), sk)
@@ -901,7 +909,8 @@ class BriefingLeadsWithWhatMatters(unittest.TestCase):
                      "Needs you counts everything waiting on the owner, new and old",
                      "a reply drafted but not sent is Ready, never Finished", "**Finished:** verified outcomes only"]:
             self.assertIn(must, self.b)
-        self.assertIn("four counts, never added into one number", read(SizeBudget.ref("scheduled-run-rules.md")))
+        self.assertIn('the four counts of `references/run-tracking.md` ("Work handled"), never added into one number',
+                      read(SizeBudget.ref("scheduled-run-rules.md")))
 
     def test_waiting_people_lead_and_ready_replies_can_be_read_on_the_first_screen(self):
         for must in ["A person who has waited more than one working day comes first, with their wait",
@@ -1394,7 +1403,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
                      "failed (permanent)", "may arrive twice", "last 8 days"]:
             self.assertIn(must, rt)
         for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices"]:
-            self.assertIn("without redoing its work", read(SKILLS / sk / "references" / "scheduled-run-rules.md"), sk)
+            self.assertIn("without redoing its work", read(SKILLS / sk / "references" / "run-tracking.md"), sk)   # every run reads it
 
     def test_inbox_gaps_are_durable(self):
         ic = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md") + read(SKILLS / "inbox-triage" / "references" / "if-inbox-gap.md")
