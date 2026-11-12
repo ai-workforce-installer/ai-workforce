@@ -62,6 +62,7 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 - Customer email inbox: _not set_
 - Invoices are kept in: _not set_
 - Marketing performance data: _not set_
+- Team work: _not set_
 
 ## Extra rules for my team
 

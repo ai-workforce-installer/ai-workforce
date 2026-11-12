@@ -290,7 +290,7 @@ STANDARD_VIEWS = {
 REQUIRED_DBS = tuple(STANDARD_VIEWS)
 # Headings the upgrade sections add to existing pages (Priorities), checked and added by the repair too.
 REQUIRED_HEADINGS = ("Work I'd like to hand off", "Always worth my attention", "Not my responsibility anymore")
-LATEST_BRAIN = "1.0.0"       # the newest "## Upgrade to" section in brain-upgrades.md
+LATEST_BRAIN = "1.1.0"       # the newest "## Upgrade to" section in brain-upgrades.md
 
 
 def check_and_repair(workspace, fail_on=()):
@@ -337,7 +337,7 @@ def upgrade_views(workspace, fail_on=()):
     return check_and_repair(workspace, {("view", d) for d in fail_on})[0]
 
 
-SECTIONS_WITH_STEPS = ("1.0.0",)
+SECTIONS_WITH_STEPS = ("1.0.0", "1.1.0")
 
 
 def version_looks_current(workspace):

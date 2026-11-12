@@ -661,6 +661,47 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         self.assertTrue(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 2}))
 
 
+class WhereTheTeamSavesItsOwnWork(unittest.TestCase):
+    """1.1.0 step 7."""
+    def setUp(self):
+        self.clock, self.q, self.area = monday_morning(), w.Queue(), w.TeamWork()
+        self.row = self.q.record("deliverable:acme:proposal", "Proposal for Acme", self.clock.now(), work_type="Deliverable")
+
+    def test_a_work_product_gets_its_own_page_linked_from_its_row(self):
+        where = w.save_work_product(self.area, self.q, self.row, "v1")
+        self.assertEqual(where, "page:tw-1")
+        self.assertEqual(self.row.evidence, "tw-1")
+
+    def test_updating_keeps_the_owners_edits_and_makes_no_second_page(self):
+        w.save_work_product(self.area, self.q, self.row, "v1")
+        self.area.pages["tw-1"]["owner"] = "my notes: ask about the venue"
+        w.save_work_product(self.area, self.q, self.row, "v2", page_id="tw-1")
+        self.assertEqual(self.area.pages["tw-1"], {"team": "v2", "owner": "my notes: ask about the venue"})
+        self.assertEqual(len(self.area.pages), 1)
+
+    def test_only_known_page_ids_never_a_search_result(self):
+        self.area.pages["someone-elses"] = {"team": "", "owner": "the owner's own page"}
+        with self.assertRaises(PermissionError):
+            w.save_work_product(self.area, self.q, self.row, "v1", page_id="someone-elses")
+        w.save_work_product(self.area, self.q, self.row, "v1")
+        with self.assertRaises(PermissionError):
+            w.save_work_product(self.area, self.q, self.row, "v2", page_id="tw-1", found_by_search=True)
+        self.assertEqual(self.area.pages["someone-elses"]["owner"], "the owner's own page")
+
+    def test_members_never_write(self):
+        with self.assertRaises(PermissionError):
+            w.save_work_product(self.area, self.q, self.row, "v1", who="Sales")
+
+    def test_without_a_designated_page_it_stays_in_the_run_record(self):
+        self.assertEqual(w.save_work_product(w.TeamWork(designated=False), self.q, self.row, "v1"), "briefing")
+        self.assertEqual(w.save_work_product(self.area, self.q, self.row, "two lines", long=False), "briefing")
+
+    def test_a_save_that_did_not_land_is_never_called_saved(self):
+        self.area.fail_next_save = True
+        self.assertEqual(w.save_work_product(self.area, self.q, self.row, "v1"), "not saved")
+        self.assertEqual(self.row.evidence, "")
+
+
 class HonestAboutCost(unittest.TestCase):
     """1.1.0 step 14."""
     def test_typical_usage_comes_from_the_records_and_is_never_a_cost(self):

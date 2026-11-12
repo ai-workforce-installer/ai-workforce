@@ -37,6 +37,12 @@ Nothing existing changes: no status option, view, row or schedule is touched, an
 2. **Workforce Settings.** Under Connections, add `- Sending: _not set_` if there is no Sending line, and `- Work lives in: _not set_` if there is no such line. Existing owners keep things as they were (replies left for them to send) until they answer the desk's one question.
 3. **Version line.** Only when all nine fields and both lines are there, set `- Business Brain version: 1.0.0`. Otherwise leave the line as it was and say what is still to add.
 
+## Upgrade to 1.1.0 (a place for the team's own work, and one setting)
+Nothing existing changes, and each step adds only what is missing.
+1. **Team work.** If Where things live has no `Team work` line, ask once: "Where should your team keep the documents it prepares for you? I can add a private page called Team work to your Business Brain." On yes, create that page inside the Business Brain (or take the page the owner names) and save `- Team work: <title> (<page ID>)`. No answer: `- Team work: _not set_`, and work products stay in each run's Briefings page, as before.
+2. **Schedule.** Add `- Commitments review: _not set_` if there is no such line.
+3. **Version line.** Only when both lines are there, set `- Business Brain version: 1.1.0`.
+
 Later versions add their own section here, below this one, and run in order.
 
 **No longer used.** Workspaces set up before 0.8.0 may have a `Recurring tasks update themselves` line under Schedule. Recurring tasks no longer change their own instructions, so the line means nothing now: leave it where it is, never add it, and ignore what it says.

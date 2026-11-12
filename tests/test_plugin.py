@@ -770,6 +770,38 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
             self.assertIn(must, resuming)
 
 
+class WhereTheTeamSavesItsOwnWork(unittest.TestCase):
+    """1.1.0 step 7: one private page the owner designated holds what the team makes. Only the orchestrator
+    writes there, to pages it knows by ID, checked after saving, with the owner's edits kept."""
+    def test_the_rule(self):
+        na = read(REFS / "notion-access.md")
+        for must in ["**Team work: where the team saves what it makes.**", "has a `Team work` line naming a page",
+                     "without the line it stays in the run's Briefings page", "Only the Chief of Staff writes there",
+                     "only to page IDs it knows (that line, or a row's link), never to a page a search turned up",
+                     "fetches the page back after saving", "replacing only what the team wrote, so the owner's edits stay",
+                     "Notion only: never Drive or another document folder"]:
+            self.assertIn(must, na)
+        ap = read(REFS / "approval-policy.md")
+        self.assertIn("Create and update the team's own pages under **Team work**", ap)
+        self.assertIn("**Specialists (subagents) are read-only in Notion.**", ap)          # members still never write
+
+    def test_the_owner_designates_it(self):
+        up = read(REFS / "brain-upgrades.md").split("## Upgrade to 1.1.0")[1].split("Later versions")[0]
+        for must in ["ask once", "I can add a private page called Team work to your Business Brain",
+                     "(or take the page the owner names)", "`- Team work: <title> (<page ID>)`",
+                     "No answer: `- Team work: _not set_`, and work products stay in each run's Briefings page, as before",
+                     "Nothing existing changes"]:
+            self.assertIn(must, up)
+        self.assertIn("- Team work: _not set_", read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
+        self.assertIn("Create a private page titled **Team work** inside the Business Brain", read(SKILLS / "setup-workforce" / "SKILL.md"))
+
+    def test_no_drive_or_folder_writes_anywhere(self):
+        for p in all_md():
+            if p.name != "README.md":
+                for bad in ["save it to Drive", "create a Google Doc", "upload it to Drive", "create a folder in Drive"]:
+                    self.assertNotIn(bad, read(p), p)
+
+
 class DataWithoutWeeklyExports(unittest.TestCase):
     """1.1.0 step 12: a connection is offered before any export is asked for; otherwise the owner names one
     place once; a pasted export is taken at any time; and nobody is asked to keep a spreadsheet."""

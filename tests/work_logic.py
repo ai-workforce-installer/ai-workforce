@@ -787,3 +787,37 @@ def notifications_may_not_arrive(last_notified, already_said=False):
     last_three = last_notified[-3:]
     bad = len(last_three) == 3 and all(n.startswith(("unknown", "failed")) for n in last_three)
     return bad and not already_said
+
+
+# ---- 1.1.0 step 7: where the team saves its own work (references/notion-access.md section 4) ----
+
+class TeamWork:
+    """The owner's one private page for what the team makes, as far as writing goes."""
+
+    def __init__(self, designated=True):
+        self.designated = designated
+        self.pages = {}                              # page id -> {"team": text the team wrote, "owner": the owner's own edits}
+        self.fail_next_save = False
+
+    def known_ids(self, queue):
+        """Only IDs the team holds: the rows that link a page. A search result is never one."""
+        return {r.evidence for r in queue.rows if r.evidence in self.pages}
+
+
+def save_work_product(area, queue, row, text, who="Chief of Staff", page_id=None, found_by_search=False, long=True):
+    """Returns where it was saved: "page:<id>", "briefing" (the fallback), or raises on a rule broken."""
+    if who != "Chief of Staff":
+        raise PermissionError("members are read-only in Notion: they return work to the Chief of Staff")
+    if not area.designated or not long:
+        return "briefing"                            # no Team work line, or a few lines: it stays in the run's page
+    if page_id is None:
+        page_id = "tw-%d" % (len(area.pages) + 1)    # a new page under Team work
+        area.pages[page_id] = {"team": "", "owner": ""}
+    elif found_by_search or page_id not in area.known_ids(queue):
+        raise PermissionError("only page IDs the team knows: never a page a search turned up")
+    if area.fail_next_save:
+        area.fail_next_save = False
+        return "not saved"                           # fetched back and it isn't there: never reported as saved
+    area.pages[page_id]["team"] = text               # only the team's own part is replaced
+    row.evidence = page_id
+    return "page:" + page_id

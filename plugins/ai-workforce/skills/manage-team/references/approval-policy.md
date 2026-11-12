@@ -26,6 +26,7 @@ The owner does these personally. The team prepares them as an approval item with
     - Add new questions under "Waiting for an answer from you" on the FAQs page (skip ones already listed).
     - On the **Paste Box**, move a handled email under **Handled** with the line "Handled <date>, see Briefings". Move it; never delete it or change its text.
     - Add dated lines under "Suggestions from your Chief of Staff" on the Your Team page (at most one a week from briefings).
+    - Create and update the team's own pages under **Team work** (`references/notion-access.md` section 4): known page IDs only, the owner's edits kept.
   - **Attended only, after the owner confirms the exact wording in the chat:**
     - Save business facts, preferences and team changes to the pages and databases named in `references/interview.md`, `references/just-in-time.md` and the `manage-team` skill: replace a placeholder, add a line or row, mark a line or row (for example "(answered <date>)", Status "Retired", a suggestion "accepted" or "declined", unticking Active for a retired offer), or replace an old line only when the owner chose the new one over it.
     - Update the Schedule lines in Workforce Settings (`schedule-workforce`).
