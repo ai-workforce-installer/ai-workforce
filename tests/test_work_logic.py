@@ -254,7 +254,7 @@ class AssignmentsUpgrade(unittest.TestCase):
 
     def test_existing_owners_keep_the_old_sending_behaviour_until_they_answer(self):
         ws = w.old_workspace(); w.upgrade_to_1_0_0(ws)
-        self.assertEqual(ws["connections"][-1], "Sending: not set")
+        self.assertEqual(ws["connections"][-2:], ["Sending: not set", "Work lives in: not set"])
         self.assertEqual(ws["connections"][:4], w.old_workspace()["connections"])      # nothing the owner chose was touched
         self.assertIsNone(w.sending_choice({"Sending": "not set"}))                    # not set: replies are left for them
 
@@ -528,6 +528,68 @@ class PlainLanguageControl(unittest.TestCase):
         self.assertEqual(w.save_preference("price or policy"), "confirm first")
         self.assertEqual(w.save_preference("style", stated_outright=False), "confirm first")
         self.assertTrue(w.save_preference("sending or spending").startswith("never saved"))   # a preference grants no permission
+
+
+class ReachTheWork(unittest.TestCase):
+    def test_the_question_is_neutral_and_names_no_product(self):
+        self.assertEqual(len(w.WORK_LIVES_CHOICES), 6)
+        for choice in w.WORK_LIVES_CHOICES:
+            self.assertNotIn("highlevel", choice.lower())
+
+    def test_finish_names_one_fix_for_a_place_the_team_cannot_read(self):
+        self.assertEqual(w.unreachable_work(["Gmail", "A CRM or help desk"], connected=["Gmail"]), ["A CRM or help desk"])
+        self.assertEqual(w.unreachable_work(["Gmail"], connected=["Gmail"]), [])
+        self.assertEqual(w.one_fix("your help desk", registry_has_it=True), "connect your help desk")
+        self.assertEqual(w.one_fix("Text messages"), "forward those messages to your connected inbox")
+        self.assertEqual(w.one_fix("Text messages", inbox_connected=False), "paste them into your Paste Box")
+
+    def test_a_goal_is_proposed_only_from_what_the_team_saw_and_nothing_is_saved(self):
+        question, saved = w.propose_goal([], {"pricing": 6, "refunds": 2})
+        self.assertIn("6 customers asked about pricing", question)
+        self.assertEqual(saved, [])
+        self.assertEqual(w.propose_goal([], {}), (None, []))                       # nothing seen: no invented goal
+        self.assertEqual(w.propose_goal(["Fill the March workshop"], {"pricing": 6}), (None, []))
+
+
+class MorningRunByDefault(unittest.TestCase):
+    def test_one_ok_schedules_it_and_the_test_run_is_only_a_success_with_its_record(self):
+        tasks = []
+        self.assertEqual(w.morning_run_in_setup("ok", tasks), ("scheduled, confirmed", "test run succeeded: its Briefings row exists"))
+        self.assertEqual(len(tasks), 1)
+        state, what = w.morning_run_in_setup("OK!", [], briefing_row_appears=False)
+        self.assertIn("not reported as a success", what)
+
+    def test_a_different_time_is_a_yes(self):
+        self.assertEqual(w.morning_run_in_setup("7:15 am", [])[0], "scheduled, confirmed")
+        self.assertEqual(w.morning_run_in_setup("make it 8 AM", [])[0], "scheduled, confirmed")
+
+    def test_an_unclear_reply_leaves_it_proposed_never_silently_scheduled(self):
+        for reply in ["hmm", "what would it cost?", "maybe later", "tell me more", ""]:
+            tasks = []
+            self.assertEqual(w.morning_run_in_setup(reply, tasks)[0], "proposed, not scheduled", reply)
+            self.assertEqual(tasks, [])
+        self.assertEqual(w.morning_run_in_setup("no thanks", [])[0], "declined")
+
+    def test_a_second_setup_never_creates_a_second_task(self):
+        tasks = []
+        w.morning_run_in_setup("ok", tasks)
+        again = w.morning_run_in_setup("ok", tasks)
+        self.assertEqual(len(tasks), 1)
+        self.assertIn("never a second task", again[1])
+        paused = ["[AI Workforce task: daily-executive-briefing | prompt version 0.8.0]"]          # an older, paused one counts too
+        w.morning_run_in_setup("ok", paused)
+        self.assertEqual(len(paused), 1)
+
+    def test_without_run_now_the_offer_stays_and_says_why(self):
+        self.assertEqual(w.morning_run_in_setup("ok", [], can_run_now=False),
+                         ("scheduled, confirmed", "test run offered, with the reason it wasn't started"))
+        self.assertEqual(w.morning_run_in_setup("ok", [], tool_available=False)[0], "not available on this account")
+
+    def test_setup_is_finished_only_when_the_morning_run_is_settled(self):
+        for state in ["scheduled, confirmed", "declined", "not available on this account"]:
+            self.assertTrue(w.setup_finished(True, state), state)
+        self.assertFalse(w.setup_finished(True, "proposed, not scheduled"))
+        self.assertFalse(w.setup_finished(False, "scheduled, confirmed"))
 
 
 if __name__ == "__main__":

@@ -510,6 +510,21 @@ class WorkHandled(unittest.TestCase):
         self.assertFalse(quiet_streak_notice([quiet, quiet, quiet], today, last_said=today - timedelta(days=3)))
         self.assertTrue(quiet_streak_notice([quiet, quiet, quiet], today, last_said=today - timedelta(days=7)))
 
+    def test_the_first_quiet_briefing_says_it_when_the_work_lives_somewhere_unconnected(self):
+        """1.0.0: one account had ten quiet runs because its customer messages lived in an unconnected app.
+        With the owner's own "Work lives in" answer, the first quiet briefing names the fix, not the third."""
+        quiet, busy = {"emails reviewed": 41}, {"reply drafts ready": 2}
+        today = T0.date()
+        self.assertTrue(quiet_streak_notice([quiet], today, work_lives_in="A CRM or help desk", connected=("Gmail",)))
+        self.assertFalse(quiet_streak_notice([busy], today, work_lives_in="A CRM or help desk", connected=("Gmail",)))   # not quiet
+        self.assertFalse(quiet_streak_notice([quiet], today, work_lives_in="Gmail", connected=("Gmail",)))               # it is connected
+        self.assertTrue(quiet_streak_notice([quiet], today, work_lives_in="Gmail, Text messages", connected=("Gmail",)))
+        self.assertFalse(quiet_streak_notice([quiet], today, work_lives_in="A CRM or help desk", connected=("Gmail",),
+                                             last_said=today - timedelta(days=2)))                                         # at most once in 7 days
+        for missing in (None, "", "not set"):                                 # no line: the three-quiet rule is the fallback
+            self.assertFalse(quiet_streak_notice([quiet], today, work_lives_in=missing))
+            self.assertTrue(quiet_streak_notice([quiet, quiet, quiet], today, work_lives_in=missing))
+
 
 class HighLevelLine(unittest.TestCase):
     """0.8.1: first-time setup is click-and-sign-in only. HighLevel is offered after the first

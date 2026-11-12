@@ -29,8 +29,8 @@ A truthful account of what the team actually did. Every line rests on a record i
    - **Never call runs duplicates because of their timing.** Several runs in one day, or a weekly task running on another day, usually mean the owner pressed Run now. Mention a duplicate schedule only if the scheduled-task list shows two tasks for the same responsibility.
    - A row with a configuration warning → say what the run did about it. An older `prompt version` line on a task is never a problem: every task follows the installed plugin (`references/if-old-task.md`), so never offer to update one.
    - A daily briefing task and a separate inbox triage task that runs within 3 hours of it → mention once that the morning briefing now checks the inbox itself, and offer to combine them (`schedule-workforce`, "One morning run").
-   - An Inbox triage record that says it was included in a daily briefing is part of that morning run, not a second run. A Schedule line reading "part of the daily briefing" is not a separate task: its runs are those records.
-   - Runs whose row says the plugin or an app wasn't available → say so plainly, with the fix (reconnect the app, or keep AI Workforce turned on under Customize → Plugins).
+   - An Inbox triage record included in a daily briefing is part of that morning run, not a second run; a Schedule line reading "part of the daily briefing" is not a separate task.
+   - Runs whose row says the plugin or an app wasn't available → say so, with the fix (reconnect the app, or turn AI Workforce on under Customize → Plugins).
 4. **Report in this order**, short and plain:
    1. **Handled:** first the period's totals in one line, added up from the records' Handled lines and kept apart ("This week: 6 finished, 14 reply drafts ready, 3 meeting preps, 5 decisions raised"; never one combined number), then what the team finished, grouped by team member, each with a count and link ("Client Success: 12 reply drafts across 3 runs"). Runs finishing is not the measure; work handled is. If the total is zero, or the records show three or more runs in a row with nothing handled, say that first and plainly, with the reason the reports give (usually a place the work lives that isn't connected, named under Blocked or Not checked) and the one step that would change it. Never soften it with a count of runs that completed.
    2. **Needs your decision:** pending approvals (count, oldest AP number and age) and things handed to you that only you can do. Then, in one line, what the team prepared that is still waiting on you (drafts and prepared pieces in open work: how many, and since when).
@@ -40,7 +40,7 @@ A truthful account of what the team actually did. Every line rests on a record i
 5. If nothing ran in the period, say exactly that and why, if the records show it. Offer the most useful next step (for example "Want me to run this morning's briefing now?").
 
 ## First-week recap ("how's my first week going?")
-Optional, on request (the daily briefing mentions it once, between day 5 and 10). Same records as above, from "Set up on" in Workforce Settings to today, answered in at most six short lines, each resting on a record:
+On request (the daily briefing mentions it once). Same records as above, from "Set up on" in Workforce Settings to today, in at most six short lines, each resting on a record:
 1. **First assignment:** did it produce something useful? Its Briefings row and Result, and what came out of it (with the link). If it was a quick look, say whether the full inbox review has happened since.
 2. **First recurring run:** for each recurring responsibility, did a run actually land (a Briefings row from the recurring task) and how did it end? "Scheduled but no run recorded yet" is said as that.
 3. **Your first decisions:** how many approvals are waiting and the oldest; offer to go through them now (`review-approvals`).

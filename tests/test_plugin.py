@@ -360,7 +360,7 @@ class WorkHandled(unittest.TestCase):
 
     def test_reports_open_with_it(self):
         b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
-        for must in ["1. **The opening line: work handled**", "**Three quiet briefings in a row:**",
+        for must in ["1. **The opening line: work handled**", "after three quiet briefings in a row",
                      "never invent a reason the records don't show", "judged by what the team handled, not by the run finishing"]:
             self.assertIn(must, b)
         self.assertIn("Open the chat reply or notification with the work-handled line", read(SKILLS / "inbox-triage" / "SKILL.md"))
@@ -591,6 +591,58 @@ class DraftsAreNotApprovals(unittest.TestCase):
         ra = read(SKILLS / "review-approvals" / "SKILL.md")
         self.assertIn("**Waiting work**", ra)
         self.assertIn("a Gmail draft stays where it is, never deleted", ra)
+
+
+class ReachTheWorkAndKeepRunning(unittest.TestCase):
+    """1.0.0: ten scheduled runs on one account handled nothing because customer messages lived in an app
+    the team couldn't read, and setup left recurring work as an open question."""
+    def setUp(self):
+        self.s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.ftm = read(SKILLS / "first-team-meeting" / "SKILL.md")
+
+    def test_setup_asks_where_messages_reach_the_owner_without_naming_a_product(self):
+        stage3 = self.s.split("## Stage 3", 1)[1].split("## Stage 4", 1)[0]
+        q = '"Where do customer and lead messages actually reach you?"'
+        self.assertIn(q, stage3)
+        self.assertIn("Gmail / Outlook / A CRM or help desk / Text messages / Social DMs / Somewhere else", stage3)
+        self.assertIn("Never name a product in this question", stage3)
+        self.assertIn("Save the answer as the `Work lives in` line under Connections", stage3)
+        self.assertNotIn("HighLevel", stage3)
+        stage0 = self.s.split("## Stage 0", 1)[1].split("## Stage 1", 1)[0]
+        self.assertNotIn("reach you", stage0)                       # first-setup-does-not-mention-highlevel still holds
+        finish = self.s.split("## Finish", 1)[1]
+        self.assertIn("If `Work lives in` names a place the team can't read, name the one fix in one line", finish)
+        self.assertIn("forward those messages to the connected inbox, or paste them into the Paste Box", finish)
+
+    def test_the_line_is_saved_by_an_add_only_upgrade(self):
+        self.assertIn("- Work lives in: _not set_", read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
+        self.assertIn("- Work lives in: <where customer and lead messages reach the owner>", read(REFS / "connections.md"))
+        up = read(REFS / "brain-upgrades.md").split("## Upgrade to 1.0.0")[1].split("Later versions")[0]
+        self.assertIn("`- Work lives in: _not set_` if there is no such line", up)
+
+    def test_the_first_quiet_briefing_names_the_fix(self):
+        b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
+        for must in ["**A quiet briefing** leads this section with the one change that would give the team real work",
+                     "on the first briefing that handled nothing while `Work lives in` names a place that isn't connected",
+                     "without that line, after three quiet briefings in a row", "At most once in 7 days",
+                     "never invent a reason the records don't show",
+                     "the one question proposes a goal drawn only from what the team saw", "nothing is saved until the owner says yes"]:
+            self.assertIn(must, b)
+
+    def test_the_morning_run_is_on_by_default_and_confirmed_in_one_word(self):
+        for must in ["**In the setup path the morning run is on by default,** confirmed in one word",
+                     "I'll have your team do this every morning at <30 minutes before their workday> (<time zone>), starting tomorrow. Reply 'ok' or give me a different time.",
+                     "Use the saved `Check-in frequency` if there is one",
+                     "A clear yes or a time creates it; anything else leaves it proposed, never silently scheduled",
+                     "never a second one for the same responsibility, paused ones included",
+                     "Setup isn't finished until the morning run is scheduled and confirmed, declined, or not available on the account"]:
+            self.assertIn(must, self.ftm)
+        self.assertNotIn("Want the team to do this every morning? Every day is what I'd suggest", self.ftm)   # the open question
+        sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
+        for must in ["start one without asking, and report success only when that run's Briefings row exists",
+                     "say why it wasn't started", "`proposed, not scheduled`, `declined <date>` or `not available on this account`"]:
+            self.assertIn(must, sw)
+        self.assertIn("the Daily briefing line under Schedule says scheduled and confirmed, declined, or not available on this account", self.s)
 
 
 class PlainLanguageControl(unittest.TestCase):
@@ -845,7 +897,7 @@ class WorkClosesHonestly(unittest.TestCase):
     def test_the_upgrade_is_add_only_and_resumable(self):
         up = read(REFS / "brain-upgrades.md").split("## Upgrade to 1.0.0")[1].split("Later versions")[0]
         for must in ["Nothing existing changes: no status option, view, row or schedule is touched",
-                     "an interrupted upgrade simply carries on when it is run again", "Only when all nine fields and that line are there",
+                     "an interrupted upgrade simply carries on when it is run again", "Only when all nine fields and both lines are there",
                      "A property of the owner's with one of these names stays as it is"]:
             self.assertIn(must, up)
         schema = read(SKILLS / "setup-workforce" / "references" / "notion-schema.md")      # statuses and the owner's view are as they were

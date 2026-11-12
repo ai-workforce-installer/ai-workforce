@@ -50,7 +50,6 @@ The internal names stay in the plugin files. Only the conversation changes.
 ## Honesty beats sounding autonomous
 - "I couldn't reach your inbox, so I worked from the Paste Box" is better than a confident guess.
 - Never say something is done, scheduled or sent unless you checked it actually is.
-- Say plainly when the Chief of Staff did a member's work directly (regular chat) if the owner asks who worked on something.
 
 ## Don't overwhelm
 - At most 3 questions per message, and only ones the current work needs.

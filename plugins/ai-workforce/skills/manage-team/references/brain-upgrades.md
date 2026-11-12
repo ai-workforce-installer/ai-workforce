@@ -8,7 +8,7 @@ Workforce Settings ends with an **About this workspace** section holding `- Busi
 - **Newer than this file knows** (the workspace was upgraded by a newer copy of the plugin, for example on another device): change nothing and carry on. In attended mode, mention once that their AI Workforce may be out of date and they can update it from Customize → Plugins.
 - **Scheduled:** never upgrade. Add one line to the briefing: "Workspace improvements are ready. Say 'update my team workspace' when you have a minute."
 - `setup-workforce` offers it the same way when it finds an existing Business Brain.
-- **After a plugin update,** recurring tasks need nothing: each one follows the installed plugin on its next run. If the owner has both a daily briefing task and a separate inbox triage task, offer once to combine them (`schedule-workforce`, "One morning run"). Change nothing without a yes.
+- **After a plugin update,** recurring tasks need nothing: each follows the installed plugin on its next run.
 
 ## Rules
 - **Check, then add.** Every step first checks whether its change is already there and skips it if so. Running the steps twice changes nothing.
@@ -60,8 +60,8 @@ A version line of "setup in progress", or a missing line, means the upgrades and
 ## Upgrade to 1.0.0 (open work tracked to a verified outcome)
 Nothing existing changes: no status option, view, row or schedule is touched, and runs work without these fields (they keep the same facts in each row's text). Every step adds only what is missing, so an interrupted upgrade simply carries on when it is run again.
 1. **Assignments properties.** Fetch the Assignments data source and add each of these that is missing, checking it is there before the next: `Work type` (select: Task, Reply, Commitment, Waiting on someone, Customer case, Deliverable, Monitored issue), `Due` and `Next check` (dates), `Waiting on`, `Blocker`, `Done when` and `Work key` (text), `Evidence` (URL), `Closed as` (select: Completed, Sent, Cancelled, Dismissed, Superseded, Unverified). A property of the owner's with one of these names stays as it is: say so once.
-2. **Workforce Settings.** Under Connections, add `- Sending: _not set_` if there is no Sending line. Existing owners keep things as they were (replies left for them to send) until they answer the desk's one question.
-3. **Version line.** Only when all nine fields and that line are there, set `- Business Brain version: 1.0.0`. Otherwise leave the line as it was and say what is still to add.
+2. **Workforce Settings.** Under Connections, add `- Sending: _not set_` if there is no Sending line, and `- Work lives in: _not set_` if there is no such line. Existing owners keep things as they were (replies left for them to send) until they answer the desk's one question.
+3. **Version line.** Only when all nine fields and both lines are there, set `- Business Brain version: 1.0.0`. Otherwise leave the line as it was and say what is still to add.
 
 Later versions add their own section here, below this one, and run in order.
 

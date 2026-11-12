@@ -509,12 +509,19 @@ def morning_opening(briefing_work, inbox_work=None, needs_you=0, waiting_on_some
         total["finished"] or "nothing", ", ".join(ready) or "nothing new", needs_you, waiting_on_someone)
 
 
-def quiet_streak_notice(recent_briefings, today, last_said=None):
+def quiet_streak_notice(recent_briefings, today, last_said=None, work_lives_in=None, connected=()):
     """recent_briefings: the work of finished Daily briefings, newest first, this one included.
-    Blocked leads with the one fix only after three in a row handled nothing, at most once in 7 days."""
-    if len(recent_briefings) < 3 or not all(handled_nothing(w) for w in recent_briefings[:3]):
+    Worth knowing leads with the one fix: on the FIRST quiet briefing when the owner's own
+    "Work lives in" line names a place that isn't connected (1.0.0); without that line, only after
+    three in a row handled nothing. Either way at most once in 7 days."""
+    if last_said is not None and (today - last_said).days < 7:
         return False
-    return last_said is None or (today - last_said).days >= 7
+    if not recent_briefings or not handled_nothing(recent_briefings[0]):
+        return False
+    places = [x.strip() for x in (work_lives_in or "").split(",") if x.strip() and not x.strip().lower().startswith("not set")]
+    if places:
+        return any(place not in connected for place in places)
+    return len(recent_briefings) >= 3 and all(handled_nothing(w) for w in recent_briefings[:3])
 
 
 # ---- connections.md and setup-workforce "Connecting HighLevel": the Customer messages line ----

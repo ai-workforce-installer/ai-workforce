@@ -7,12 +7,12 @@ Goal: every field in the Business Brain is either answered by the owner or delib
 ## How to run it
 
 - **One topic at a time**, at most 3 questions per message. Use multiple-choice options when a question tool is available; otherwise ask in plain text.
-- **Propose before you ask.** Use what you already know (website, earlier answers, whatever email and calendar the owner connected) to draft an answer and ask "Is this right?" Owners correct faster than they write. Say what you looked at.
+- **Propose before you ask.** Draft an answer from what you already know (website, earlier answers, connected email and calendar) and ask "Is this right?", saying what you looked at.
 - **Confirm, then save immediately.** After each topic, show the answers as 2-6 bullets, ask "Save this?", and on yes write them to Notion right away (see Saving). Then show one progress line, e.g. `Saved: Policies (topic 5 of 11)`.
 - **Skipping is fine.** "Skip" or "later" leaves that field as `not set` and moves on. Keep a list of skipped fields for the end.
 - **Confirmed, not inferred.** Only what the owner confirms is saved. Facts drafted from the website, an email or a calendar are proposals until then, and a yes to a summary covers its descriptive points, not prices or policies: confirm each price, offer and policy on its own line ("from your website, not confirmed: 30-day refunds. Still right?"). Never save or quote an unconfirmed one.
 - **Already answered is answered.** Anything the owner said earlier in setup, in this chat, or that's already saved is not asked again; show it for a quick check instead ("You said replies within a day. Still right?").
-- **The owner's words, lightly tidied.** Never invent prices, policies, facts or quotes. If an answer is vague ("depends"), save it as said and add "ask me case by case" so the team escalates.
+- **The owner's words, lightly tidied.** Never invent prices, policies, facts or quotes. A vague answer ("depends") is saved as said, plus "ask me case by case".
 - **Resuming.** If setup is restarted, fetch every page first and start at the first topic that still has `not set` fields. Don't re-ask answered fields; offer to review them instead.
 - **In a hurry?** Do the topics marked ★ first (the minimum for a useful team) and offer the rest later.
 

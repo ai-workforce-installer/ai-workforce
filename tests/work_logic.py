@@ -349,6 +349,10 @@ def upgrade_to_1_0_0(ws, stop_after=None, can_write=True):
         if not can_write:
             raise Interrupted("the Sending line is still to add")
         ws["connections"].append("Sending: not set")   # existing owners keep the old behaviour until they answer
+    if not any(line.startswith("Work lives in:") for line in ws["connections"]):
+        if not can_write:
+            raise Interrupted("the Work lives in line is still to add")
+        ws["connections"].append("Work lives in: not set")
     if all(n in ws["properties"] for n in NEW_PROPERTIES):
         ws["version"] = "1.0.0"
     return added
@@ -633,3 +637,60 @@ def save_preference(kind, stated_outright=True):
     if kind in ("style", "working") and not stated_outright:
         return "confirm first"                       # something the team noticed is offered, not saved
     return PREFERENCE_KINDS[kind]
+
+
+# ---- 1.0.0 step 5: reach the work, and keep the team running after setup ----
+
+WORK_LIVES_CHOICES = ("Gmail", "Outlook", "A CRM or help desk", "Text messages", "Social DMs", "Somewhere else")
+
+
+def unreachable_work(work_lives_in, connected):
+    """The places the owner said messages reach them that no connection reads."""
+    return [p for p in work_lives_in if p not in connected]
+
+
+def one_fix(place, registry_has_it=False, inbox_connected=True):
+    """Setup's Finish names one fix in one line: connect it, forward it, or paste it."""
+    if registry_has_it:
+        return "connect %s" % place
+    return ("forward those messages to your connected inbox" if inbox_connected
+            else "paste them into your Paste Box")
+
+
+def propose_goal(priorities, seen):
+    """Quiet days with no goals: the one question proposes a goal drawn only from what the team saw.
+    seen: {what was observed: how many times}. Returns (the question or None, what is saved now)."""
+    if priorities or not seen:
+        return None, []
+    what, n = max(seen.items(), key=lambda kv: kv[1])
+    return "%d customers asked about %s this month; want a goal for it this quarter?" % (n, what), []   # nothing saved until yes
+
+
+def morning_run_in_setup(reply, tasks, default_time="7:30 AM", tool_available=True, owner_present=True,
+                         can_run_now=True, briefing_row_appears=True):
+    """The morning run is on by default, confirmed in one word. tasks: the first-line tags of the owner's
+    existing scheduled tasks, paused ones included. Returns (the Schedule line's state, what happened)."""
+    tag = "[AI Workforce task: daily-executive-briefing"
+    if any(t.startswith(tag) for t in tasks):
+        return "scheduled", "already there: offer to change its time, never a second task"
+    if not tool_available:
+        return "not available on this account", "said plainly; the owner can still ask for a briefing any time"
+    r = reply.strip().lower().rstrip(".!")
+    a_time = any(ch.isdigit() for ch in r) and ("am" in r or "pm" in r or ":" in r)
+    if r in ("no", "no thanks", "not now", "don't"):
+        return "declined", "nothing created"
+    if not (r in ("ok", "okay", "yes", "sure", "do it", "sounds good") or a_time):
+        return "proposed, not scheduled", "nothing created: only a clear yes or a time schedules it"
+    tasks.append(tag + " | prompt version 1.0.0]")
+    listed = any(t.startswith(tag) for t in tasks)                 # schedule-workforce's list check
+    if not listed:
+        return "proposed, not scheduled", "the task did not appear in the list"
+    if not (owner_present and can_run_now):
+        return "scheduled, confirmed", "test run offered, with the reason it wasn't started"
+    if briefing_row_appears:
+        return "scheduled, confirmed", "test run succeeded: its Briefings row exists"
+    return "scheduled, confirmed", "test run started, but no Briefings row yet: not reported as a success"
+
+
+def setup_finished(first_job_done, schedule_state):
+    return first_job_done and schedule_state in ("scheduled, confirmed", "scheduled", "declined", "not available on this account")

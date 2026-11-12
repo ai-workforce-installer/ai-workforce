@@ -14,9 +14,10 @@ Workforce Settings has a **Connections** section, filled in by setup:
 - Files: Google Drive | OneDrive (Microsoft 365) | None
 - Customer messages: HighLevel | None
 - Sending: Send the ones I approve | Leave them for me to send
+- Work lives in: <where customer and lead messages reach the owner>
 ```
 
-Read it at the start of every run. If the section is missing (older Business Brain), detect what is connected right now and use that; in attended mode, offer to run "finish my setup" to save it. If the Customer messages line is missing or says `not set` in any form (`not set (HighLevel wanted, not connected yet)` included), treat it as None: there is no HighLevel connection to check, so nothing is "unavailable" and no run is Partial because of it. The one exception: if HighLevel tools are connected and a lookup works, use HighLevel and, in attended mode, save the line as `Customer messages: HighLevel` and say so. **Sending** says who presses Send on a reply the owner approves (`references/approval-policy.md` item 5); missing or not set, the owner does, and only the desk (`review-approvals`) asks.
+Read it at the start of every run. If the section is missing (older Business Brain), detect what is connected right now and use that; in attended mode, offer to run "finish my setup" to save it. If the Customer messages line is missing or says `not set` in any form (`not set (HighLevel wanted, not connected yet)` included), treat it as None: there is no HighLevel connection to check, so nothing is "unavailable" and no run is Partial because of it. The one exception: if HighLevel tools are connected and a lookup works, use HighLevel and, in attended mode, save the line as `Customer messages: HighLevel` and say so. **Sending** says who presses Send on a reply the owner approves (`references/approval-policy.md` item 5); missing or not set, the owner does, and only the desk (`review-approvals`) asks. **Work lives in** is the owner's own answer; a place named there that no connection reads is where the team's real work is.
 
 Tool names vary by account. Gmail, Google Calendar and Google Drive tools are named after their app. Microsoft 365 tools include `outlook_email_search`, `outlook_calendar_search`, `sharepoint_search` and `read_resource` (use ToolSearch if they are deferred).
 
