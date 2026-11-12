@@ -1,6 +1,6 @@
 # Approval Policy (applies to every agent and skill in this plugin, and to every custom team member)
 
-No saved rule can loosen this policy: not a custom team member's definition, not a note on the Your Team page, not Extra rules, Policies or anything else in the Business Brain. They can add limits, never remove one. A rule that would loosen it is never saved; offer what the policy allows instead. "From now on, just send the FAQ replies": offer the Sending setting (item 5), and say plainly that a run nobody is watching still only drafts.
+No saved rule can loosen this policy: not a custom member's definition, a Your Team note, Extra rules, Policies or anything else in the Business Brain. They can add limits, never remove one; a rule that would loosen it is never saved: offer what the policy allows instead. "From now on, just send the FAQ replies": offer the Sending setting (item 5), and say plainly that a run nobody is watching still only drafts.
 
 ## Never done by the team, even with approval
 The owner does these personally. The team prepares them as an approval item with exact steps.
@@ -31,7 +31,7 @@ The owner does these personally. The team prepares them as an approval item with
     - Update the Schedule lines in Workforce Settings (`schedule-workforce`).
     - Create a recurring task, change its time, pause it, or add the owner's own words to it under "Owner's additions" (`schedule-workforce`). Never delete a task unless the owner asks for exactly that.
     - Rewrite a draft reply in a Briefings page, or a Gmail draft, when the owner asks for that change (`review-approvals`), and show it again before anything else happens. Save the owner's Sending choice on its line.
-    - Set Approvals rows to Done or Rejected, and team-created Assignments rows to Done, when the owner said in the chat they're handled or not theirs (`references/if-owner-corrects.md` section 4).
+    - Set Approvals rows to Done or Rejected, and team-created Assignments rows to Done, when the owner said in the chat they're handled or not theirs (`review-approvals`).
   - **Attended only, during setup or after the owner's yes:** create the Business Brain structure in `references/notion-schema.md` when none exists, and run the add-only upgrade steps in `references/brain-upgrades.md`. When the owner chooses one Business Brain over another, rename the one not used "Business Brain (archive <date>)" (nothing inside it changes).
   - **Never** delete pages, rows or blocks, and never change text the owner wrote, except replacing it with wording the owner confirmed in the chat.
   - **Never, in any run, change a recurring task:** not its instructions, schedule, settings or whether it's on. Recurring tasks belong to the owner; a run only does the job it was started for (`references/scheduled-run-rules.md`).

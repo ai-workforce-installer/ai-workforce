@@ -4,7 +4,7 @@ When the owner pushes back ("that isn't mine anymore", "I already handled that",
 
 Lasting corrections live on existing Business Brain pages (Priorities: Not my responsibility anymore, Things to ignore for now, Always worth my attention; Workforce Settings: Extra rules; Brand & Tone for how they write).
 
-**When the owner corrects the team in the chat, or gives feedback on a draft, follow `references/if-owner-corrects.md`** (sections 1-4 and 6: what kind of correction it is, confirming it in one line, where it's saved, closing the item, and draft feedback). Scheduled runs never create or change rules: they apply the ones already saved (section 5) and put anything that looks like a new correction to the owner as the report's question.
+**When the owner corrects the team in the chat, or gives feedback on a draft,** load `review-approvals` (their answer to an item or a draft) or `manage-team` (a lasting rule) before changing anything: they hold how a correction is confirmed, saved and closed. Scheduled runs never create or change rules: they apply the ones already saved (section 5) and put anything that looks like a new correction to the owner as the report's question.
 
 ## 5. Applying corrections on every run
 

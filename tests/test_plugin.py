@@ -471,7 +471,7 @@ class ReadWhenNeeded(unittest.TestCase):
         "if-run-unfinished.md": ("run-tracking.md", "One found: follow `references/if-run-unfinished.md`"),
         "if-notification-missed.md": ("run-tracking.md", "follow `references/if-notification-missed.md`"),
         "if-old-task.md": ("scheduled-run-rules.md", "follow `references/if-old-task.md`"),
-        "if-owner-corrects.md": ("owner-corrections.md", "follow `references/if-owner-corrects.md`"),
+        "if-owner-corrects.md": (None, None),           # 1.1.0: named only by the skills the owner talks to (below)
         "if-no-team-agents.md": ("team-roles.md", "brief from `references/if-no-team-agents.md`"),
         "if-highlevel.md": ("connections.md", "follow `references/if-highlevel.md`"),
         "if-asked-how-safe.md": ("approval-policy.md", "read `references/if-asked-how-safe.md` first"),
@@ -492,6 +492,19 @@ class ReadWhenNeeded(unittest.TestCase):
                 self.assertIn(words, read(SizeBudget.ref(home)), name)
         for sk in ["inbox-triage", "first-team-meeting", "setup-workforce"]:
             self.assertIn("`references/if-quick-look.md`", read(SKILLS / sk / "SKILL.md"), sk)
+
+    def test_corrections_are_taken_only_where_the_owner_is(self):
+        """1.1.0: a run nobody is watching never creates or changes a rule, so the file that says how a
+        correction is confirmed and saved is named only by skills that need the owner present. The files
+        every scheduled run reads send the chat to those skills instead of naming it."""
+        for sk in ["review-approvals", "manage-team"]:
+            self.assertIn("`references/if-owner-corrects.md`", read(SKILLS / sk / "SKILL.md"), sk)
+        for name in ["owner-corrections.md", "approval-policy.md", "team-roles.md", "scheduled-run-rules.md", "run-tracking.md"]:
+            self.assertNotIn("if-owner-corrects.md", read(SizeBudget.ref(name)), name)
+        for sk in ["daily-executive-briefing", "inbox-triage", "prepare-weekly-marketing", "review-overdue-invoices", "assign-work"]:
+            self.assertNotIn("if-owner-corrects.md", read(SKILLS / sk / "SKILL.md"), sk)
+        self.assertIn("load `review-approvals` (their answer to an item or a draft) or `manage-team` (a lasting rule) before changing anything",
+                      read(REFS / "owner-corrections.md"))
 
     def test_every_skill_is_told_how_these_files_work(self):
         for s in SKILLS.glob("*/SKILL.md"):

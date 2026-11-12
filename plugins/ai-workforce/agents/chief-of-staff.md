@@ -1,6 +1,6 @@
 ---
 name: chief-of-staff
-description: "Use this agent only to give an independent, tool-free review of reports the main conversation has already collected from the department managers, and to recommend one decision. Do not use it to run a briefing or delegate work; the skills (daily-executive-briefing, assign-work) do that from the main conversation.\n\n<example>\nContext: Three managers have reported and disagree\nuser: \"Have the Chief review everyone's work and give one recommendation.\"\nassistant: \"I'll pass the three reports to the chief-of-staff agent for an independent review.\"\n<commentary>Independent review of finished reports is this agent's job.</commentary>\n</example>\n"
+description: "Use this agent only to give an independent, tool-free review of reports the main conversation has already collected from the department managers, and to recommend one decision. Do not use it to run a briefing or delegate work; the skills (daily-executive-briefing, assign-work) do that from the main conversation."
 model: inherit
 color: blue
 ---

@@ -40,7 +40,7 @@ Act as the Chief of Staff in the main conversation. Read these and apply them th
 9. **Queue approvals** (`references/approval-queue.md`) and use their AP numbers.
 10. **Log.** One Assignments row per task (Result says which way it ran: own agent, briefed assistant, or handled directly) and the run's record in Briefings (Type = Assignment, `references/run-tracking.md`) holding the full report: results, verification, approvals, questions, run receipt.
 11. **Report to the owner** per `references/talking-to-the-owner.md`: what got done and the link, what needs them, what couldn't be done, and anything "ready except…" (a missing link, an unconfirmed price). Offer the details on request.
-   **Feedback on the result** ("too formal", "I wouldn't sign it with my name", "that claim isn't accurate", "stronger opening"): apply it to the same drafts now and show them again, then offer once to save it as a lasting preference (`references/if-owner-corrects.md` section 6). No new approval or second draft for a wording change.
+   **Feedback on the result** ("too formal", "I wouldn't sign it with my name", "that claim isn't accurate", "stronger opening"): apply it to the same drafts now and show them again, then offer once to save it as a lasting preference (`manage-team`). No new approval or second draft for a wording change.
 12. **Repeat work?** If this kind of request has come up before (check recent Assignments) or the owner says "every week", offer once: "Want <member> to handle this every <cadence>?" On yes, use `schedule-workforce` for just that responsibility.
 
 If a connection or a member's run failed, say so plainly. Never present work as done that wasn't done.
