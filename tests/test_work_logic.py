@@ -661,6 +661,108 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         self.assertTrue(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 2}))
 
 
+class CommitmentsAndWaitingOn(unittest.TestCase):
+    """1.1.0 step 5."""
+    def setUp(self):
+        self.clock, self.q = monday_morning(), w.Queue()
+        self.start = self.clock.now() - timedelta(days=1)
+        self.n = 0
+
+    def thread(self, kind, what, hours_ago, who="Jordan", due=None, sure=True):
+        self.n += 1
+        return {"id": "t%d" % self.n, "at": self.clock.now() - timedelta(hours=hours_ago), "kind": kind, "who": who,
+                "what": what, "due": due, "sure": sure}
+
+    def test_a_promise_in_sent_mail_becomes_one_item_with_its_due_date(self):
+        friday = self.clock.local_time(2026, 3, 6, 17, 0)
+        sent = [self.thread("promise", "send-proposal", 5, due=friday)]
+        rows, checkpoint = w.commitments_review(sent, self.start, self.clock.now(), self.q, self.clock)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual((rows[0].work_type, rows[0].due, rows[0].check_is_suggested), ("Commitment", friday, False))
+        again, _ = w.commitments_review(sent, self.start, self.clock.now(), self.q, self.clock)      # the same mail seen again
+        self.assertEqual(len(self.q.open_rows()), 1)                                                # still one item
+        self.assertEqual(checkpoint, sent[0]["at"])
+
+    def test_no_date_is_never_an_invented_date(self):
+        rows, _ = w.commitments_review([self.thread("promise", "intro-venue", 4)], self.start, self.clock.now(), self.q, self.clock)
+        self.assertIsNone(rows[0].due)
+        self.assertTrue(rows[0].check_is_suggested)                       # a suggested check, called that
+
+    def test_waiting_on_someone_else_is_their_move(self):
+        rows, _ = w.commitments_review([self.thread("waiting on them", "contract-signature", 6, who="Priya")],
+                                       self.start, self.clock.now(), self.q, self.clock)
+        self.assertEqual((rows[0].work_type, rows[0].status, rows[0].waiting_on), ("Waiting on someone", "Blocked", "Priya"))
+
+    def test_marketing_receipts_quoted_text_invites_and_idle_ideas_are_not_obligations(self):
+        sent = [self.thread(kind, "x%d" % i, i + 1) for i, kind in enumerate(w.NOT_OBLIGATIONS)]
+        rows, checkpoint = w.commitments_review(sent, self.start, self.clock.now(), self.q, self.clock)
+        self.assertEqual(rows, [])
+        self.assertEqual(checkpoint, max(t["at"] for t in sent))          # looked at, set aside, not looked at again
+
+    def test_an_uncertain_one_is_recorded_as_uncertain(self):
+        rows, _ = w.commitments_review([self.thread("promise", "maybe-send-deck", 3, sure=False)], self.start, self.clock.now(), self.q, self.clock)
+        self.assertTrue(rows[0].title.startswith("may be a promise: "))
+
+    def test_it_is_off_until_turned_on_and_never_touches_the_inbox_bookmark(self):
+        sent = [self.thread("promise", "send-proposal", 5)]
+        self.assertEqual(w.commitments_review(sent, self.start, self.clock.now(), self.q, self.clock, enabled=False), ([], self.start))
+        import inspect
+        self.assertNotIn("bookmark", inspect.signature(w.commitments_review).parameters)
+
+    def test_the_pass_is_bounded_and_the_checkpoint_stops_where_reading_stopped(self):
+        sent = [self.thread("promise", "p%d" % i, 23 - i * 0.5) for i in range(20)]
+        rows, checkpoint = w.commitments_review(sent, self.start, self.clock.now(), self.q, self.clock)
+        self.assertEqual(len(rows), w.PER_RUN_READ)
+        self.assertEqual(checkpoint, sorted(t["at"] for t in sent)[w.PER_RUN_READ - 1])
+        more, checkpoint = w.commitments_review(sent, checkpoint, self.clock.now(), self.q, self.clock)
+        self.assertEqual(len(more), 5)                                    # the next run takes the rest: no gap, nothing twice
+        self.assertEqual(len(self.q.open_rows()), 20)
+
+    def test_a_due_follow_up_is_prepared_without_new_inbound_mail(self):
+        rows, _ = w.commitments_review([self.thread("waiting on them", "contract-signature", 6, who="Priya")],
+                                       self.start, self.clock.now(), self.q, self.clock)
+        self.assertEqual(w.follow_ups_due(self.q, self.clock), [])        # not due yet
+        self.clock.advance(days=3)
+        self.assertEqual(w.follow_ups_due(self.q, self.clock), rows)      # due: a nudge is drafted, with no new mail at all
+
+    def test_a_reply_before_the_check_prevents_it(self):
+        rows, _ = w.commitments_review([self.thread("waiting on them", "contract-signature", 6, who="Priya")],
+                                       self.start, self.clock.now(), self.q, self.clock)
+        self.clock.advance(days=3)
+        self.assertEqual(w.follow_ups_due(self.q, self.clock, replied={rows[0].key}), [])
+        self.assertEqual((rows[0].status, rows[0].closed_as), ("Done", "Completed"))
+        rows2, _ = w.commitments_review([self.thread("promise", "send-quote", 80)], self.start - timedelta(days=5), self.clock.now(), self.q, self.clock)
+        self.clock.advance(days=5)
+        self.assertEqual(w.follow_ups_due(self.q, self.clock, cancelled={rows2[0].key}), [])
+        self.assertEqual(rows2[0].closed_as, "Cancelled")
+
+    def test_two_follow_ups_a_day_at_most_oldest_first(self):
+        sent = [self.thread("waiting on them", "w%d" % i, 20 - i) for i in range(4)]
+        rows, _ = w.commitments_review(sent, self.start, self.clock.now(), self.q, self.clock)
+        self.clock.advance(days=3)
+        self.assertEqual(w.follow_ups_due(self.q, self.clock), rows[:2])
+        self.assertEqual(w.follow_ups_due(self.q, self.clock, drafted_today=2), [])
+
+    def test_the_catch_up_is_offered_once_runs_only_on_a_yes_and_resumes_without_gaps_or_duplicates(self):
+        catch_up = w.CatchUp(self.clock.now(), days=7)
+        sent = [self.thread("promise", "c%d" % i, 24 * 6.5 - i * 6) for i in range(26)]            # across the seven days
+        older = self.thread("promise", "too-old", 24 * 9)
+        self.assertIn("last 7 days", catch_up.offer())
+        self.assertIsNone(catch_up.offer())                               # offered once
+        self.assertEqual(catch_up.run(sent + [older], self.q, self.clock), [])                      # no yes: nothing is read
+        catch_up.accepted = True
+        first = catch_up.run(sent + [older], self.q, self.clock)
+        self.assertEqual(len(first), w.PER_RUN_READ)
+        self.assertFalse(catch_up.done)
+        second = catch_up.run(sent + [older], self.q, self.clock)         # the next run resumes from its own checkpoint
+        self.assertEqual(len(second), 11)
+        self.assertTrue(catch_up.done)
+        self.assertEqual(len(self.q.open_rows()), 26)                     # every one once
+        self.assertNotIn("too-old", [r.title for r in self.q.rows])       # nothing older than the range asked
+        self.assertEqual(catch_up.run(sent + [older], self.q, self.clock), [])                      # done is done
+        self.assertEqual((w.CatchUp(self.clock.now(), days=30).end - w.CatchUp(self.clock.now(), days=30).start).days, 30)   # "check the last month"
+
+
 class CasesAndDeliverables(unittest.TestCase):
     """1.1.0 step 6."""
     def setUp(self):

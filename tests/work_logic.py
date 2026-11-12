@@ -960,3 +960,87 @@ def handed_item_closes(row, messages, clock):
 def case_status(research_done, outcome_seen):
     """Research is not a fix."""
     return "Resolved" if outcome_seen else ("Researched: answer prepared, not resolved" if research_done else "Open")
+
+
+# ---- 1.1.0 step 5: commitments and waiting-on (references/if-commitments.md) ----
+
+NOT_OBLIGATIONS = ("marketing", "receipt", "quoted", "invite", "idle idea")
+PER_RUN_THREADS, PER_RUN_READ, FOLLOW_UPS_A_DAY = 50, 15, 2
+
+
+def commitments_review(sent, checked_through, now, queue, clock, enabled=True, until=None):
+    """One bounded pass over sent mail after the review's own checkpoint. `sent` is a list of threads:
+    {"id", "at", "kind", "who", "what", "due" (a datetime the thread states, or None), "sure" (bool)}.
+    Returns (rows added or updated, the new checkpoint). The inbox bookmark is not an argument: it is never touched."""
+    if not enabled:
+        return [], checked_through                    # off until the owner turns it on
+    end = until or now
+    window = sorted((t for t in sent if checked_through < t["at"] <= end), key=lambda t: t["at"])[:PER_RUN_THREADS]
+    rows, read, new_checkpoint = [], 0, checked_through
+    for t in window:
+        if t["kind"] in NOT_OBLIGATIONS:
+            new_checkpoint = t["at"]                  # seen and set aside: no row
+            continue
+        if read == PER_RUN_READ:
+            break                                     # the rest waits; the checkpoint stops where reading stopped
+        read += 1
+        new_checkpoint = t["at"]
+        owner_owes = t["kind"] in ("promise", "open customer work", "stalled follow-up")
+        row = queue.record("gmail-thread:%s:%s" % (t["id"], t["what"]), t["what"], t["at"], source=t["id"],
+                           work_type="Commitment" if owner_owes else "Waiting on someone")
+        if row is None:
+            continue
+        if not owner_owes:
+            row.status, row.waiting_on = "Blocked", t["who"]
+        row.due = t["due"]                            # only a date the thread states
+        if t["due"]:
+            row.next_check, row.check_is_suggested = t["due"], False
+        else:
+            set_next_check(row, clock)                # "no date given": a suggested check, called that
+        if not t.get("sure", True) and "may be a promise" not in row.title:
+            row.title = "may be a promise: " + row.title
+        rows.append(row)
+    return rows, new_checkpoint
+
+
+def follow_ups_due(queue, clock, replied=(), cancelled=(), drafted_today=0):
+    """At a row's next check: a reply or a cancellation closes it and nothing is drafted; otherwise a follow-up,
+    two a day at most, the oldest first."""
+    drafts = []
+    due = sorted((r for r in queue.open_rows() if r.work_type in ("Commitment", "Waiting on someone")
+                  and r.next_check and r.next_check <= clock.now()), key=lambda r: r.latest)
+    for row in due:
+        if row.key in replied:
+            _close(row, "Completed", clock.now(), evidence="the reply in the thread")
+        elif row.key in cancelled:
+            _close(row, "Cancelled", clock.now(), words="cancelled in the thread")
+        elif drafted_today + len(drafts) < FOLLOW_UPS_A_DAY:
+            drafts.append(row)
+    return drafts
+
+
+class CatchUp:
+    """One catch-up, offered once, for one of the two kinds, with its own checkpoint, resumed across runs."""
+
+    def __init__(self, now, days=7):
+        self.start, self.end = now - timedelta(days=days), now
+        self.checked_through = self.start
+        self.offered, self.accepted = False, False
+
+    def offer(self):
+        if self.offered:
+            return None                               # never offered twice
+        self.offered = True
+        return "Want me to go back over the last %d days of sent mail?" % (self.end - self.start).days
+
+    def run(self, sent, queue, clock):
+        if not self.accepted or self.done:
+            return []                                 # only on the owner's yes, and never past the range
+        rows, self.checked_through = commitments_review(sent, self.checked_through, clock.now(), queue, clock, until=self.end)
+        if not [t for t in sent if self.checked_through < t["at"] <= self.end]:
+            self.checked_through = self.end
+        return rows
+
+    @property
+    def done(self):
+        return self.checked_through >= self.end

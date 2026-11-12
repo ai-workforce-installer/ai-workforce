@@ -28,6 +28,7 @@ The goal of every briefing: **"Here's what your team finished, what's ready for 
    - **No inbox at all:** say "No inbox to check" in one line and go on.
    - If the inbox check fails or ends Partial, the briefing still goes ahead: say what wasn't covered, and this run's Result is Partial.
    What the inbox check found feeds everything below. Link its record in Details; don't repeat its coverage block.
+   **Promises and waiting-on:** with `Commitments review: on` under Schedule, run that review once now (`references/if-commitments.md`): sent mail only, its own checkpoint, the inbox bookmark untouched.
 4. **Due work before new work.** Take the open rows whose Next check has come, or that are due today, changed or newly blocked (`references/run-tracking.md` section 6), and re-read each one's source once: someone may have replied, paid or handled it.
    - Close what the evidence closes, and keep what showed it.
    - Someone wrote again since their reply was drafted: refresh that same draft to answer the new message. It stays a ready reply, never an Approvals row.

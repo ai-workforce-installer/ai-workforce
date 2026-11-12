@@ -39,7 +39,7 @@ Nothing existing changes: no status option, view, row or schedule is touched, an
 
 ## Upgrade to 1.1.0 (a place for the team's own work, and one setting)
 Nothing existing changes, and each step adds only what is missing.
-1. **Team work.** If Where things live has no `Team work` line, ask once: "Where should your team keep the documents it prepares for you? I can add a private page called Team work to your Business Brain." On yes, create that page inside the Business Brain (or take the page the owner names) and save `- Team work: <title> (<page ID>)`. No answer: `- Team work: _not set_`, and work products stay in each run's Briefings page, as before.
+1. **Team work.** If Where things live has no `Team work` line, ask once: "Where should your team keep the documents it prepares for you? I can add a private page called Team work to your Business Brain." On yes, create that page there (or take the page the owner names) and save `- Team work: <title> (<page ID>)`. No answer: `- Team work: _not set_`, and work products stay in each run's Briefings page, as before.
 2. **Schedule.** Add `- Commitments review: _not set_` if there is no such line.
 3. **Version line.** Only when both lines are there, set `- Business Brain version: 1.1.0`.
 

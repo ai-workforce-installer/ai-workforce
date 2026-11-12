@@ -51,7 +51,7 @@ A correction the owner saved ("not my responsibility anymore", "ignore these not
 - Scheduled (unattended) runs never execute approval items. They only queue them. See `references/run-modes.md`.
 
 ## How to request approval
-Every decision the owner has to make goes into the **Approvals** database using the format in `references/approval-queue.md`, and is also listed in the run's report with its AP number. Then stop work on that item.
+Every decision for the owner goes into **Approvals** in the format of `references/approval-queue.md` and into the run's report with its AP number. Then stop work on that item.
 
 ## What enforces these rules
 Three things: the apps and the access the owner granted, the send lock built into this plugin, and these instructions. Whenever the owner asks how sure any of this is, and whenever the lock is described to them, read `references/if-asked-how-safe.md` first and never claim more protection than it says.

@@ -33,6 +33,7 @@ The rest of this skill is the full meeting, used when the owner asks for one lat
    | Responsibility | Team member | Runs with |
    |---|---|---|
    | The morning run: go through all email, prepare replies, then brief you on today's priorities, meetings and what needs you | Chief of Staff with the team | `daily-executive-briefing` (it runs the inbox check first; `inbox-triage` alone for a one-off "triage my inbox") |
+   | Keep track of what you promised and what you're waiting on, with a follow-up drafted when one is due | Chief of Staff | the morning run (`schedule-workforce` turns it on) |
    | Find leads that need a follow-up and draft them | Sales | `assign-work` (Sales) |
    | Check the next week of commitments and flag problems | Operations | `assign-work` (Operations) |
    | Weekly marketing plan from last week's results | Marketing | `prepare-weekly-marketing` (needs a results source) |
@@ -50,15 +51,15 @@ The rest of this skill is the full meeting, used when the owner asks for one lat
 
 4. **Do the work now** with the skill in the table, in attended mode, for a small real slice (for example, this week's emails, or the next five leads). Tell the owner in one line who's on it.
 
-5. **Check the work actually happened.** Fetch the Briefings row back from Notion; check drafts exist where the result says they are (search Gmail drafts, or open the Replies ready to copy section); check any Approvals rows got AP numbers. If something didn't happen, say so plainly, fix it if you can, and never present it as done.
+5. **Check the work actually happened.** Fetch the Briefings row back; check drafts exist where the result says (Gmail drafts, or the Replies ready to copy section) and that any Approvals rows got AP numbers. If something didn't happen, say so plainly, fix it if you can, and never present it as done.
 
-6. **Show the result:** what was done (counts, for example "4 reply drafts ready in Gmail"), the link to where it's saved, what needs the owner, and anything the team couldn't do and why. The first time approvals appear, explain them in one line: "Anything that needs your yes gets a number. Reply 'approve 3' or 'change 3: shorter' and I'll take care of it."
+6. **Show the result:** what was done (counts, for example "4 reply drafts ready in Gmail"), the link to where it's saved, what needs the owner, and anything the team couldn't do and why. The first time something waits on them, say once: "Say 'clear my desk' and I'll walk you through what's waiting, one at a time."
 
 7. **Make it recurring.** Every day is the default for daily work; weekly work (marketing plan, invoice review) stays weekly. A quick look, or any inbox job, becomes the recurring **morning run** (the daily briefing task, which does the full inbox check first and then briefs the owner: one run, one notification), never a recurring quick look and never a separate inbox task alongside a briefing.
    - **In the setup path the morning run is on by default,** confirmed in one word: "I'll have your team do this every morning at <30 minutes before their workday> (<time zone>), starting tomorrow. Reply 'ok' or give me a different time." Use the saved `Check-in frequency` if there is one. A clear yes or a time creates it; anything else leaves it proposed, never silently scheduled.
    - **Later meetings** offer it: "Want the team to do this every morning?"
    On yes, use `schedule-workforce` for this one responsibility only: it checks for an existing task first (never a second one for the same responsibility, paused ones included), creates the run, confirms it in the task list, and in the setup path starts one test run. Setup isn't finished until the morning run is scheduled and confirmed, declined, or not available on the account, with that written on its Schedule line. If recurring runs aren't available, say so plainly: they can still ask any time ("Run the daily briefing").
 
-8. **Save the meeting** without creating a second record: add a short "Team meeting" section at the top of the Briefings row the work just created, with the recommendations and their reasons, what was chosen, and whether it's now recurring. Add the recommendations not chosen to "Suggestions from your Chief of Staff" on the Your Team page, each with today's date and "open", so they aren't lost or repeated.
+8. **Save the meeting** without a second record: add a short "Team meeting" section at the top of the Briefings row the work just created (the recommendations and their reasons, what was chosen, whether it's now recurring), and add the ones not chosen to "Suggestions from your Chief of Staff" on the Your Team page, each with today's date and "open".
 
-9. **Close** in 3-4 lines: what the team just did, how to talk to it from here ("Have Sales work on…", "Clear my desk", "What's my team been working on?"), and one next suggestion.
+9. **Close** in 3-4 lines: what the team just did, how to talk to it ("Have Sales work on…", "Clear my desk", "What's my team been working on?"), and one next suggestion.

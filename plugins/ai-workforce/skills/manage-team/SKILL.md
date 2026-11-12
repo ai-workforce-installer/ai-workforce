@@ -32,7 +32,7 @@ The owner should never have to rebuild a team member. They say how they want the
 
 2. **Say the exact words you'll save.** A style or working preference the owner states outright ("use this shorter style from now on", "finish what's waiting before starting something new") is saved straight away, with no second "Save this?": confirm in one line what was saved and where, and that "undo" takes it back. Everything else is confirmed first and saved only after their yes: a price, a policy, a fact, anything you inferred, and above all a rule that hides items (part A2), because a wrong one silently buries mail. "Got it. I'll save this for Client Success: 'Keep replies under five sentences, warm and friendly.' OK?"
 3. **Save it**, add-only where possible: replace a placeholder line, or add a bullet. Fetch the page first. Placeholders read back in italics (`<i>none yet</i>`, `<i>not set</i>`) and repeat under every heading, so match the heading together with its placeholder, for example `### Client Success\n\n- <i>none yet</i>`. When a section already has bullets, add yours after the last one. When the new rule contradicts an old one, show both and ask which wins; then replace the old line, except on Priorities' correction sections, where the old line gets " · no longer applies <date>" instead (`references/owner-corrections.md`). Never delete anything else.
-4. **Say how it applies:** "Done. Client Success will follow this from the next reply on." If drafts made under the old rule are still waiting (pending approvals, Replies ready to copy), offer to redo them.
+4. **Say how it applies:** "Done. Client Success will follow this from the next reply on." If drafts made under the old rule are still waiting, offer to redo them.
 
 ## A2. "That's not mine anymore" / "stop bringing this up"
 The owner is correcting what the team thinks matters. Follow `references/if-owner-corrects.md` (this item only, this thread, a lasting rule or a temporary one; the exact line confirmed before anything is saved; related items closed with their history kept), then say how it applies: "Done. The team won't raise the old Northwind automations again. A new security problem on your own accounts would still come to you."
@@ -46,7 +46,7 @@ Reuse before expanding. Most new jobs belong to someone already on the team.
 1. **Understand the job:** what work, how often, what a good result looks like, which apps or information it needs.
 2. **Decide, in this order, and stop at the first yes:**
    1. **An existing member, with clearer instructions.** Podcast show notes fit Marketing; vendor follow-ups fit Operations. Offer: "Marketing can take this on. I'll add 'Podcast: research, show notes, repurposing' to Marketing's responsibilities on Your Team." Save it there (part A).
-   2. **Something the owner already has.** If another installed plugin covers it, point the owner to it. Don't search the web for agents and don't install anything: the owner can browse Customize → Plugins themselves, and should check where anything from elsewhere came from.
+   2. **Something the owner already has.** If another installed plugin covers it, point to it. Don't search the web for agents or install anything: the owner can browse Customize → Plugins, and should check where anything from elsewhere came from.
    3. **A new custom team member**, only if the work recurs, has its own deliverables, and would crowd an existing member's job. More than three custom members usually means some should merge: say so.
 3. **Draft the new member** and show it in plain language:
    - **Name and job** (one sentence)
@@ -57,7 +57,7 @@ Reuse before expanding. Most new jobs belong to someone already on the team.
    - **Recurring work**, if any
 4. **Ask for approval:** "Add <Name> to your team with these responsibilities and limits?" Nothing is saved before a yes.
 5. **Save** it under Custom team members on the Your Team page, one block per member: `### <Name>` then bullets for Status (Active), Job, Responsibilities, Deliverables, Uses, Limits, Recurring, Added (date, approved by owner).
-6. **Be accurate about what it is.** In chat a custom member is a saved role your Chief of Staff takes on; in Cowork it runs as a separate assistant briefed with this role. It is not a separately installed agent, so never call it one. The owner can just think of it as a new team member.
+6. **Be accurate about what it is.** In chat a custom member is a saved role your Chief of Staff takes on; in Cowork it runs as a separate assistant briefed with this role. It is never a separately installed agent; to the owner it is simply a new team member.
 7. **Offer a first task** to show it working (via `assign-work`), and offer to make its recurring work a recurring responsibility (`schedule-workforce`).
 
 ## C. Changing or removing a member

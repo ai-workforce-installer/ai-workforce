@@ -1,5 +1,5 @@
 # Page templates (Notion-flavored Markdown)
-Use each block as the page's starting content. Every `_not set_` marker is a field the setup interview fills in. Notion stores the marker as italic, so when you fetch a page it reads back as `<i>not set</i>`: fetch the page first, then replace the whole line including its label (e.g. `- Name: <i>not set</i>`), or the heading plus marker for paragraph fields, because the bare marker appears many times. Leave a marker in place if the owner skips that question.
+Use each block as the page's starting content. Every `_not set_` marker is a field still to fill, left in place if the owner skips that question; it reads back as `<i>not set</i>`, and `references/interview.md` ("Saving") says how to replace one.
 
 ## Start here (top of the Business Brain page)
 
@@ -56,6 +56,7 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 - Inbox triage: _not set_
 - Weekly marketing plan: _not set_
 - Invoice review: _not set_
+- Commitments review: _not set_
 
 ## Where things live
 
