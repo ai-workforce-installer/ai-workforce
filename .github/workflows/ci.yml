@@ -7,29 +7,39 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # 3.9 is the python3 on many Macs, and the tests must keep running on it; 3.12 is a current one.
-        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
       - name: Reference copies in sync
         run: python3 tools/sync_references.py --check
       - name: Tests (versions, package, plugin text, design models, generated eval cases)
         run: python3 -m unittest discover tests -v
       - uses: actions/setup-node@v4
-        if: matrix.python-version == '3.12'
         with:
           node-version: "22"
       # Validation needs no login or API key. The version is pinned so a CLI release can't change results unannounced.
       - name: Install Claude Code CLI
-        if: matrix.python-version == '3.12'
         run: npm install -g @anthropic-ai/claude-code@2.1.319
       - name: Validate marketplace and plugin manifests
-        if: matrix.python-version == '3.12'
         run: claude plugin validate . && claude plugin validate plugins/ai-workforce
       # Behaviour evals (plugins/ai-workforce/evals) cost real usage, so they run locally before each release (tests/README.md).
+
+  # 3.9 is the python3 on many Macs, and the tests must keep running on it. The runner image no longer
+  # offers 3.9 through setup-python, so uv supplies it; python3 on PATH is 3.9 for the send lock's hook too.
+  tests-on-python-3-9:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Put Python 3.9 first on PATH
+        run: |
+          uv venv --python 3.9 "$RUNNER_TEMP/py39"
+          echo "$RUNNER_TEMP/py39/bin" >> "$GITHUB_PATH"
+      - name: It really is 3.9
+        run: python3 --version | grep -F "3.9."
+      - name: Reference copies in sync
+        run: python3 tools/sync_references.py --check
+      - name: Tests
+        run: python3 -m unittest discover tests -v
