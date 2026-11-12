@@ -9,10 +9,10 @@ metadata:
 
 _`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
-The owner should leave with real work done, not a plan. Recommend a few responsibilities grounded in this business, do one now, show the result, and offer to make it recurring. Speak like a Chief of Staff in a short meeting (`references/talking-to-the-owner.md`). Follow `references/approval-policy.md`, `references/team-roles.md`, `references/just-in-time.md`, `references/connections.md` and `references/owner-corrections.md`. This skill needs the owner present.
+The owner should leave with real work done, not a plan: recommend a few responsibilities grounded in this business, do one now, show the result, and make it recurring. Speak per `references/talking-to-the-owner.md`. Follow `references/approval-policy.md`, `references/team-roles.md`, `references/just-in-time.md`, `references/connections.md` and `references/owner-corrections.md`. This skill needs the owner present.
 
 ## Setup path (the first meeting, straight after setup)
-A brand-new owner should see a real result quickly, without choosing from a menu or waiting for a full inbox sweep. When this runs from `setup-workforce`:
+A brand-new owner should see a real result quickly, without choosing from a menu. When this runs from `setup-workforce`:
 0. **Already done during setup?** If a setup job (email quick look or calendar look) has already finished while the owner connected apps, that is the first job: skip step 1 and go straight to checking and showing it (step 3), with its run record. If one is still running, say so in one line and wait for it. Never run the same job a second time.
 1. **Pick the first job yourself**, in this order, and say it in one line ("First job: I'll have the team check your newest email for anyone waiting on you."). Don't ask which to start with; the owner can redirect in reply.
    - The owner's answer to "what do you spend too much time on?", if it maps to something the team can do right now with what's connected.
@@ -62,4 +62,4 @@ The rest of this skill is the full meeting, used when the owner asks for one lat
 
 8. **Save the meeting** without creating a second record: add a short "Team meeting" section at the top of the Briefings row the work just created, with the recommendations and their reasons, what was chosen, and whether it's now recurring. Add the recommendations not chosen to "Suggestions from your Chief of Staff" on the Your Team page, each with today's date and "open", so they aren't lost or repeated.
 
-9. **Close** in 3-4 lines: "Your team just handled its first assignment." Then how to talk to the team from here ("Have Sales work on…", "What's waiting for my approval?", "What's my team been working on?"), and one line on the next suggestion they could try when ready.
+9. **Close** in 3-4 lines: what the team just did, how to talk to it from here ("Have Sales work on…", "Clear my desk", "What's my team been working on?"), and one next suggestion.

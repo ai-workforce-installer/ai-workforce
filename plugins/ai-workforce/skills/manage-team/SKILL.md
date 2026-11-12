@@ -64,7 +64,7 @@ Reuse before expanding. Most new jobs belong to someone already on the team.
 
 - **Change a custom member:** edit its block after the owner confirms the new wording.
 - **Retire one:** set Status to "Retired" (never delete the block), and offer to pause any recurring responsibility it had.
-- **Core members** can't be removed, but they can sit out. Under Active departments, no ticks means the default set (`references/run-modes.md`); once anything is ticked, only ticked members take part. So to turn one off, tick every other member the owner wants and leave that one unticked; to turn one back on, tick it. Check the result, then say what changes: "Finance won't appear in your briefings until you turn it back on."
+- **Core members** can't be removed, but they can sit out. Under Active departments, no ticks means the default set (`references/run-modes.md`); once anything is ticked, only ticked members take part. So to turn one off, tick every other member the owner wants; to turn it back on, tick it. Then say what changes.
 
 ## Proactive suggestions
 The daily briefing may add one suggestion a week (its rule is there). When the owner answers one, mark it "accepted" or "declined" under "Suggestions from your Chief of Staff" on Your Team, and never repeat a declined one.

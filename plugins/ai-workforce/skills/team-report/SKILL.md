@@ -9,7 +9,7 @@ metadata:
 
 _`references/…` files are in this skill's own folder; a same-named file in another skill's folder is an identical copy. Read each at most once per conversation, the ones you need together. A file named `references/if-….md` covers one situation: read it only when it comes up._
 
-A truthful account of what the team actually did. Every line rests on a record in the Business Brain or the list of scheduled tasks. Never fill a gap with what probably happened. Speak per `references/talking-to-the-owner.md`.
+A truthful account of what the team actually did: every line rests on a record in the Business Brain or the list of scheduled tasks, never on what probably happened. Speak per `references/talking-to-the-owner.md`.
 
 ## Steps
 
@@ -23,8 +23,7 @@ A truthful account of what the team actually did. Every line rests on a record i
 3. **Reconcile the schedule against what landed.** For each scheduled responsibility, compare the runs it should have made in the period with the Briefings rows that exist:
    - Expected run with a matching row → **ran**, with its Result.
    - Expected run with no row → **no record**: it didn't run, or it didn't finish. Give the last-run status from the schedule list if you have it. Don't guess which.
-   - Listed in Workforce Settings but missing from the schedule list, or disabled → **not actually scheduled**.
-   - Saved as "proposed, not scheduled" → **not set up yet**.
+   - Listed in Workforce Settings but missing from the schedule list, or disabled → **not actually scheduled**; saved as "proposed, not scheduled" → **not set up yet**.
    - A record still running with no Progress for over 45 minutes → **stuck**: the next run will finish it. Not run records are normal (two runs overlapped) and aren't problems. Abandoned records are problems: say what was left undone.
    - **Never call runs duplicates because of their timing.** Several runs in one day, or a weekly task running on another day, usually mean the owner pressed Run now. Mention a duplicate schedule only if the scheduled-task list shows two tasks for the same responsibility.
    - A row with a configuration warning → say what the run did about it. An older `prompt version` line on a task is never a problem: every task follows the installed plugin (`references/if-old-task.md`), so never offer to update one.
@@ -41,11 +40,11 @@ A truthful account of what the team actually did. Every line rests on a record i
 
 ## First-week recap ("how's my first week going?")
 On request (the daily briefing mentions it once). Same records as above, from "Set up on" in Workforce Settings to today, in at most six short lines, each resting on a record:
-1. **First assignment:** did it produce something useful? Its Briefings row and Result, and what came out of it (with the link). If it was a quick look, say whether the full inbox review has happened since.
-2. **First recurring run:** for each recurring responsibility, did a run actually land (a Briefings row from the recurring task) and how did it end? "Scheduled but no run recorded yet" is said as that.
-3. **Your first decisions:** how many approvals are waiting and the oldest; offer to go through them now (`review-approvals`).
-4. **What the team has learned:** the owner preferences and corrections saved so far (Brand & Tone, Your Team notes, Priorities). If none, ask the one question that would help most, for example "How do you usually sign off?" or "Is there anything in your inbox the team should stop flagging?"
-5. **One thing to hand off next:** one suggestion grounded in what the team saw (a request that came up more than once in Assignments, or the owner's own answer under "Work I'd like to hand off"), and offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled).
+1. **First assignment:** did it produce something useful? Its Briefings row, Result and what came of it (with the link). After a quick look, say whether the full inbox review has happened since.
+2. **First recurring run:** for each recurring responsibility, did a run actually land, and how did it end? "Scheduled but no run recorded yet" is said as that.
+3. **Waiting on you:** how many things, and the oldest; offer the desk (`review-approvals`).
+4. **What the team has learned:** the preferences and corrections saved so far (Brand & Tone, Your Team notes, Priorities). If none, ask the one question that would help most ("How do you usually sign off?").
+5. **One thing to hand off next:** one suggestion grounded in what the team saw, with an offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled).
 6. **In one line:** what the team did this week (counts, from the records).
 Nothing here creates tasks, approvals or notifications; anything the owner agrees to is done by the skill named.
 

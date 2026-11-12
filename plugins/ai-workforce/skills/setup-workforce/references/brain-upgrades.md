@@ -1,6 +1,6 @@
 # Business Brain upgrades (safe, repeatable, add-only)
 
-Plugin updates change how the team works. They never change the owner's Business Brain on their own. When a newer plugin needs something new in the Business Brain, it is added by these steps, with the owner's yes.
+Plugin updates never change the owner's Business Brain on their own. What a newer plugin needs there is added by these steps, with the owner's yes.
 
 ## When to upgrade
 Workforce Settings ends with an **About this workspace** section holding `- Business Brain version: <x.y.z>`. A missing section means version 0.3 or older, or a setup that didn't finish; "setup in progress" means setup didn't finish. In every one of these cases, run every upgrade section below in order (each skips what's already there), skipping their version-line steps, then the structure check, which sets the version line at the end.

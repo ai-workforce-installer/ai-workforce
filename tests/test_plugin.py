@@ -476,6 +476,7 @@ class ReadWhenNeeded(unittest.TestCase):
         "if-queuing-a-decision.md": ("approval-queue.md", "follow `references/if-queuing-a-decision.md`"),
         "if-inbox-gap.md": ("inbox-coverage.md", "follow `references/if-inbox-gap.md`"),
         "if-quick-look.md": (None, None),               # named by the skills that run a quick look
+        "if-proving-live.md": (None, None),             # 1.0.0: named only by the self-test's proof mode
     }
 
     def test_every_file_says_when_to_read_it_and_something_sends_runs_there(self):
@@ -591,6 +592,46 @@ class DraftsAreNotApprovals(unittest.TestCase):
         ra = read(SKILLS / "review-approvals" / "SKILL.md")
         self.assertIn("**Waiting work**", ra)
         self.assertIn("a Gmail draft stays where it is, never deleted", ra)
+
+
+class LiveProofMode(unittest.TestCase):
+    """1.0.0: the self-test can check, on the owner's real account, each thing not yet seen live. The
+    README's "Not yet proven live" list and the proof script name the same checks, so one can't drift
+    from the other, and the list shrinks only from what the proof mode records."""
+    def setUp(self):
+        self.proof = read(SKILLS / "workforce-self-test" / "references" / "if-proving-live.md")
+        self.st = read(SKILLS / "workforce-self-test" / "SKILL.md")
+
+    def test_the_self_test_has_a_proof_mode(self):
+        head = self.st.split("---", 2)[1]
+        self.assertIn('"prove it"', head)
+        self.assertIn('"run the live checks"', head)
+        self.assertIn("**Proof mode:**", self.st)
+        self.assertIn("`references/if-proving-live.md`", self.st)
+        self.assertEqual([p.parent.parent.name for p in SKILLS.glob("*/references/if-proving-live.md")], ["workforce-self-test"])
+
+    def test_every_check_is_seen_not_seen_or_could_not_test(self):
+        for must in ["**seen** (with the link that shows it)", "**not seen** (what was expected, what happened)",
+                     "**couldn't test** (why, and what would make it testable)", "Never round up"]:
+            self.assertIn(must, self.proof)
+
+    def test_it_never_sends_changes_a_schedule_or_touches_real_records(self):
+        for must in ["Nothing is sent to anyone", "No recurring task is created, changed or started",
+                     'The only records written are this run\'s own, titled "Self-test proof <code>"',
+                     "Real work is looked at, never touched", "(never sent)"]:
+            self.assertIn(must, self.proof)
+        rows = re.findall(r"^\| (P\d+) \| ([^|]+) \| ([^|]+) \|$", self.proof, re.M)
+        for pid, _, how in rows:                                    # a check either only reads, or works on its own proof records
+            self.assertTrue("Read-only" in how or "proof row" in how or "this run's record" in how or "its own record" in how
+                            or "the owner confirms" in how or "their own address" in how, f"{pid}: {how}")
+
+    def test_the_readme_and_the_script_list_the_same_checks(self):
+        ids = re.findall(r"^\| (P\d+) \|", self.proof, re.M)
+        self.assertEqual(ids, [f"P{n}" for n in range(1, len(ids) + 1)])
+        self.assertGreaterEqual(len(ids), 12)
+        readme = read(PLUGIN / "README.md")
+        unproven = readme.split("- **Not yet proven live", 1)[1].split("\n", 1)[0]
+        self.assertEqual(sorted(set(re.findall(r"\bP\d+\b", unproven)), key=lambda x: int(x[1:])), ids)
 
 
 class ReachTheWorkAndKeepRunning(unittest.TestCase):

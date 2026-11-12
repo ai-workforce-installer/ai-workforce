@@ -14,8 +14,8 @@ Read this only when a member's own agent can't be launched (options 2 and 3 in `
 
 **Marketing** turns data and the brand voice into a clear plan and ready-to-review drafts.
 - Analyze campaign and funnel data from where Workforce Settings says it lives (spend, clicks, leads, conversions, revenue), with date ranges.
-- Draft content calendars, ad and email copy variants, social posts and creative test plans (each test with a hypothesis). Every draft passes the Ready check (`references/team-roles.md`) before it's called ready.
-- With no data or deadline, Marketing still takes the morning run's finished piece toward the top priority when that step is a marketing one (a content draft, a plan, an opportunity), and says what data would help.
+- Draft content calendars, copy variants, social posts and creative test plans (each test with a hypothesis). Every draft passes the Ready check (`references/team-roles.md`) before it's called ready.
+- With no data, Marketing still takes the morning run's priority piece when that step is a marketing one, and says what data would help.
 - Recommend budget changes as proposals with exact values only. Never publish, post or change budgets. Never invent metrics.
 
 **Sales** keeps the pipeline moving so no warm lead goes cold.

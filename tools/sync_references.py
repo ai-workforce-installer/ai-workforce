@@ -20,6 +20,7 @@ CANONICAL_HOME = {  # file -> skill folder that owns the original
     **{f: "assign-work" for f in ["if-asked-how-safe.md", "if-highlevel.md", "if-no-team-agents.md", "if-notification-missed.md",
        "if-old-task.md", "if-owner-corrects.md", "if-queuing-a-decision.md", "if-run-unfinished.md"]},
     **{f: "inbox-triage" for f in ["if-inbox-gap.md", "if-quick-look.md"]},
+    "if-proving-live.md": "workforce-self-test",   # the live acceptance script: only the self-test reads it
     **{f: "setup-workforce" for f in ["interview.md", "notion-schema.md", "page-templates.md"]},
     "scheduled-prompts.md": "schedule-workforce",
     "scheduled-run-rules.md": "schedule-workforce",

@@ -15,12 +15,11 @@ Read this only when the owner, in the chat, pushes back on something the team ra
 | "Ignore the launch emails until Friday." "Not this week." | **Temporary rule** | Saved with "until <date>"; stops applying after that date (the line stays, as history). |
 | "Sounds too formal." "I wouldn't sign it with my name." "That claim isn't accurate." "Use a stronger opening." | **Draft feedback** | Fix the current draft now; offer to save it as a lasting writing preference (section 6). |
 
-When it's not clear whether the owner means this item or a lasting rule, ask **one** short question that proposes the rule, rather than guessing: "Got it, I'll close AP-7. Should the team stop raising alerts about the old Northwind Make automations from now on (I'd still flag a new security problem)?" Never turn an ambiguous remark into a lasting rule.
+When it's not clear whether the owner means this item or a lasting rule, ask **one** short question that proposes the rule ("I'll close AP-7. Should the team stop raising alerts about the old Northwind automations from now on?"). Never turn an ambiguous remark into a lasting rule.
 
 ## 2. Confirm a lasting rule in one line
 
-Quote the exact words you'll save, what they cover, and what still gets through:
-"I'll save: 'Not my responsibility anymore: Northwind Studio, including its Make automations and their failure alerts (since Nov 6).' I'll still tell you about a new security problem or money leaving your accounts. I'll also close AP-4 and AP-9 about the same thing. OK?"
+Quote the exact words you'll save, what still gets through, and the related items you'd close: "I'll save: 'Not my responsibility anymore: Northwind Studio, including its automations and their failure alerts (since Nov 6).' I'll still tell you about a new security problem or money leaving your accounts. I'll also close AP-4 and AP-9. OK?"
 
 One yes covers the rule and the related items you listed. Save nothing before that yes. Scheduled runs never create or change rules: they apply the rules already saved and list anything that looks like a new correction under Questions for you.
 
@@ -52,7 +51,7 @@ Saving follows `manage-team` part A: fetch the page first, replace a placeholder
 
 - Only rows the team created, and only the ones the owner named or confirmed in the same yes (section 2). Never touch rows the owner created.
 - Add to Owner note and Result; never overwrite them. Never delete a row: closed rows leave the active queue and the Open work view but stay in the database as history.
-- Gmail drafts the team made for a closed item stay where they are; mention them once ("The draft reply is still in your Gmail drafts if you want it") and never delete them.
+- Gmail drafts the team made for a closed item stay where they are (mention them once); never delete them.
 - When this happens during an inbox run, also list the item's source key in that run's Handled list, so retries and overlapping windows don't raise it again.
 
 ## 6. Draft feedback: fix it now, offer to keep it

@@ -80,14 +80,14 @@ Rules:
 For each approved item, carry out exactly its Exact action, nothing more, one item at a time:
 - **Send message:** as "Sending on the owner's yes" says.
 - **Calendar with others:** on Google Calendar, create or change the event exactly as described, with the listed attendees. To decline an invitation the owner named, respond "no" to that event only, without a note unless the owner gave one, and never delete it. On Outlook or paste mode, give the owner the exact event details (title, date, time, attendees) to add themselves.
-- **Spend money, Financial record, Publish, Irreversible change (including deleting):** never perform these. Give the owner the exact steps to do it themselves.
-- **Other:** do it only if it is a reversible action Claude may take with the owner's yes and is not in the list above; otherwise give the owner the steps.
+- **Spend money, Financial record, Publish, Irreversible change (including deleting):** never perform these: give the owner the exact steps.
+- **Other:** only a reversible action Claude may take with the owner's yes; otherwise the steps.
 
 **Update each row** so it's clear who finished what:
 - **Done:** the team carried it out completely (the event exists, the reply went and has its receipt), the owner confirms they did their part ("I sent it"), or the owner acknowledged or already handled it (Owner note: their words).
 - **Handed to you:** the owner still has to do it personally: press Send on a checked draft, pay, publish, change a financial record. Put the exact steps or the draft's location in Owner note.
 - **Rejected:** the owner said no, or said it isn't theirs (Owner note: their words; any lasting rule per `references/if-owner-corrects.md`).
 - **Pending, investigating:** the owner asked the team to look into it; Owner note "Investigating: <Assignments task>". Bring it back with what was found.
-Set Decided to today and put the owner's words or any change in Owner note. Leave undecided items as Pending. If the Approvals database has no "Handed to you" option yet (older workspace), offer the upgrade in `references/brain-upgrades.md`; until then leave the item **Pending** and start Owner note with "Handed to you: <the step the owner still has to do>", and mark it Done only when the owner confirms. Never mark something Done that the owner hasn't finished.
+Set Decided to today and put the owner's words or any change in Owner note. Leave undecided items as Pending. Without a "Handed to you" option (older workspace), offer the upgrade in `references/brain-upgrades.md` and leave the item **Pending**, Owner note starting "Handed to you: <the step>". Never mark something Done that the owner hasn't finished.
 
 **Learn from changes.** Apply a change to the same draft (no new approval, no second draft). If the owner changed a draft in a way that would apply next time (tone, length, sign-off, a phrase, a rule), and especially if it's the second time, ask once (`references/if-owner-corrects.md` section 6): "Should <member> do it this way from now on?" On yes, save it with `manage-team` (part A).
