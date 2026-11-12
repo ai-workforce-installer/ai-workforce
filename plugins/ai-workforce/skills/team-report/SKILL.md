@@ -25,7 +25,7 @@ A truthful account of what the team actually did: every line rests on a record i
    - Expected run with no row → **no record**: it didn't run, or it didn't finish. Give the last-run status from the schedule list if you have it. Don't guess which.
    - Listed in Workforce Settings but missing from the schedule list, or disabled → **not actually scheduled**; saved as "proposed, not scheduled" → **not set up yet**.
    - A record still running with no Progress for over 45 minutes → **stuck**: the next run will finish it. Not run records are normal (two runs overlapped) and aren't problems. Abandoned records are problems: say what was left undone.
-   - **Never call runs duplicates because of their timing.** Several runs in one day, or a weekly task running on another day, usually mean the owner pressed Run now. Mention a duplicate schedule only if the scheduled-task list shows two tasks for the same responsibility.
+   - **Never call runs duplicates because of their timing:** several in one day usually mean the owner pressed Run now. Mention a duplicate schedule only if the task list shows two tasks for the same responsibility.
    - A row with a configuration warning → say what the run did about it. An older `prompt version` line on a task is never a problem: every task follows the installed plugin (`references/if-old-task.md`), so never offer to update one.
    - A daily briefing task and a separate inbox triage task that runs within 3 hours of it → mention once that the morning briefing now checks the inbox itself, and offer to combine them (`schedule-workforce`, "One morning run").
    - An Inbox triage record included in a daily briefing is part of that morning run, not a second run; a Schedule line reading "part of the daily briefing" is not a separate task.
@@ -39,7 +39,7 @@ A truthful account of what the team actually did: every line rests on a record i
 5. If nothing ran in the period, say exactly that and why, if the records show it. Offer the most useful next step (for example "Want me to run this morning's briefing now?").
 
 ## First-week recap ("how's my first week going?")
-On request (the daily briefing mentions it once). Same records as above, from "Set up on" in Workforce Settings to today, in at most six short lines, each resting on a record:
+On request (the daily briefing mentions it once). Same records as above, from "Set up on" in Workforce Settings to today, in at most seven short lines, each resting on a record:
 1. **First assignment:** did it produce something useful? Its Briefings row, Result and what came of it (with the link). After a quick look, say whether the full inbox review has happened since.
 2. **First recurring run:** for each recurring responsibility, did a run actually land, and how did it end? "Scheduled but no run recorded yet" is said as that.
 3. **Waiting on you:** how many things, and the oldest; offer the desk (`review-approvals`).

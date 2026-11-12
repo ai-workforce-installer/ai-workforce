@@ -504,6 +504,7 @@ class ReadWhenNeeded(unittest.TestCase):
         "if-proving-live.md": (None, None),             # 1.0.0: named only by the self-test's proof mode
         "if-numbers-missing.md": (None, None),          # 1.1.0: named by the jobs that need figures (below)
         "if-urgent-only.md": (None, None),              # 1.1.0: named by the inbox skill, for the optional afternoon check
+        "if-case.md": (None, None),                     # 1.1.0: named by the skills that meet a case or a deliverable
     }
 
     def test_every_file_says_when_to_read_it_and_something_sends_runs_there(self):
@@ -769,6 +770,51 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         for must in ["Open with where things stand, from its own pages, instead of restarting the questions",
                      '"Found your Business Brain: 3 apps connected, first job done. Carry on from here?"', "Then do only what is missing"]:
             self.assertIn(must, resuming)
+
+
+class CasesAndDeliverables(unittest.TestCase):
+    """1.1.0 step 6: a problem one reply can't settle is tracked to its resolution, a deliverable is finished
+    rather than started again each day, a meeting gets its follow-up, and work only the owner could do closes
+    when the team can see it happened."""
+    def setUp(self):
+        self.c = read(SizeBudget.ref("if-case.md"))
+        self.b = read(SKILLS / "daily-executive-briefing" / "SKILL.md")
+
+    def test_a_case_is_assembled_decided_once_and_tracked(self):
+        for must in ["**One row until it is resolved**", "Work type Customer case or Deliverable, with Done when",
+                     "assemble the thread, the policies that apply, the receipts and the documents the team can open",
+                     "prepare the answer or the resolution package", "name the one decision still missing as the owner's single choice",
+                     "Before any invoice reminder, re-check the payment or dispute as it stands now",
+                     "Research is not a fix: say what was found, never \"resolved\""]:
+            self.assertIn(must, self.c)
+
+    def test_a_deliverable_is_continued_and_usable_as_it_is(self):
+        for must in ["Continue the row and the page that exist; never start a new piece for the same thing",
+                     "a meeting brief with action items from the notes there are", "a comparison that ends in a recommendation",
+                     "a proposal from confirmed terms only", "an evidence packet with its sources", "a reconciliation that adds up",
+                     "finish every part that doesn't and leave their step as one sentence"]:
+            self.assertIn(must, self.c)
+        for must in ["First choice each morning: finish a commitment that is due, or continue a deliverable that already exists",
+                     "rather than start something new; nothing is made for a count"]:
+            self.assertIn(must, self.b)
+
+    def test_the_morning_after_a_meeting(self):
+        for must in ["**The morning after a meeting with another person,** look once for its notes or transcript in whatever is connected",
+                     "(a meeting recorder, Notion meeting notes, the calendar event, shared documents)",
+                     "draft the follow-up to the attendees, and add each action item to open work with an owner and a due date",
+                     "\"Paste a few notes from your call with <name> and I'll draft the follow-up.\"", "The meeting having passed closes nothing."]:
+            self.assertIn(must, self.b)
+        self.assertNotIn("Fathom", self.b)                       # whatever is connected, never one product by name
+
+    def test_handed_to_you_closes_on_evidence_the_team_can_read(self):
+        rt = read(REFS / "run-tracking.md")
+        self.assertIn("A **Handed to you** item closes the same way, on evidence the team can read and never by doing the step itself", rt)
+        self.assertIn("a later \"payment succeeded\" from the same vendor for the same amount closes a failed-payment item", rt)
+
+    def test_the_skills_that_meet_one_point_to_it(self):
+        for sk in ["daily-executive-briefing", "process-customer-inquiries", "assign-work"]:
+            self.assertIn("`references/if-case.md`", read(SKILLS / sk / "SKILL.md"), sk)
+        self.assertEqual(len(list(SKILLS.glob("*/SKILL.md"))), 13)             # no new skill: existing skills and roles are reused
 
 
 class AnOptionalUrgentOnlyCheck(unittest.TestCase):

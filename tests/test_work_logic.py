@@ -661,6 +661,59 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         self.assertTrue(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 2}))
 
 
+class CasesAndDeliverables(unittest.TestCase):
+    """1.1.0 step 6."""
+    def setUp(self):
+        self.clock, self.q = monday_morning(), w.Queue()
+
+    def test_an_existing_deliverable_is_finished_rather_than_replaced(self):
+        first, existed = w.continue_deliverable(self.q, "deliverable:acme:proposal", "Proposal for Acme", self.clock.now())
+        self.assertFalse(existed)
+        self.clock.advance(days=1)
+        again, existed = w.continue_deliverable(self.q, "deliverable:acme:proposal", "Proposal for Acme", self.clock.now())
+        self.assertTrue(existed)
+        self.assertIs(again, first)
+        self.assertEqual(len(self.q.open_rows()), 1)                       # day two continued it; no second generic piece
+
+    def test_the_priority_piece_prefers_due_commitments_then_existing_deliverables(self):
+        self.assertEqual(w.priority_choice(["send Acme the proposal"], ["bookkeeper comparison"], "announcement email"), ("finish", "send Acme the proposal"))
+        self.assertEqual(w.priority_choice([], ["bookkeeper comparison"], "announcement email"), ("continue", "bookkeeper comparison"))
+        self.assertEqual(w.priority_choice([], [], "announcement email"), ("new", "announcement email"))
+        self.assertEqual(w.priority_choice([], [], None), (None, None))    # nothing is manufactured for a count
+
+    def test_the_morning_after_a_meeting_with_notes(self):
+        notes = {"action_items": [{"what": "send-proposal", "owner": "owner", "due": self.clock.local_time(2026, 3, 6, 17, 0)},
+                                  {"what": "intro-venue", "owner": "owner"}]}
+        draft, rows, ask = w.after_meeting(self.q, self.clock, {"date": "2026-03-02", "with": "Acme"}, notes)
+        self.assertEqual((draft, ask), ("Follow-up to Acme: 2 action items", None))
+        self.assertEqual([r.owner for r in rows], ["owner", "owner"])
+        self.assertIsNotNone(rows[0].due)                                  # the date the notes gave
+        self.assertIsNone(rows[1].due)                                     # none given: no invented date...
+        self.assertTrue(rows[1].check_is_suggested)                        # ...a suggested check instead
+        self.assertEqual(len({r.key for r in rows}), 2)                    # two promises stay two
+
+    def test_without_notes_it_asks_in_one_line_and_closes_nothing(self):
+        draft, rows, ask = w.after_meeting(self.q, self.clock, {"date": "2026-03-02", "with": "Acme"}, None)
+        self.assertEqual((draft, rows), (None, []))
+        self.assertEqual(ask, "Paste a few notes from your call with Acme and I'll draft the follow-up.")
+
+    def test_a_handed_item_closes_only_on_matching_evidence(self):
+        row = w.Row("alert:hostco:failed-payment", "Update the card for HostCo", status="Handed to you", vendor="HostCo", amount=29.0)
+        row.latest = self.clock.now()
+        later = self.clock.now() + timedelta(hours=5)
+        other_amount = [{"id": "m1", "kind": "payment succeeded", "vendor": "HostCo", "amount": 9.0, "at": later}]
+        other_vendor = [{"id": "m2", "kind": "payment succeeded", "vendor": "PrintHub", "amount": 29.0, "at": later}]
+        self.assertFalse(w.handed_item_closes(row, other_amount + other_vendor, self.clock))
+        self.assertEqual(row.status, "Handed to you")
+        match = [{"id": "m3", "kind": "payment succeeded", "vendor": "HostCo", "amount": 29.0, "at": later}]
+        self.assertTrue(w.handed_item_closes(row, match, self.clock))
+        self.assertEqual((row.closed_as, row.evidence), ("Completed", "m3"))
+
+    def test_research_is_not_a_fix(self):
+        self.assertEqual(w.case_status(research_done=True, outcome_seen=False), "Researched: answer prepared, not resolved")
+        self.assertEqual(w.case_status(research_done=True, outcome_seen=True), "Resolved")
+
+
 class UrgentOnlyCheck(unittest.TestCase):
     """1.1.0 step 13."""
     def setUp(self):

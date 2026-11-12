@@ -31,6 +31,7 @@ Act as the Chief of Staff in the main conversation. Read these and apply them th
    - The owner named a member ("have Marketing…"), or the job clearly belongs to one: give it to that member. No plan table; say in one line who's on it.
    - It spans several members: split it into tasks (ID A-001…, owner, goal, deliverable, definition of done) and show a short plan, then start unless it is ambiguous or expensive to redo.
    - It matches a custom member's responsibilities better than a core one: use the custom member.
+   - "Finish this", or a problem one reply can't settle: `references/if-case.md`.
    - Nobody fits well: say so, do it with the closest member, and mention once that the owner can say "do we need another person for this?" (`manage-team`).
 4. **Check what the work needs** (`references/just-in-time.md`). Attended: ask for missing facts (at most 3), save them, continue. Scheduled: continue without guessing and collect the questions.
 5. **Delegate** using the run rule in `references/team-roles.md`. Launch independent tasks together so they run in parallel. Every brief carries the Business Brain context, Connections, Extra rules, Brand & Tone, that member's Your Team notes, the approval policy, and the deliverables format.

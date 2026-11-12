@@ -104,6 +104,8 @@ class Row:
     asked_once: bool = False
     said_cant_tell: bool = False
     owner_created: bool = False
+    vendor: str = ""
+    amount: float = 0.0
 
     @property
     def open(self):
@@ -909,3 +911,52 @@ def urgent_only_check(threads, bookmark, now, queue, enabled=True, not_the_owner
     record["notified"] = "requested" if urgent else "not requested (nothing urgent)"
     notification = ("Urgent: " + "; ".join(t["subject"] for t, _ in urgent)) if urgent else None
     return {"record": record, "rows": rows, "notification": notification}
+
+
+# ---- 1.1.0 step 6: cases and deliverables (references/if-case.md; the briefing's due-work step) ----
+
+def continue_deliverable(queue, key, title, now):
+    """"Finish this" continues the row that exists. A new generic piece each day is the failure this prevents."""
+    row = queue.record(key, title, now, work_type="Deliverable")
+    return row, row.count > 1                         # (the one row, whether it already existed)
+
+
+def priority_choice(due_commitments, open_deliverables, next_goal_step):
+    """The morning's one piece: a due commitment first, then a deliverable that exists, then a new step.
+    Nothing is made for a count: with none of the three, there is no piece."""
+    if due_commitments:
+        return "finish", due_commitments[0]
+    if open_deliverables:
+        return "continue", open_deliverables[0]
+    return ("new", next_goal_step) if next_goal_step else (None, None)
+
+
+def after_meeting(queue, clock, meeting, notes=None):
+    """The morning after a meeting with another person. Returns (follow-up draft or None, rows added, what to ask)."""
+    if not notes:
+        return None, [], "Paste a few notes from your call with %s and I'll draft the follow-up." % meeting["with"]
+    rows = []
+    for item in notes["action_items"]:
+        row = queue.record("meeting:%s:%s:%s" % (meeting["date"], meeting["with"].lower(), item["what"]), item["what"], clock.now(),
+                           work_type="Commitment", owner=item["owner"])
+        row.due = item.get("due")                     # a date only when the notes give one
+        if row.due is None:
+            set_next_check(row, clock)                # otherwise a suggested check, called that
+        rows.append(row)
+    return "Follow-up to %s: %d action items" % (meeting["with"], len(rows)), rows, None
+
+
+def handed_item_closes(row, messages, clock):
+    """A Handed to you item closes on matching evidence the team can read, never by doing the step itself."""
+    if row.status != "Handed to you":
+        return False
+    for m in messages:
+        if m["kind"] == "payment succeeded" and m["vendor"] == row.vendor and m["amount"] == row.amount and m["at"] > row.latest:
+            _close(row, "Completed", clock.now(), evidence=m["id"])
+            return True
+    return False
+
+
+def case_status(research_done, outcome_seen):
+    """Research is not a fix."""
+    return "Resolved" if outcome_seen else ("Researched: answer prepared, not resolved" if research_done else "Open")
