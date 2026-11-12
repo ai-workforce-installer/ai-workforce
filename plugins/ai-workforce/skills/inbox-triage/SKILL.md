@@ -19,6 +19,8 @@ Follow `references/inbox-coverage.md` (how to search, sort and count), `referenc
 
 **Quick look:** when the owner asks for one at any time ("just check my newest 20 emails", "anything new since lunch"), or `first-team-meeting` asks for one during setup, follow `references/if-quick-look.md` instead of the full window: its own record labelled a quick look, bookmark not moved, never said to cover the whole inbox, the full check offered in one line. Every other run, attended or scheduled, is the full triage below.
 
+**Urgent-only check:** a recurring task whose Owner's additions begin `Urgent-only check`, or the owner asking "anything urgent?", follows `references/if-urgent-only.md` instead: subjects only, nothing drafted, bookmark not moved, a notification only when something is urgent.
+
 ## Steps
 
 1. **Pick the run mode and start the run record** (`references/run-modes.md`, `references/run-tracking.md`): Run ID, Source, and whether this is a new run, an interrupted one to finish, or an overlap to skip. Set the window from the checkpoint (`references/inbox-coverage.md` section 1).

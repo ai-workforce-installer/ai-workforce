@@ -503,6 +503,7 @@ class ReadWhenNeeded(unittest.TestCase):
         "if-quick-look.md": (None, None),               # named by the skills that run a quick look
         "if-proving-live.md": (None, None),             # 1.0.0: named only by the self-test's proof mode
         "if-numbers-missing.md": (None, None),          # 1.1.0: named by the jobs that need figures (below)
+        "if-urgent-only.md": (None, None),              # 1.1.0: named by the inbox skill, for the optional afternoon check
     }
 
     def test_every_file_says_when_to_read_it_and_something_sends_runs_there(self):
@@ -768,6 +769,38 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         for must in ["Open with where things stand, from its own pages, instead of restarting the questions",
                      '"Found your Business Brain: 3 apps connected, first job done. Carry on from here?"', "Then do only what is missing"]:
             self.assertIn(must, resuming)
+
+
+class AnOptionalUrgentOnlyCheck(unittest.TestCase):
+    """1.1.0 step 13: off by default. A mid-afternoon look at subjects for emergencies only: it drafts nothing,
+    leaves the bookmark alone and notifies only when something is urgent."""
+    def setUp(self):
+        self.t = read(SizeBudget.ref("if-urgent-only.md"))
+
+    def test_what_it_does_and_does_not_do(self):
+        for must in ["off unless the owner turned it on", "It is not a triage: the morning run still reviews everything",
+                     "**Window:** from the inbox bookmark to now. The bookmark is not moved.", "**Senders, subjects and previews only,**",
+                     "a security alert, a failed payment, an outage or failure the business relies on, a deadline within 48 hours",
+                     "**Draft nothing and queue no decision.**", "**Notify only when something is urgent:**",
+                     "`Notified: not requested (nothing urgent)`, and stay quiet", "`Coverage: urgent-only`",
+                     "`Completed through: not moved (urgent-only check)`", "The owner's corrections"]:
+            self.assertIn(must, self.t)
+
+    def test_it_is_off_by_default_offered_once_and_uses_the_existing_task_block(self):
+        triage = read(SKILLS / "inbox-triage" / "SKILL.md")
+        self.assertIn("**Urgent-only check:** a recurring task whose Owner's additions begin `Urgent-only check`", triage)
+        self.assertIn("`references/if-urgent-only.md`", triage)
+        sw = read(SKILLS / "schedule-workforce" / "SKILL.md")
+        for must in ["Urgent-only check: off by default and never in the default set", "says yes to its one offer",
+                     "create one more task from the Inbox triage block for mid-afternoon", "`Owner's additions:` reading `Urgent-only check.`"]:
+            self.assertIn(must, sw)
+        recap = read(SKILLS / "team-report" / "SKILL.md").split("## First-week recap")[1]
+        self.assertIn("If the records show an urgent item that arrived after a morning run, offer once instead", recap)
+        self.assertIn("so it isn't offered twice", recap)
+        # No new stored block: the five blocks a task can store are as they were.
+        blocks = re.findall(r"```\n(.*?)```", read(SKILLS / "schedule-workforce" / "references" / "scheduled-prompts.md"), re.S)
+        self.assertEqual(len(blocks), 5)
+        self.assertFalse([b for b in blocks if "Urgent-only" in b])
 
 
 class ASmallerInbox(unittest.TestCase):

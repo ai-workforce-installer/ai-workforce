@@ -44,7 +44,7 @@ On request (the daily briefing mentions it once). Same records as above, from "S
 2. **First recurring run:** for each recurring responsibility, did a run actually land, and how did it end? "Scheduled but no run recorded yet" is said as that.
 3. **Waiting on you:** how many things, and the oldest; offer the desk (`review-approvals`).
 4. **What the team has learned:** the preferences and corrections saved so far (Brand & Tone, Your Team notes, Priorities). If none, ask the one question that would help most ("How do you usually sign off?").
-5. **One thing to hand off next:** one suggestion grounded in what the team saw, with an offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled).
+5. **One thing to hand off next:** one suggestion grounded in what the team saw, with an offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled). If the records show an urgent item that arrived after a morning run, offer once instead (noted under Suggestions on Your Team, so it isn't offered twice): "Want a quick afternoon check for emergencies only? It reads subjects, drafts nothing and stays quiet unless something is urgent."
 6. **In one line:** what the team did this week (counts, from the records).
 7. **Version:** "You're on AI Workforce 1.0.0. To update: Customize → Plugins if you installed it from the marketplace; if you uploaded a file, upload the new one (a file never updates itself)." Said here and in the self-test only, never in a daily briefing.
 Nothing here creates tasks, approvals or notifications; anything the owner agrees to is done by the skill named.

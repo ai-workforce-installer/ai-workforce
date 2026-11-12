@@ -661,6 +661,49 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         self.assertTrue(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 2}))
 
 
+class UrgentOnlyCheck(unittest.TestCase):
+    """1.1.0 step 13."""
+    def setUp(self):
+        self.clock, self.q = monday_morning(), w.Queue()
+        self.bookmark = self.clock.now()
+        self.clock.advance(hours=7)                                   # mid-afternoon
+        def mail(i, subject, hours_after, sender="news@example.com"):
+            return {"id": "m%d" % i, "from": sender, "subject": subject, "at": self.bookmark + timedelta(hours=hours_after)}
+        self.mail = mail
+        self.quiet = [mail(1, "5 ideas for better one-on-ones", 1), mail(2, "Your receipt from PrintHub", 2), mail(3, "Lunch on Friday?", 3)]
+
+    def test_it_is_off_unless_the_owner_turned_it_on(self):
+        self.assertIsNone(w.urgent_only_check(self.quiet, self.bookmark, self.clock.now(), self.q, enabled=False))
+
+    def test_a_day_with_nothing_urgent_is_one_quiet_record(self):
+        out = w.urgent_only_check(self.quiet, self.bookmark, self.clock.now(), self.q)
+        self.assertIsNone(out["notification"])                        # silent
+        self.assertEqual(out["record"]["line"], "Urgent-only check: nothing urgent in 3 emails")
+        self.assertEqual(out["record"]["notified"], "not requested (nothing urgent)")
+        self.assertEqual((out["rows"], out["record"]["drafts"]), ([], 0))
+
+    def test_a_failed_payment_notifies_once_and_drafts_nothing(self):
+        mail = self.quiet + [self.mail(4, "Payment failed for your subscription", 5, "billing@host.example")]
+        out = w.urgent_only_check(mail, self.bookmark, self.clock.now(), self.q)
+        self.assertEqual(out["notification"], "Urgent: Payment failed for your subscription")
+        self.assertEqual(len(out["rows"]), 1)                         # one open-work row for the morning run
+        self.assertEqual(out["record"]["drafts"], 0)
+        again = w.urgent_only_check(mail, self.bookmark, self.clock.now(), self.q)     # a second look the same afternoon
+        self.assertEqual(len(self.q.open_rows()), 1)                  # the same row, updated, not a second one
+        self.assertIs(again["rows"][0], out["rows"][0])
+
+    def test_the_bookmark_is_never_moved(self):
+        out = w.urgent_only_check(self.quiet, self.bookmark, self.clock.now(), self.q)
+        self.assertEqual(out["record"]["completed_through"], self.bookmark)
+        self.assertEqual(out["record"]["coverage"], "urgent-only")
+
+    def test_mail_before_the_bookmark_and_what_the_owner_ruled_out_are_left_alone(self):
+        old = self.mail(5, "Payment failed for your subscription", -3, "billing@host.example")
+        ruled_out = self.mail(6, "Northwind lead sync failed again", 2, "alerts@flow.example")
+        out = w.urgent_only_check([old, ruled_out], self.bookmark, self.clock.now(), self.q, not_the_owners=("northwind",))
+        self.assertIsNone(out["notification"])
+
+
 class ASmallerInbox(unittest.TestCase):
     """1.1.0 step 9."""
     def test_labels_follow_the_row_and_come_off_when_it_closes(self):

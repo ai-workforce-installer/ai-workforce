@@ -875,3 +875,37 @@ def archive_card(routine, in_inbox, open_row_threads=()):
 def archive_on_tap(card_ids, tapped, owner_present=True):
     """Archived only on that tap, only with the owner there, and only the ids the card held."""
     return list(card_ids) if (tapped and owner_present) else []
+
+
+# ---- 1.1.0 step 13: an optional urgent-only check (references/if-urgent-only.md) ----
+
+URGENT_WORDS = (("security alert", ("new sign-in", "password reset", "suspicious", "security alert")),
+                ("failed payment", ("payment failed", "failed payment", "card was declined", "could not be charged")),
+                ("outage or failure", ("outage", "is down", "failed again", "service disruption")),
+                ("deadline within 48 hours", ("due tomorrow", "expires today", "final notice", "ends tonight")))
+
+
+def urgent_only_check(threads, bookmark, now, queue, enabled=True, not_the_owners=()):
+    """Subjects only, from the bookmark to now. Returns what the run did: the bookmark it leaves, the rows it
+    made or updated, drafts (always none), and the one notification it sends, or None when it stays quiet."""
+    if not enabled:
+        return None                                   # off by default: nothing runs
+    seen, urgent = 0, []
+    for t in threads:
+        if not (bookmark < t["at"] <= now):
+            continue
+        seen += 1
+        subject = t["subject"].lower()
+        if any(name in subject for name in not_the_owners):
+            continue                                  # the owner's corrections apply as always
+        for kind, words in URGENT_WORDS:
+            if any(wd in subject for wd in words):
+                urgent.append((t, kind))
+                break
+    rows = [queue.record("alert:%s:%s" % (t["from"], kind), t["subject"], t["at"], work_type="Monitored issue", source=t["id"])
+            for t, kind in urgent]
+    record = {"coverage": "urgent-only", "completed_through": bookmark, "drafts": 0,
+              "line": "Urgent-only check: %s in %d emails" % ("%d urgent" % len(urgent) if urgent else "nothing urgent", seen)}
+    record["notified"] = "requested" if urgent else "not requested (nothing urgent)"
+    notification = ("Urgent: " + "; ".join(t["subject"] for t, _ in urgent)) if urgent else None
+    return {"record": record, "rows": rows, "notification": notification}
