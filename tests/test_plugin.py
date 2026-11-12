@@ -818,6 +818,11 @@ class TheDeskAndSending(unittest.TestCase):
                      "The desk never searches the inbox"]:
             self.assertIn(must, self.ra)
 
+    def test_a_snoozed_row_stays_off_the_desk_and_says_it_is_snoozed(self):
+        """Every waiting row has a next check, so the date alone can't say which rows to hold back."""
+        self.assertIn("A snoozed row isn't on the desk until its time.", self.ra)
+        self.assertIn('"Snoozed until <when>" at the start of Next action; it returns then, and not before', self.ra)
+
     def test_send_means_exactly_what_was_shown_once(self):
         for must in ["## Sending on the owner's yes", "sends exactly that, once", "**Re-read right before sending:**",
                      "the owner's own edit counts", "wait for a fresh yes", "as a reply in the same thread",

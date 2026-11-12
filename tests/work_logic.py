@@ -201,10 +201,23 @@ def wait_on(row, who, clock, until=None, blocker=""):
     return set_next_check(row, clock, until)
 
 
+SNOOZED = "Snoozed until"
+
+
 def snooze(row, until_utc):
-    """Snoozing keeps the status; the row simply returns at its next check."""
+    """Snoozing keeps the status; the row simply returns at its next check. Its Next action says it is snoozed,
+    because every waiting row has a next check and only this one should stay off the desk until then."""
     row.next_check, row.check_is_suggested = until_utc, False
+    if not row.next_action.startswith(SNOOZED):
+        row.next_action = (SNOOZED + "; then: " + row.next_action).rstrip(": ").rstrip(";")
     return row
+
+
+def on_the_desk(queue, clock):
+    """Open rows waiting on the owner, without the ones snoozed to a time that hasn't come.
+    A suggested next check (when the team looks again) never hides a row: only a snooze does."""
+    return [r for r in queue.open_rows() if r.next_move == "owner"
+            and not (r.next_action.startswith(SNOOZED) and r.next_check and r.next_check > clock.now())]
 
 
 def input_arrived(row):

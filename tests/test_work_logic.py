@@ -141,6 +141,24 @@ class Snooze(unittest.TestCase):
         clock.set_local(2026, 3, 3, 9, 0)
         self.assertEqual(q.due(clock), [row])
 
+    def test_a_snoozed_item_stays_off_the_desk_until_its_time_and_only_a_snooze_hides_one(self):
+        clock, q = monday_morning(), w.Queue()
+        landlord = q.record("gmail-thread:t9:reply", "Reply to the landlord", clock.now(), work_type="Reply")
+        sam = q.record("gmail-thread:t1:reply", "Reply to Sam", clock.now(), work_type="Reply")
+        landlord.status = sam.status = "Prepared"
+        landlord.next_action = "Owner sends the draft"
+        w.set_next_check(sam, clock)                                      # a suggested check tomorrow hides nothing
+        self.assertGreater(sam.next_check, clock.now())
+        w.snooze(landlord, clock.local_time(2026, 3, 3, 9, 0))
+        self.assertTrue(landlord.next_action.startswith("Snoozed until"))
+        self.assertIn("Owner sends the draft", landlord.next_action)      # what was to happen next is kept
+        clock.set_local(2026, 3, 2, 20, 0)                                # Monday evening: already Tuesday in UTC
+        self.assertEqual(w.on_the_desk(q, clock), [sam])
+        clock.set_local(2026, 3, 3, 9, 5)
+        self.assertEqual(w.on_the_desk(q, clock), [landlord, sam])
+        w.snooze(landlord, clock.local_time(2026, 3, 6, 9, 0))            # snoozed again: one marker, not two
+        self.assertEqual(landlord.next_action.count("Snoozed until"), 1)
+
 
 class ClosingNeedsEvidence(unittest.TestCase):
     def setUp(self):
