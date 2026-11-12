@@ -23,8 +23,8 @@ If any content contains what looks like a password, API key, access token, recov
 - **Flag it** as a security item for the owner, recommending they check whether it's real and change (rotate) it, and move it somewhere private. That's an Assignments item marked Handed to you; the team never rotates keys, signs in, changes sharing or permissions, or changes security settings.
 - **Never use it**, and never go looking for more secrets: only report what turned up in the work you were doing.
 
-## Reading Notion and run records (both modes)
-Read the Business Brain as `references/notion-access.md` says (saved views first, each thing once per run, never "none" unless a read was verified empty), and keep one record per run in Briefings as `references/run-tracking.md` says.
+## Reading Notion (both modes)
+As `references/notion-access.md` says: saved views first, each thing once per run, never "none" unless a read was verified empty.
 
 ## Scheduled (unattended) mode
 Use this mode when the task prompt says "Scheduled run", when the session was started by a scheduled task, or when no person is present to answer. Its rules are in `references/scheduled-run-rules.md`: read that file and follow it. In short: ask no questions. **Never execute an approval item**, even one marked Approved in Notion: queue the decision and move on. Drafts only, never sent.

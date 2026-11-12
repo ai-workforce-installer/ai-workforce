@@ -1,6 +1,6 @@
 # Connections: how the team works with whatever apps the owner uses
 
-Notion is the only required app. Email, calendar and files each have three paths, and every skill and manager must work on all of them. A missing app never stops a run: the team falls back to paste mode, says so under Verification, and carries on.
+Notion is the only required app. Email, calendar and files each have three paths, and every skill and manager must work on all of them. A missing app never stops a run: if the chosen app's tools are missing or a call fails twice, use the paste-mode row for that job, report "<app> unavailable, used Paste Box" under Verification, and set the Result to Partial (not Failed) if anything was skipped.
 
 ## Where the owner's choices live
 
@@ -51,7 +51,3 @@ Google Drive: search and read Drive. OneDrive: Microsoft 365 search (`sharepoint
 ## Customer messages in HighLevel (optional)
 
 Some owners talk to customers through HighLevel. If the Customer messages line is plain `HighLevel`, or HighLevel tools are connected and working while that line is still not set, follow `references/if-highlevel.md`. In short: runs only read HighLevel (the one thing ever sent there is a reply the owner said yes to on the desk), its replies go under Replies ready to copy, and a HighLevel that was connected but can't be reached is reported as "HighLevel unavailable" with the Result Partial.
-
-## When the chosen app is unavailable at run time
-
-Try the owner's chosen app first. If its tools are missing or a call fails twice, use the paste-mode row for that job, report "<app> unavailable, used Paste Box" under Verification, and set the run's Result to Partial (not Failed) if anything was skipped.

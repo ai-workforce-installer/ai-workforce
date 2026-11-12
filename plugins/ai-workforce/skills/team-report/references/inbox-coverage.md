@@ -4,7 +4,7 @@ General inbox triage reviews **all** the owner's email for a window, not just cu
 
 ## 1. The window and the checkpoint
 
-The team keeps one bookmark: **Completed through**, the time up to which every message has been found and sorted. Follow-up work still to do is kept in the open-work queue. It lives in the run record (`references/run-tracking.md`): the `Completed through` property if the Briefings database has it, otherwise the "Completed through:" line at the end of the body.
+The team keeps one bookmark: **Completed through**, the time up to which every message has been found and sorted. It lives in the run record (`references/run-tracking.md`): the `Completed through` property if the Briefings database has it, otherwise the "Completed through:" line at the end of the body.
 
 - **Start:** the newest **Completed through** among finished Inbox triage records with an IT Run ID (read the property first, then the body line), minus a 15-minute overlap (messages already handled are skipped by their ID, below). No record has one yet (records from before 0.5.0): the end of the Window line of the newest older Inbox triage record whose Coverage says comprehensive. None of those either: the last 24 hours (on Monday, since Friday 00:00), or the start of the earliest quick look's window if that is earlier, and say "Earlier mail not scanned by the team: first run of the bookmark". Customer support triage records never count. Attended runs may use the period the owner asks for instead.
 - **End:** when this run started.
@@ -107,4 +107,4 @@ Count **threads**, not messages, everywhere in the report. Buckets are mutually 
 
 ## 6. Saying it precisely
 
-"No customer emails visible in Gmail" is not "nothing to do" or "inbox clear": report what was found in every bucket, name any place customer email lives that the team can't reach ("Customer support: none visible in Gmail. Not checked: <place>"), and never say a source was checked unless it was searched in this run.
+"No customer emails visible in Gmail" is not "nothing to do" or "inbox clear": report every bucket, name any place customer email lives that the team can't reach ("Customer support: none visible in Gmail. Not checked: <place>"), and never call a source checked unless this run searched it.
