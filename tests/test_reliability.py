@@ -226,15 +226,19 @@ class SetupAndRepair(unittest.TestCase):
         self.assertTrue(complete)                         # ...but the missing view is still repaired
         self.assertEqual(report["added"], ["Approvals/Active approvals"])
 
-    def test_old_workspace_runs_upgrade_sections_before_the_version_moves(self):
+    def test_old_workspace_gets_earlier_additions_from_the_structure_check_and_runs_the_sections_that_have_steps(self):
+        """1.1.0: what 0.4.0 to 0.6.0 added is in the schema, so the structure check adds it (the views below);
+        only sections from 1.0.0 on still have steps of their own, and they run before the version moves."""
         w = {"version": "0.4.0", "dbs": set(REQUIRED_DBS), "views": {}}
         sections = []
-        update_my_team_workspace(w, sections_run=sections)
-        self.assertEqual(sections, ["0.5.0", "0.5.1", "0.5.2", "0.6.0"])
+        complete, report = update_my_team_workspace(w, sections_run=sections)
+        self.assertEqual(sections, ["1.0.0"])
+        self.assertEqual(sorted(report["added"]), sorted(f"{db}/{name}" for db, (name, _) in STANDARD_VIEWS.items()))
         w2 = {"version": "setup in progress", "dbs": set(), "views": {}}
         sections = []
-        update_my_team_workspace(w2, sections_run=sections)
-        self.assertEqual(sections, ["0.4.0", "0.5.0", "0.5.1", "0.5.2", "0.6.0"])
+        complete, report = update_my_team_workspace(w2, sections_run=sections)
+        self.assertEqual(sections, ["1.0.0"])
+        self.assertTrue(set(REQUIRED_DBS) <= set(report["added"]))
 
     def test_repeated_repair_changes_nothing(self):
         w = self.fresh(); check_and_repair(w)

@@ -28,34 +28,8 @@ Runs after any upgrade sections that are due (the version line reaches the lates
 
 A version line of "setup in progress", or a missing line, means the upgrades and the structure check haven't finished: offer them when attended, mention it once when scheduled.
 
-## Upgrade to 0.4.0
-1. **Your Team page.** If the Business Brain has no child page titled "Your Team", create it (icon 👥) from the Your Team template.
-2. **Work to hand off.** If Priorities has no "Work I'd like to hand off" heading, append that section from the Priorities template at the end of the page.
-3. **Handed to you.** If the Approvals Status property has no "Handed to you" option, add it (blue), keeping every existing option.
-4. **Version line.** If Workforce Settings has no "About this workspace" heading, append it from the Workforce Settings template; otherwise replace the existing `Business Brain version` line. It ends as `- Business Brain version: 0.4.0`.
-
-## Upgrade to 0.5.0 (run tracking fields; runs work without them)
-1. **Briefings properties.** Add any that are missing: `Run ID` (text), `Started`, `Finished` and `Completed through` (dates).
-2. **Options.** Add `Unknown` (gray) to Run type in Briefings and in Assignments, and `Running` (blue) to Briefings' Result, if missing, sending every existing option with them.
-3. **Version line:** `- Business Brain version: 0.5.0`.
-
-## Upgrade to 0.5.1 (open work in Assignments; runs work without it)
-1. **Assignments options.** Add `Prepared` (purple), `Handed to you` (orange) and `Blocked` (brown) to Status if missing, sending every existing option with them.
-2. **Assignments properties.** Add `Source` (text) and `Next action` (text) if missing.
-3. **Version line:** `- Business Brain version: 0.5.1`.
-
-## Upgrade to 0.5.2 (saved views, which keep working on Notion's free plan when its query allowance runs out)
-1. Fetch each database to see its views. For each view below that **doesn't exist yet by that name**, create it as a table view with the notion-create-view tool (`database_id` = the database, `data_source_id` = its collection, `configure` = the line below). If one with that name exists, leave it as it is, even if its filter differs (runs check a view's filter before using it). After creating, fetch the database again and check each new view is there with that filter and sort.
-   - Approvals → "Active approvals": `FILTER "Status" IN ("Pending", "Approved", "Handed to you"); SORT BY "AP" ASC`. On a workspace without the "Handed to you" option, leave that value out.
-   - Assignments → "Open work": `FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC`, leaving out options the database doesn't have.
-   - Briefings → "Newest first": `SORT BY "Date" DESC` (only if missing).
-   - Pricing & Offers → "Active offers": `FILTER "Active" = TRUE; SORT BY "Offer" ASC`.
-   - Customers & Leads → "All contacts": `SORT BY "Last contact" DESC`.
-2. **Version line.** Only when every view above exists (created now or already there), set `- Business Brain version: 0.5.2`. If any step failed, leave the version line as it was, say which step failed, and the upgrade can simply be run again.
-
-## Upgrade to 0.6.0 (a place for the owner's corrections, `references/owner-corrections.md`)
-1. **Priorities sections.** Fetch Priorities. If it has no "Always worth my attention" heading, append that section from the Priorities template at the end of the page. Then, if it has no "Not my responsibility anymore" heading, append that section the same way.
-2. **Version line.** Only when both headings are there, set `- Business Brain version: 0.6.0`. If Priorities couldn't be read or written, leave the version line as it was and say which step didn't finish.
+## Upgrades before 1.0.0 (0.4.0, 0.5.0, 0.5.1, 0.5.2, 0.6.0)
+Everything those versions added is in `references/notion-schema.md` and the page templates today, so the structure check above adds whatever an older workspace is missing and they have no steps of their own: the Your Team page and the About this workspace section; the Priorities headings; the Briefings run fields; the `Unknown`, `Running`, `Prepared`, `Handed to you` and `Blocked` options (every existing option sent with them); `Source` and `Next action` on Assignments; and the five saved views, which keep working on Notion's free plan when its query allowance runs out (Approvals "Active approvals", Assignments "Open work", Briefings "Newest first", Pricing & Offers "Active offers", Customers & Leads "All contacts"). A missing view is created as a table view with the notion-create-view tool (`database_id` = the database, `data_source_id` = its collection, `configure` = that view's line in the schema, leaving out of a filter any option the database doesn't have); then fetch the database again and check each new view is there with that filter and sort. Runs work without any of this.
 
 ## Upgrade to 1.0.0 (open work tracked to a verified outcome)
 Nothing existing changes: no status option, view, row or schedule is touched, and runs work without these fields (they keep the same facts in each row's text). Every step adds only what is missing, so an interrupted upgrade simply carries on when it is run again.

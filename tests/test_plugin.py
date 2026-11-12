@@ -1313,7 +1313,7 @@ class FreePlanAndEfficiency(unittest.TestCase):
         for v in ["Active approvals", "Open work", "Newest first", "Active offers", "All contacts"]:
             self.assertIn(v, up)
             self.assertIn(v, read(SKILLS / "setup-workforce" / "references" / "notion-schema.md"))
-        self.assertIn("leave it as it is", up)
+        self.assertIn("leave it exactly as it is", up)
 
     def test_unfinished_work_never_closed_by_age(self):
         rt = read(REFS / "run-tracking.md")
@@ -1382,8 +1382,10 @@ class FreePlanAndEfficiency(unittest.TestCase):
 
     def test_view_upgrade_verifies_before_version_bump(self):
         up = read(REFS / "brain-upgrades.md")
-        self.assertIn("Only when every view above exists", up)
+        # 1.1.0 folded the 0.4.0-0.6.0 sections into the structure check, which already compared with the schema.
+        self.assertIn("only when nothing required is missing and every upgrade section that was due finished", up)
         self.assertIn("check each new view is there with that filter and sort", up)
+        self.assertIn("so the structure check above adds whatever an older workspace is missing", up)
 
     def test_readme_separates_enforced_tested_and_unproven(self):
         r = read(PLUGIN / "README.md")
@@ -1445,8 +1447,9 @@ class LearningRules(unittest.TestCase):
         for h in ["## Always worth my attention", "## Not my responsibility anymore", "- Set up on: _not set_"]:
             self.assertIn(h, pt)
         up = read(REFS / "brain-upgrades.md")
-        self.assertIn("## Upgrade to 0.6.0", up)
-        self.assertIn("Only when both headings are there", up)
+        self.assertIn("## Upgrades before 1.0.0 (0.4.0, 0.5.0, 0.5.1, 0.5.2, 0.6.0)", up)
+        self.assertIn("the Priorities headings", up.split("## Upgrades before 1.0.0")[1].split("## Upgrade to 1.0.0")[0])
+        self.assertIn('"Always worth my attention"', up.split("## Structure check and repair")[1])
         self.assertIn("\"Not my responsibility anymore\"", up.split("## Structure check and repair")[1])
 
     def test_five_owner_categories(self):
@@ -1517,6 +1520,10 @@ class NotionCompatibility(unittest.TestCase):
     def test_upgrade_is_add_only_and_versions_line_up(self):
         up = read(REFS / "brain-upgrades.md")
         latest = re.findall(r"## Upgrade to ([0-9.]+)", up)[-1]
+        sys.path.insert(0, str(ROOT / "tests"))
+        import notion_logic
+        self.assertEqual(notion_logic.LATEST_BRAIN, latest)                       # the model follows the text
+        self.assertEqual(list(notion_logic.SECTIONS_WITH_STEPS), re.findall(r"## Upgrade to ([0-9.]+)", up))
         # Fresh setup starts "in progress"; the latest version is set only after the structure check.
         self.assertIn("- Business Brain version: setup in progress",
                       read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))

@@ -290,7 +290,7 @@ STANDARD_VIEWS = {
 REQUIRED_DBS = tuple(STANDARD_VIEWS)
 # Headings the upgrade sections add to existing pages (Priorities), checked and added by the repair too.
 REQUIRED_HEADINGS = ("Work I'd like to hand off", "Always worth my attention", "Not my responsibility anymore")
-LATEST_BRAIN = "0.6.0"
+LATEST_BRAIN = "1.0.0"       # the newest "## Upgrade to" section in brain-upgrades.md
 
 
 def check_and_repair(workspace, fail_on=()):
@@ -337,6 +337,9 @@ def upgrade_views(workspace, fail_on=()):
     return check_and_repair(workspace, {("view", d) for d in fail_on})[0]
 
 
+SECTIONS_WITH_STEPS = ("1.0.0",)
+
+
 def version_looks_current(workspace):
     v = workspace.get("version")
     return v not in (None, "setup in progress") and vkey(v) >= vkey(LATEST_BRAIN)
@@ -344,10 +347,12 @@ def version_looks_current(workspace):
 
 def update_my_team_workspace(workspace, fail_on=(), sections_run=None):
     """setup-workforce "Update my team workspace": due upgrade sections first (all of them when the
-    line is missing or "setup in progress"), then the structure check, whatever the version says."""
+    line is missing or "setup in progress"), then the structure check, whatever the version says.
+    Since 1.1.0 the sections for 0.4.0 to 0.6.0 have no steps of their own: everything they added is in
+    the schema, so the structure check adds it. Only sections from 1.0.0 on still have steps."""
     sections_run = [] if sections_run is None else sections_run
     v = workspace.get("version")
-    for section in ("0.4.0", "0.5.0", "0.5.1", "0.5.2", "0.6.0"):
+    for section in SECTIONS_WITH_STEPS:
         if v in (None, "setup in progress") or vkey(v) < vkey(section):
             sections_run.append(section)              # each is check-then-add; version moves only below
     return check_and_repair(workspace, fail_on)
