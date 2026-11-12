@@ -8,8 +8,7 @@ Only a decision the owner has to make: a price, discount, refund or term the Bus
 **A reply draft is not a decision.** A reply the team could write from the Business Brain waits in Gmail drafts (or under Replies ready to copy), is listed in the report as ready, and is tracked as a Prepared row in the open-work queue (`references/run-tracking.md` section 6). The owner pressing Send is the approval, so it never gets an Approvals row. When a reply can't be written without a decision, queue the decision, and say in its Exact action which draft is waiting on it.
 
 ## Who writes to the queue
-- **Specialists (subagents) do not write to Notion.** They return approval items in their report, in the item format below, under a heading **Approvals Needed**.
-- **The orchestrator (the skill running in the main conversation, acting as Chief of Staff) writes them**, after verifying each one. This keeps one writer, avoids duplicates and lets the Chief drop items that fail verification.
+Specialists (subagents) never write to Notion: they return approval items in their report, in the item format below, under **Approvals Needed**. The orchestrator (the skill running in the main conversation, as Chief of Staff) writes them, after verifying each one and dropping any that fail.
 
 ## Item format (specialists return exactly this, one block per item)
 
@@ -28,4 +27,4 @@ Only a decision the owner has to make: a price, discount, refund or term the Bus
 When this run has an item to queue, follow `references/if-queuing-a-decision.md` (find the database, check for duplicates, create the row, read back its AP number, and when an old item may be set to Expired). A run with nothing to queue doesn't need it.
 
 ## The active queue
-The active queue is every row with Status Pending or Approved. Briefings and reviews always account for all of them, not only new ones. Handed to you rows are counted with what is still waiting on the owner, not as decisions. Done, Rejected and Expired rows stay in the database as history and never appear in the active queue. That's how "already handled" and "not mine" items leave the queue: by their status, never by deleting them.
+The active queue is every row with Status Pending or Approved. Briefings and reviews always account for all of them, not only new ones. Handed to you rows are counted with what is still waiting on the owner, not as decisions. Done, Rejected and Expired rows stay in the database as history: items leave the queue by their status, never by being deleted.

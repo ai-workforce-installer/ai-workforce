@@ -1,6 +1,6 @@
 ---
 description: The daily briefing goes through the inbox itself, in the same run, and reports once, opening with what was handled.
-tags: [morning-run, scheduled]
+tags: [text-only, morning-run, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

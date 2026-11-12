@@ -1,6 +1,6 @@
 ---
 description: A run that finds another run of the same job still working does not run alongside it.
-tags: [run-tracking, scheduled]
+tags: [text-only, run-tracking, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

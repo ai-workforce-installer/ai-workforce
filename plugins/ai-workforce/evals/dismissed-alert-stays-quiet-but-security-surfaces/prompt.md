@@ -1,6 +1,6 @@
 ---
 description: A dismissed alert stays quiet; a new security incident still surfaces.
-tags: [learning, inbox]
+tags: [text-only, learning, inbox]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

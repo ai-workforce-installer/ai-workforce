@@ -1,0 +1,12 @@
+Requested draft: {{input.draftId}}. The stand-in returns every draft in the mailbox; one that is not listed below no longer exists.
+
+(Test stand-in: every search returns this whole mailbox. Each message shows its labels. No more pages.)
+
+Sent mail, last 7 days: nothing other than what the threads below show.
+
+Thread t-priya | "Thursday"
+  m-priya-1 | from Priya Shah <priya@northfield.example> | Wed 2026-03-04 15:02 | labels INBOX | "Are we still on for Thursday at 10? Happy to move it to 11 if that's easier."
+  (nothing newer in this thread)
+
+Drafts in this mailbox:
+(none)

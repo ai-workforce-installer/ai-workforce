@@ -1,6 +1,6 @@
 ---
 description: With a quiet inbox, the morning run still finishes one usable piece toward the owner's first goal, from confirmed facts only.
-tags: [priorities, scheduled]
+tags: [text-only, priorities, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

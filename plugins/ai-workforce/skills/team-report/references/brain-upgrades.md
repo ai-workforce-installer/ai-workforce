@@ -1,6 +1,6 @@
 # Business Brain upgrades (safe, repeatable, add-only)
 
-Plugin updates change how the team works. They never change the owner's Business Brain on their own. When a newer plugin needs something new in the Business Brain, it is added by these steps, with the owner's yes.
+Plugin updates never change the owner's Business Brain on their own. What a newer plugin needs there is added by these steps, with the owner's yes.
 
 ## When to upgrade
 Workforce Settings ends with an **About this workspace** section holding `- Business Brain version: <x.y.z>`. A missing section means version 0.3 or older, or a setup that didn't finish; "setup in progress" means setup didn't finish. In every one of these cases, run every upgrade section below in order (each skips what's already there), skipping their version-line steps, then the structure check, which sets the version line at the end.
@@ -8,7 +8,7 @@ Workforce Settings ends with an **About this workspace** section holding `- Busi
 - **Newer than this file knows** (the workspace was upgraded by a newer copy of the plugin, for example on another device): change nothing and carry on. In attended mode, mention once that their AI Workforce may be out of date and they can update it from Customize → Plugins.
 - **Scheduled:** never upgrade. Add one line to the briefing: "Workspace improvements are ready. Say 'update my team workspace' when you have a minute."
 - `setup-workforce` offers it the same way when it finds an existing Business Brain.
-- **After a plugin update,** recurring tasks need nothing: each one follows the installed plugin on its next run. If the owner has both a daily briefing task and a separate inbox triage task, offer once to combine them (`schedule-workforce`, "One morning run"). Change nothing without a yes.
+- **After a plugin update,** recurring tasks need nothing: each follows the installed plugin on its next run.
 
 ## Rules
 - **Check, then add.** Every step first checks whether its change is already there and skips it if so. Running the steps twice changes nothing.
@@ -28,39 +28,20 @@ Runs after any upgrade sections that are due (the version line reaches the lates
 
 A version line of "setup in progress", or a missing line, means the upgrades and the structure check haven't finished: offer them when attended, mention it once when scheduled.
 
-## Upgrade to 0.4.0
-1. **Your Team page.** If the Business Brain has no child page titled "Your Team", create it (icon 👥) from the Your Team template.
-2. **Work to hand off.** If Priorities has no "Work I'd like to hand off" heading, append that section from the Priorities template at the end of the page.
-3. **Handed to you.** If the Approvals Status property has no "Handed to you" option, add it (blue), keeping every existing option.
-4. **Version line.** If Workforce Settings has no "About this workspace" heading, append it from the Workforce Settings template. Otherwise replace the existing `Business Brain version` line. Either way it ends as `- Business Brain version: 0.4.0` (then continue with 0.5.0).
+## Upgrades before 1.0.0 (0.4.0, 0.5.0, 0.5.1, 0.5.2, 0.6.0)
+Everything those versions added is in `references/notion-schema.md` and the page templates today, so the structure check above adds whatever an older workspace is missing and they have no steps of their own: the Your Team page and the About this workspace section; the Priorities headings; the Briefings run fields; the `Unknown`, `Running`, `Prepared`, `Handed to you` and `Blocked` options (every existing option sent with them); `Source` and `Next action` on Assignments; and the five saved views, which keep working on Notion's free plan when its query allowance runs out (Approvals "Active approvals", Assignments "Open work", Briefings "Newest first", Pricing & Offers "Active offers", Customers & Leads "All contacts"). A missing view is created as a table view with the notion-create-view tool (`database_id` = the database, `data_source_id` = its collection, `configure` = that view's line in the schema, leaving out of a filter any option the database doesn't have); then fetch the database again and check each new view is there with that filter and sort. Runs work without any of this.
 
-## Upgrade to 0.5.0
-Adds run tracking fields so the team can tell retries from new runs and keep its inbox bookmark. Nothing existing changes; runs work without these fields too (they keep the same information in each record's text).
-1. **Briefings properties.** Fetch the Briefings data source. Add any that are missing: `Run ID` (text), `Started` (date), `Finished` (date), `Completed through` (date).
-2. **Briefings options.** Add `Unknown` (gray) to Run type and `Running` (blue) to Result if missing, sending every existing option with them.
-3. **Assignments option.** Add `Unknown` (gray) to its Run type if missing, sending every existing option with it.
-4. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.0`.
+## Upgrade to 1.0.0 (open work tracked to a verified outcome)
+Nothing existing changes: no status option, view, row or schedule is touched, and runs work without these fields (they keep the same facts in each row's text). Every step adds only what is missing, so an interrupted upgrade simply carries on when it is run again.
+1. **Assignments properties.** Fetch the Assignments data source and add each of these that is missing, checking it is there before the next: `Work type` (select: Task, Reply, Commitment, Waiting on someone, Customer case, Deliverable, Monitored issue), `Due` and `Next check` (dates), `Waiting on`, `Blocker`, `Done when` and `Work key` (text), `Evidence` (URL), `Closed as` (select: Completed, Sent, Cancelled, Dismissed, Superseded, Unverified). A property of the owner's with one of these names stays as it is: say so once.
+2. **Workforce Settings.** Under Connections, add `- Sending: _not set_` if there is no Sending line, and `- Work lives in: _not set_` if there is no such line. Existing owners keep things as they were (replies left for them to send) until they answer the desk's one question.
+3. **Version line.** Only when all nine fields and both lines are there, set `- Business Brain version: 1.0.0`. Otherwise leave the line as it was and say what is still to add.
 
-## Upgrade to 0.5.1
-Lets the Assignments database hold the team's open work so nothing found is forgotten between runs. Nothing existing changes; runs work without it (they keep the same details in each row's text). Safe to repeat: each step only adds what's missing.
-1. **Assignments options.** Add `Prepared` (purple), `Handed to you` (orange) and `Blocked` (brown) to Status if missing, sending every existing option with them.
-2. **Assignments properties.** Add `Source` (text) and `Next action` (text) if missing.
-3. **Version line.** Replace the `Business Brain version` line with `- Business Brain version: 0.5.1`.
-
-## Upgrade to 0.5.2
-Adds saved views, which keep working on Notion's free plan after its query allowance runs out. Nothing existing changes: no records are edited and no existing view is changed. Safe to repeat.
-1. Fetch each database to see its views. For each view below that **doesn't exist yet by that name**, create it as a table view with the notion-create-view tool (`database_id` = the database, `data_source_id` = its collection, `configure` = the line below). If one with that name exists, leave it as it is, even if its filter differs (runs check a view's filter before using it). After creating, fetch the database again and check each new view is there with that filter and sort.
-   - Approvals → "Active approvals": `FILTER "Status" IN ("Pending", "Approved", "Handed to you"); SORT BY "AP" ASC`. On a workspace without the "Handed to you" option, leave that value out.
-   - Assignments → "Open work": `FILTER "Status" IN ("Planned", "In progress", "Prepared", "Handed to you", "Blocked"); SORT BY "Date" ASC`, leaving out options the database doesn't have.
-   - Briefings → "Newest first": `SORT BY "Date" DESC` (only if missing).
-   - Pricing & Offers → "Active offers": `FILTER "Active" = TRUE; SORT BY "Offer" ASC`.
-   - Customers & Leads → "All contacts": `SORT BY "Last contact" DESC`.
-2. **Version line.** Only when every view above exists (created now or already there), replace the `Business Brain version` line with `- Business Brain version: 0.5.2`. If any step failed (a view couldn't be created, the database couldn't be read), leave the version line as it was, say which step failed, and the upgrade can simply be run again.
-
-## Upgrade to 0.6.0
-Gives the team a place to keep the owner's corrections about what matters, so they apply to every later run (`references/owner-corrections.md`). Nothing existing changes and no records are edited; runs work without it (corrections go under "Things to ignore for now" until then). Safe to repeat: each step only adds what's missing.
-1. **Priorities sections.** Fetch Priorities. If it has no "Always worth my attention" heading, append that section from the Priorities template at the end of the page. Then, if it has no "Not my responsibility anymore" heading, append that section the same way.
-2. **Version line.** Only when both headings are there, replace the `Business Brain version` line with `- Business Brain version: 0.6.0`. If Priorities couldn't be read or written, leave the version line as it was and say which step didn't finish.
+## Upgrade to 1.1.0 (a place for the team's own work, and one setting)
+Nothing existing changes, and each step adds only what is missing.
+1. **Team work.** If Where things live has no `Team work` line, ask once: "Where should your team keep the documents it prepares for you? I can add a private page called Team work to your Business Brain." On yes, create that page there (or take the page the owner names) and save `- Team work: <title> (<page ID>)`. No answer: `- Team work: _not set_`, and work products stay in each run's Briefings page, as before.
+2. **Schedule.** Add `- Commitments review: _not set_` if there is no such line.
+3. **Version line.** Only when both lines are there, set `- Business Brain version: 1.1.0`.
 
 Later versions add their own section here, below this one, and run in order.
 

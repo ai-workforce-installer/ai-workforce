@@ -1,10 +1,9 @@
 # Scheduled task prompts
 
-What a recurring task stores. Each block is short on purpose: which job to do, the safety rules, which skill to use, and what to do in a session where the plugin isn't loaded (stop and tell the owner). Everything else a run does comes from the installed plugin (the skill and `references/scheduled-run-rules.md`), so improvements reach every recurring task on its next run without changing it.
+What a recurring task stores: which job, the safety rules, which skill, and what to do where the plugin isn't loaded (stop and tell the owner). Everything else comes from the installed plugin (the skill and `references/scheduled-run-rules.md`), so improvements reach every task on its next run without changing it.
 
 - Create tasks with these blocks exactly, with `<BRAIN>` replaced by the Business Brain page title (usually "Business Brain"). Keep the first `[AI Workforce task: … | prompt version …]` line: it is how the team recognises its own tasks. The version on it only records which release created the task; nothing compares it.
-- The owner's own instructions for a task go at the end, after a line that reads `Owner's additions:`.
-- **A task's stored text is never rewritten**, by a run or by anyone on the team. An older task keeps whatever block it was created with (even a long one from an earlier version) and still follows the current rules, because the installed plugin wins over the stored text. The only edit ever made is adding the owner's own words under `Owner's additions:`, in chat, at the owner's request (`schedule-workforce`).
+- **A task's stored text is never rewritten**, by a run or by anyone on the team; an older task keeps its block and still follows the current rules. The only edit ever made is adding the owner's own words at the end, under `Owner's additions:`, in chat, at their request (`schedule-workforce`).
 - Change a block here only when what a new task must store changes (rare). Rules that runs follow belong in `references/scheduled-run-rules.md` or the skill.
 
 ## Daily briefing (the morning run: inbox check first, then the briefing)

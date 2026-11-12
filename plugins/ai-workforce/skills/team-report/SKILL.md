@@ -2,20 +2,20 @@
 name: team-report
 description: This skill should be used when the owner asks "what's my team been working on?", "what did the team do this week?", "did the morning briefing run?", "what's scheduled?", "is the team working?", "any problems?", "how's my first week going?", or wants a truthful summary of the team's actual activity, results, failures and pending decisions.
 metadata:
-  version: "0.9.0"
+  version: "1.1.0"
 ---
 
 # Team Report
 
-_Files named `references/…` are in this skill's own folder. A file with the same name in another skill's folder is an identical copy: read each reference at most once per conversation, and read the ones you need together, in one step. A file named `references/if-….md` covers one situation: read it only when that situation comes up._
+_`references/…` files are in this skill's folder (same-named files elsewhere are identical copies). Read each once at most, the ones you need together; a file named `if-….md` covers one situation: read it only then._
 
-A truthful account of what the team actually did. Every line rests on a record in the Business Brain or the list of scheduled tasks. Never fill a gap with what probably happened. Speak per `references/talking-to-the-owner.md`.
+A truthful account of what the team actually did: every line rests on a record in the Business Brain or the list of scheduled tasks, never on what probably happened. Speak per `references/talking-to-the-owner.md`.
 
 ## Steps
 
 1. **Pick the period:** what the owner asked for, otherwise the last 7 days.
 2. **Collect the records** from the Business Brain (`references/run-modes.md` says how to find it):
-   - **Briefings** rows in the period: title, type, Source (manual, scheduled, or "started from a recurring task" when unknown), status (finished, still running, Not run because another run was working, Abandoned), Result (Complete, Partial, Failed), its Handled line (older records: approvals raised and drafts created), link.
+   - **Briefings** rows in the period: title, type, Source (manual, scheduled, or "started from a recurring task" when unknown), status (finished, still running, Not run because another run was working, Abandoned), Result (Complete, Partial, Failed), its Handled line (older records: approvals raised and drafts created), its Usage and Notified lines, link.
    - **Assignments** rows in the period: owner, status, verification, and how it ran.
    - **Approvals:** rows still Pending (oldest first), rows marked Handed to you (things only the owner can do), and rows decided in the period.
    - **Workforce Settings → Schedule:** each recurring responsibility and its saved state.
@@ -23,30 +23,30 @@ A truthful account of what the team actually did. Every line rests on a record i
 3. **Reconcile the schedule against what landed.** For each scheduled responsibility, compare the runs it should have made in the period with the Briefings rows that exist:
    - Expected run with a matching row → **ran**, with its Result.
    - Expected run with no row → **no record**: it didn't run, or it didn't finish. Give the last-run status from the schedule list if you have it. Don't guess which.
-   - Listed in Workforce Settings but missing from the schedule list, or disabled → **not actually scheduled**.
-   - Saved as "proposed, not scheduled" → **not set up yet**.
-   - A record still running with no Progress for over 45 minutes → **stuck**: the next run will finish it. Not run records are normal (two runs overlapped) and aren't problems. Abandoned records are problems: say what was left undone.
-   - **Never call runs duplicates because of their timing.** Several runs in one day, or a weekly task running on another day, usually mean the owner pressed Run now. Mention a duplicate schedule only if the scheduled-task list shows two tasks for the same responsibility.
+   - Listed in Workforce Settings but missing from the schedule list, or disabled → **not actually scheduled**; saved as "proposed, not scheduled" → **not set up yet**.
+   - A record still running with no Progress for over 45 minutes → **stuck**: the next run will finish it. Not run records (two runs overlapped) aren't problems; Abandoned ones are: say what was left undone.
+   - **Never call runs duplicates because of their timing:** several in one day usually mean the owner pressed Run now. Mention a duplicate schedule only if the task list shows two tasks for the same responsibility.
    - A row with a configuration warning → say what the run did about it. An older `prompt version` line on a task is never a problem: every task follows the installed plugin (`references/if-old-task.md`), so never offer to update one.
    - A daily briefing task and a separate inbox triage task that runs within 3 hours of it → mention once that the morning briefing now checks the inbox itself, and offer to combine them (`schedule-workforce`, "One morning run").
-   - An Inbox triage record that says it was included in a daily briefing is part of that morning run, not a second run. A Schedule line reading "part of the daily briefing" is not a separate task: its runs are those records.
-   - Runs whose row says the plugin or an app wasn't available → say so plainly, with the fix (reconnect the app, or keep AI Workforce turned on under Customize → Plugins).
+   - An Inbox triage record included in a daily briefing is part of that morning run, not a second run; a Schedule line reading "part of the daily briefing" is not a separate task.
+   - A row saying the plugin or an app wasn't available → say so, with the fix (reconnect the app, or turn AI Workforce on under Customize → Plugins).
 4. **Report in this order**, short and plain:
-   1. **Handled:** first the period's totals in one line, added up from the records' Handled lines ("This week: 14 reply drafts, 3 meeting preps, 6 items closed, 5 decisions raised"), then what the team finished, grouped by team member, each with a count and link ("Client Success: 12 reply drafts across 3 runs"). Runs finishing is not the measure; work handled is. If the total is zero, or the records show three or more runs in a row with nothing handled, say that first and plainly, with the reason the reports give (usually a place the work lives that isn't connected, named under Blocked or Not checked) and the one step that would change it. Never soften it with a count of runs that completed.
+   1. **Handled:** first the period's totals in one line, added up from the records' Handled lines and kept apart ("This week: 6 finished, 14 reply drafts ready, 3 meeting preps, 5 decisions raised"; never one combined number), then what the team finished, grouped by team member, each with a count and link ("Client Success: 12 reply drafts across 3 runs"). Then, when the records can show it, how many of the replies the team prepared were sent within a day (rows closed as Sent within a day of being prepared: "9 of 14 replies went out within a day"); if they can't, leave it out. Runs finishing is not the measure; work handled is. If the total is zero, or the records show three or more runs in a row with nothing handled, say that first and plainly, with the reason the reports give (usually a place the work lives that isn't connected) and the one step that would change it. Never soften it with a count of runs that completed.
    2. **Needs your decision:** pending approvals (count, oldest AP number and age) and things handed to you that only you can do. Then, in one line, what the team prepared that is still waiting on you (drafts and prepared pieces in open work: how many, and since when).
-   3. **Problems:** failed or partial runs, missing runs, connections that were down, each with one line on what to do.
-   4. **Recurring responsibilities:** each one's state (scheduled, next run, last result; or paused, proposed, not available).
+   3. **Problems:** failed or partial runs, missing runs, connections that were down, each with one line on what to do. If the last three finished runs all end `Notified: unknown` or `Notified: failed`, say once that notifications may not be reaching them, and where to check: Claude's notifications, in the app and in the phone's settings.
+   4. **Recurring responsibilities:** each one's state (scheduled, next run, last result; or paused, proposed, not available) and what it typically takes, from the Usage lines of its last runs ("about 80 tool calls and 10 minutes a run"), so a heavy one can be paused (`schedule-workforce`). Tool calls and minutes only: never credits, cost or a share of their plan.
    5. **Questions the team is waiting on**, if any briefings listed some.
 5. If nothing ran in the period, say exactly that and why, if the records show it. Offer the most useful next step (for example "Want me to run this morning's briefing now?").
 
 ## First-week recap ("how's my first week going?")
-Optional, on request (the daily briefing mentions it once, between day 5 and 10). Same records as above, from "Set up on" in Workforce Settings to today, answered in at most six short lines, each resting on a record:
-1. **First assignment:** did it produce something useful? Its Briefings row and Result, and what came out of it (with the link). If it was a quick look, say whether the full inbox review has happened since.
-2. **First recurring run:** for each recurring responsibility, did a run actually land (a Briefings row from the recurring task) and how did it end? "Scheduled but no run recorded yet" is said as that.
-3. **Your first decisions:** how many approvals are waiting and the oldest; offer to go through them now (`review-approvals`).
-4. **What the team has learned:** the owner preferences and corrections saved so far (Brand & Tone, Your Team notes, Priorities). If none, ask the one question that would help most, for example "How do you usually sign off?" or "Is there anything in your inbox the team should stop flagging?"
-5. **One thing to hand off next:** one suggestion grounded in what the team saw (a request that came up more than once in Assignments, or the owner's own answer under "Work I'd like to hand off"), and offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled).
+On request (the daily briefing mentions it once). Same records as above, from "Set up on" in Workforce Settings to today, in at most seven short lines, each resting on a record:
+1. **First assignment:** did it produce something useful? Its Briefings row, Result and what came of it (with the link). After a quick look, say whether the full inbox review has happened since.
+2. **First recurring run:** for each recurring responsibility, did a run actually land, and how did it end? "Scheduled but no run recorded yet" is said as that.
+3. **Waiting on you:** how many things, and the oldest; offer the desk (`review-approvals`).
+4. **What the team has learned:** the preferences and corrections saved so far (Brand & Tone, Your Team notes, Priorities). If none, ask the one question that would help most ("How do you usually sign off?").
+5. **One thing to hand off next:** one suggestion grounded in what the team saw, with an offer to make it recurring (`schedule-workforce`, one responsibility only, never a second task for one already scheduled). If the records show an urgent item that arrived after a morning run, offer once instead (noted under Suggestions on Your Team, so it isn't offered twice): "Want a quick afternoon check for emergencies only? It reads subjects, drafts nothing and stays quiet unless something is urgent."
 6. **In one line:** what the team did this week (counts, from the records).
+7. **Version:** "You're on AI Workforce 1.1.0. To update: Customize → Plugins if you installed it from the marketplace; if you uploaded a file, upload the new one (a file never updates itself)." Said here and in the self-test only, never in a daily briefing.
 Nothing here creates tasks, approvals or notifications; anything the owner agrees to is done by the skill named.
 
 Read-only: this skill changes nothing.

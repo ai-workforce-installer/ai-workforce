@@ -1,6 +1,6 @@
 ---
 description: Asked to connect HighLevel with no sign-in or card on offer, the owner gets the four short steps and the address, and nothing is called connected.
-tags: [setup, highlevel]
+tags: [text-only, setup, highlevel]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

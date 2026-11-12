@@ -1,6 +1,6 @@
 ---
 description: Setup's first reply drafts follow how the owner writes in their own sent mail, and only the style is kept.
-tags: [setup, voice]
+tags: [text-only, setup, voice]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

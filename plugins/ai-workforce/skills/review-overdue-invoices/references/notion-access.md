@@ -18,7 +18,7 @@ If a method fails, try the next one once; then record the outcome (section 3). F
 
 The Chief of Staff (the skill running the conversation) reads the shared context once at the start: Workforce Settings, Priorities, Brand & Tone, Your Team, Pricing & Offers (active rows), Policies, FAQs, the open queue (Approvals and Assignments that aren't finished), and the schemas of the databases it will write to. It keeps them for the whole run and gives each team member only the parts that member needs. Team members don't re-read what they were given. Re-read only something this run itself changed.
 
-**Reusing a recent run's reads.** If another run finished in the last 3 hours and its record lists what it read, the stable pages (Brand & Tone, Your Team, Policies, FAQs, Company Profile) may be reused from it, marked "as of <time>", unless this run has reason to think they changed. Always read fresh (through views, which counts as fresh): Approvals, Assignments, Pricing & Offers, Workforce Settings, anything about money, security, deadlines or availability, and anything a claim to the owner depends on.
+**Reusing a recent run's reads.** If another run finished in the last 3 hours and its record lists what it read, the stable pages (Brand & Tone, Your Team, Policies, FAQs, Company Profile) may be reused from it, marked "as of <time>". Always read fresh: Approvals, Assignments, Pricing & Offers, Workforce Settings, and anything about money, security, deadlines or availability or that a claim to the owner depends on.
 
 ## 3. Every read has one of four outcomes
 
@@ -43,6 +43,8 @@ Retry a failed read once, using the next method in section 1. Then record the ou
 In the run record, list each source read and its outcome in one line ("Notion: Settings read, Pricing read (8), Approvals read (5), Assignments unavailable").
 
 ## 4. Write sparingly
-Create the run record once at the start and finish it once at the end; add a Progress line only when 30 minutes have passed since the run started or since the last Progress line, so another session never mistakes a working run for a stuck one; no other mid-run writes. Batch new rows into one call when the tool allows. After a write, trust the tool's answer; fetch a page back only when you need its link or the tool reported a problem.
+Write the run record at the start and at the end, plus its Progress lines (`references/run-tracking.md`); no other mid-run writes. Batch new rows into one call when the tool allows. After a write, trust the tool's answer; fetch a page back only when you need its link or the tool reported a problem.
+
+**Team work: where the team saves what it makes.** If Where things live has a `Team work` line naming a page, a work product longer than a few lines (a comparison, proposal, brief, packet or plan) is its own page under it, linked from its open-work row; without the line it stays in the run's Briefings page. Only the Chief of Staff writes there, only to page IDs it knows (that line, or a row's link), never to a page a search turned up; it fetches the page back after saving, and updates one by replacing only what the team wrote, so the owner's edits stay. Notion only: never Drive or another document folder.
 
 **Collapsed sections (toggles).** Reports keep the owner's first screen short by folding the rest away. In Notion's own Markdown a toggle is written as a block: a line with `<toggle>`, the title on the next line, a blank line, the content, then `</toggle>`. Never use `<details>` (Notion saves it as plain text). If the connection's own guide says otherwise, follow the guide; if a toggle can't be created, use a plain heading in the same place.

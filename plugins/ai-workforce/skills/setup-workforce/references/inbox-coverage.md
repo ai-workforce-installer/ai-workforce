@@ -1,10 +1,10 @@
 # Inbox coverage: find everything, sort it, prove it
 
-General inbox triage reviews **all** the owner's email for a window, not just customer messages. This file says how to search so nothing is missed, how to sort what was found, and how to prove coverage in the report. It works for an owner who has never set up a filter or label.
+General inbox triage reviews **all** the owner's email for a window, not just customer messages: how to search so nothing is missed, how to sort what was found, and how to prove coverage in the report.
 
 ## 1. The window and the checkpoint
 
-The team keeps one bookmark: **Completed through**, the time up to which every message has been found and sorted. Follow-up work still to do is kept in the open-work queue. It lives in the run record (`references/run-tracking.md`): the `Completed through` property if the Briefings database has it, otherwise the "Completed through:" line at the end of the body.
+The team keeps one bookmark: **Completed through**, the time up to which every message has been found and sorted. It lives in the run record (`references/run-tracking.md`): the `Completed through` property if the Briefings database has it, otherwise the "Completed through:" line at the end of the body.
 
 - **Start:** the newest **Completed through** among finished Inbox triage records with an IT Run ID (read the property first, then the body line), minus a 15-minute overlap (messages already handled are skipped by their ID, below). No record has one yet (records from before 0.5.0): the end of the Window line of the newest older Inbox triage record whose Coverage says comprehensive. None of those either: the last 24 hours (on Monday, since Friday 00:00), or the start of the earliest quick look's window if that is earlier, and say "Earlier mail not scanned by the team: first run of the bookmark". Customer support triage records never count. Attended runs may use the period the owner asks for instead.
 - **End:** when this run started.
@@ -24,7 +24,7 @@ The report states both: "Search: complete (247 emails)" or "Search: incomplete, 
 
 ## 2. Search everything, then page to the end
 
-Gmail's Inbox view is not the whole mailbox. Filters can skip the inbox (archive) or label mail, and Promotions/Updates/Social tabs hide mail from view. Partner and vendor mail often lands there. So:
+Gmail's Inbox view is not the whole mailbox: filters archive or label mail, and the Promotions, Updates and Social tabs hide it. So:
 
 | Path | Search |
 |---|---|
@@ -42,7 +42,7 @@ Gmail's Inbox view is not the whole mailbox. Filters can skip the inbox (archive
 **Quick pass on metadata only (sender, subject, preview, labels, date).** Use the search results themselves; don't open messages for this. Put every thread in one bucket. Gmail's category and Important label are hints, not verdicts: a partner email filed under Promotions is still a partner email.
 
 **The owner's corrections come first** (`references/owner-corrections.md` section 5). Before bucketing, check each thread against Priorities (Not my responsibility anymore, Things to ignore for now, Always worth my attention), Extra rules, and items the owner closed:
-- A thread a rule rules out goes to **Routine**, type "your rules", and gets no follow-up, unless it's one of the four things a rule never hides (`references/owner-corrections.md` section 5: a new security incident on an account the owner still uses, money leaving the owner's own accounts, a legal threat, chargeback or anything under Always escalate to me, or a deadline that falls on the owner personally); then it's bucketed normally with one line naming the rule it would otherwise have matched.
+- A thread a rule rules out goes to **Routine**, type "your rules", and gets no follow-up, unless it's one of the four things a rule never hides (`references/owner-corrections.md` section 5: security, money leaving, a legal threat, a deadline on the owner); then it's bucketed normally with one line naming the rule it would otherwise have matched.
 - A thread where the owner closed an item in the last 14 days and the newest message only repeats the same automated alert or notice counts as already handled. A person writing something new is new work.
 - A thread matching Always worth my attention is read in full and stays in its normal bucket (Personal and family included); it's also listed in the report under Worth knowing. That listing is a tag, outside the coverage totals.
 
@@ -83,7 +83,9 @@ For each item in the first five buckets, the assigned member does the next usefu
 
 **Safe links and attachments.** Open shared documents and public pages from senders the owner already corresponds with (Drive, Docs, Notion, the sender's own site). Never open sign-in, payment, "verify your account", unsubscribe, RSVP or confirm links, and never download programs. For a security or payment alert, never click its links: check it against other mail in the window (a matching receipt or confirmation) and recommend the owner check the account directly if it doesn't match.
 
-**Limits per run:** read at most 30 messages in full and draft at most 5 replies. Anything beyond becomes a row in the open-work queue (`references/run-tracking.md` section 6), so nothing silently drops and the next run picks it up first.
+**Limits per run:** read at most 30 messages in full and draft at most 5 replies (the morning run sets its own limit by how fast the owner clears them: `daily-executive-briefing`, "Clear first"). Anything beyond becomes a row in the open-work queue (`references/run-tracking.md` section 6), so nothing silently drops and the next run picks it up first.
+
+**Two labels, kept true (Gmail).** `Team/Needs you` goes on a thread with an open row waiting on the owner, `Team/Draft ready` on one whose reply draft is saved; the Chief of Staff adds them when it logs the rows, creating the two labels once if they're missing, and takes a label off when its row closes. A run adds or removes no other label, and never archives, trashes or marks anything.
 
 ## 5. Coverage section (every report)
 
@@ -97,16 +99,15 @@ Coverage: comprehensive (all mail in the window) | narrow (say what was left out
 - Processed: <n> with follow-up done; <n> queued in open work
 - Prioritized: <n> (urgent <n>, needs reply <n>, opportunities <n>, money and accounts <n>, meetings and projects <n>, customer <n>)
 - Filtered out as routine: <n> (promotions <n>, newsletters <n>, webinar or event pitches <n>, notifications <n>, receipts <n>, your rules <n>); personal or family: <n>
+- Routine thread IDs: <ids> (kept here for the desk's archive card)
 - Not checked: <every mailbox under Where things live the team can't reach>, or "nothing"
 - Search: complete | incomplete (<why>)
 - Follow-up: <n> done, <n> queued in open work
 - Completed through: <time> (moved forward | not moved: <why>)
 ```
 
-Count **threads**, not messages, everywhere in the report. Buckets are mutually exclusive, so Discovered must equal Prioritized + Filtered out + personal + already handled, and Prioritized must equal the sum of its buckets. Tags that overlap (for example "has a draft", "queued") are reported separately and never added into these totals. Recompute the totals before finishing; if they don't reconcile, find the thread that's double-counted or missing and fix it, or say plainly which number is off and set the Result to Partial. In the owner's summary, show only one line ("Reviewed 247 emails; 9 need you; nothing skipped"), and say so plainly if follow-up was queued for the next run or the bookmark didn't move. Coverage is **comprehensive** only when the search followed section 2 exactly (All Mail, no inbox, category or keyword filters, every page). Anything narrower is **narrow**, says what was left out, and makes the Result Partial. If the numbers don't add up, or a page of results couldn't be fetched, say so and set Result to Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
+Count **threads**, not messages, everywhere in the report. Buckets are mutually exclusive, so Discovered must equal Prioritized + Filtered out + personal + already handled, and Prioritized must equal the sum of its buckets. Tags that overlap (for example "has a draft", "queued") are reported separately and never added into these totals. Recompute the totals before finishing; if they don't reconcile, find the thread that's double-counted or missing and fix it, or say plainly which number is off and set the Result to Partial. In the owner's summary, show only one line ("Reviewed 247 emails; 9 need you; nothing skipped"), and say so plainly if follow-up was queued for the next run or the bookmark didn't move. Coverage is **comprehensive** only when the search followed section 2 exactly (All Mail, no inbox, category or keyword filters, every page). Anything narrower is **narrow**, says what was left out, and makes the Result Partial. A mailbox the team has never been connected to (listed under Not checked) doesn't make the run Partial, but it is named in every report.
 
 ## 6. Saying it precisely
 
-- "No customer emails visible in Gmail" is not "nothing to do", and neither is "inbox clear". Report what was found in every bucket.
-- If customer email lives somewhere the team can't reach, say "Customer support: none visible in Gmail. Not checked: <place>", never "no customer emails".
-- Never say a source was checked unless it was searched in this run.
+"No customer emails visible in Gmail" is not "nothing to do" or "inbox clear": report every bucket, name any place customer email lives that the team can't reach ("Customer support: none visible in Gmail. Not checked: <place>"), and never call a source checked unless this run searched it.

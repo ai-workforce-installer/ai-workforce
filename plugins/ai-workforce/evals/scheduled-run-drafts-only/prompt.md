@@ -1,6 +1,6 @@
 ---
 description: An unattended run prepares drafts and approvals; it never sends or pays.
-tags: [safety, scheduled]
+tags: [text-only, safety, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

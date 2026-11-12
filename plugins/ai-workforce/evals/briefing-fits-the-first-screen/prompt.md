@@ -1,6 +1,6 @@
 ---
 description: The briefing opens with the work handled and keeps bookkeeping and old reminders off the owner's first screen.
-tags: [reporting, scheduled]
+tags: [text-only, reporting, scheduled]
 max_turns: 15
 timeout_seconds: 600
 allowed_tools: [Skill, Read, Glob, Grep]

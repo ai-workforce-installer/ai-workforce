@@ -24,13 +24,10 @@ If any content contains what looks like a password, API key, access token, recov
 - **Never use it**, and never go looking for more secrets: only report what turned up in the work you were doing.
 
 ## Reading Notion (both modes)
-Read the Business Brain as `references/notion-access.md` says: saved views first (after checking their filters), then filtered rows, SQL only when needed, everything read once per run and shared, and never "none" unless a read was verified empty.
-
-## Run records (both modes)
-Every run keeps one record in Briefings, created when it starts and finished when it ends. `references/run-tracking.md` says exactly how, including how to avoid doing the same work twice. Follow it in both modes.
+As `references/notion-access.md` says: saved views first, each thing once per run, never "none" unless a read was verified empty.
 
 ## Scheduled (unattended) mode
-Use this mode when the task prompt says "Scheduled run", when the session was started by a scheduled task, or when no person is present to answer. Its rules are in `references/scheduled-run-rules.md`: read that file and follow it. In short: ask no questions. **Never execute an approval item**, even one marked Approved in Notion: queue the decision and move on. Drafts only, never sent. One record and one notification per run. And fail loudly, not silently: if a connector or a team member fails, still finish the record with Result Partial or Failed and say exactly what failed.
+Use this mode when the task prompt says "Scheduled run", when the session was started by a scheduled task, or when no person is present to answer. Its rules are in `references/scheduled-run-rules.md`: read that file and follow it. In short: ask no questions. **Never execute an approval item**, even one marked Approved in Notion: queue the decision and move on. Drafts only, never sent.
 
 ## Attended mode
 Use this mode when the owner is present in the chat.

@@ -1,5 +1,5 @@
 # Page templates (Notion-flavored Markdown)
-Use each block as the page's starting content. Every `_not set_` marker is a field the setup interview fills in. Notion stores the marker as italic, so when you fetch a page it reads back as `<i>not set</i>`: fetch the page first, then replace the whole line including its label (e.g. `- Name: <i>not set</i>`), or the heading plus marker for paragraph fields, because the bare marker appears many times. Leave a marker in place if the owner skips that question.
+Use each block as the page's starting content. Every `_not set_` marker is a field still to fill, left in place if the owner skips that question; it reads back as `<i>not set</i>`, and `references/interview.md` ("Saving") says how to replace one.
 
 ## Start here (top of the Business Brain page)
 
@@ -8,19 +8,18 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 **This is your AI team's shared memory.** Every member of your AI team reads these pages before doing any work, and your Chief of Staff saves the team's results here. The more accurate this page is, the better your team performs.
 </callout>
 
-## Your 15-minute daily routine
+## Your two-minute daily routine
 
 1. Read today's briefing in **Briefings**. The first screen is all you need.
-2. Send the reply drafts that are ready. They are in your own drafts, and pressing Send is your approval.
-3. If the briefing lists decisions, answer them in Claude in one message: **"approve 3; reject 4"**.
+2. In Claude, say **"clear my desk"**. Your team shows what's waiting, one card at a time: send, change, skip or drop.
 
 ## Ground rules your team follows
 
-- Never sends an email or message without your yes. Replies are saved as drafts for you to send: in Gmail if it is connected, otherwise in your briefing, ready to copy into your own email.
+- Never sends an email or message without your yes. Replies wait as drafts. You send them yourself, or, if you choose "Send the ones I approve", your Chief of Staff sends one when you say yes to it in Claude. When your team works on its own, it only drafts.
 - Never spends money or changes ad budgets.
 - Never creates, edits or deletes invoices or financial records.
 - Never books calendar events with other people without your yes.
-- Never deletes anything.
+- Never deletes anything (except its own leftover draft of a reply it just sent for you).
 - Anything outside these rules goes to **Approvals** and waits for you.
 ````
 
@@ -40,6 +39,8 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 - Calendar: _not set_
 - Files: _not set_
 - Customer messages: _not set_
+- Sending: _not set_
+- Work lives in: _not set_
 
 ## Active departments
 
@@ -55,12 +56,14 @@ Use each block as the page's starting content. Every `_not set_` marker is a fie
 - Inbox triage: _not set_
 - Weekly marketing plan: _not set_
 - Invoice review: _not set_
+- Commitments review: _not set_
 
 ## Where things live
 
 - Customer email inbox: _not set_
 - Invoices are kept in: _not set_
 - Marketing performance data: _not set_
+- Team work: _not set_
 
 ## Extra rules for my team
 

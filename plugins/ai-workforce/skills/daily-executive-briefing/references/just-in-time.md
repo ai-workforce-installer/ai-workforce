@@ -14,8 +14,8 @@ Never invent a missing price, policy, customer or date. A draft that needs one s
 | **Sales follow-ups** (Sales) | Pricing & Offers (at least one active offer) · Brand & Tone: sign-off · Policies: Discounts | "What do you sell and for how much?" · "Do you ever discount? How much at most?" |
 | **Daily briefing** (Chief of Staff + team) | Owner: Time zone, Working hours · Priorities: this quarter's goals | "What are the 1-3 things that matter most this quarter?" |
 | **Upcoming commitments** (Operations) | Connections: Calendar (or Paste Box schedule) | "Which calendar do you use?" (or ask them to paste this week's key dates) |
-| **Weekly marketing plan** (Marketing) | Where things live: Marketing performance data · Company Profile: Who we serve · Pricing & Offers | "Where can I find last week's ad or campaign results?" (suggest a weekly CSV export into one folder) |
+| **Weekly marketing plan** (Marketing) | Where things live: Marketing performance data · Company Profile: Who we serve · Pricing & Offers | "Where can I find last week's ad or campaign results?" |
 | **Overdue invoices** (Finance) | Where things live: Invoices are kept in · Policies: Payment terms | "Where do you keep invoices?" · "When are invoices due?" |
 | **Custom team member** | Its definition on the Your Team page | Whatever the definition says it needs |
 
-Save answers exactly where the setup interview would (`references/interview.md` lists every field). Fetch the page first and replace the whole labeled line, because unanswered fields read back as `<i>not set</i>` and appear many times.
+Save answers where the setup interview would (`references/interview.md` lists every field): fetch the page first and replace the whole labeled line, because unanswered fields read back as `<i>not set</i>`, many times over.

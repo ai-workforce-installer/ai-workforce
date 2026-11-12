@@ -212,6 +212,65 @@ class RealHighLevelOperations(unittest.TestCase):
             self.assertIsNone(send_lock.decide("mcp__HighLevel__" + tool, {"query": "send a message", "kind": "write"}), tool)
 
 
+class LabelTools(unittest.TestCase):
+    """1.0.0: label tools are named harmlessly ("label", "unlabel"), so the name-only lock let an
+    unattended run trash, mark as spam or archive mail through them. The lock now reads which label
+    the call names. Field names are Gmail's own (looked up from its connection's tool list):
+    labelOption on the "sensitive label" tools, labelIds, and addLabelIds / removeLabelIds."""
+    G = "mcp__Gmail__"
+    REFUSED = [
+        ("apply_sensitive_thread_label", {"threadId": "t1", "labelOption": "TRASH"}),
+        ("apply_sensitive_thread_label", {"threadId": "t1", "labelOption": "SPAM"}),
+        ("apply_sensitive_message_label", {"messageId": "m1", "labelOption": "TRASH"}),
+        ("apply_sensitive_message_label", {"messageId": "m1", "labelOption": "SPAM"}),
+        ("batch_apply_sensitive_thread_labels", {"threadIds": ["a", "b"], "labelOption": "SPAM"}),
+        ("apply_sensitive_thread_label", None),                       # that tool does nothing else
+        ("unlabel_thread", {"threadId": "t1", "labelIds": ["INBOX"]}),          # archive
+        ("unlabel_message", {"messageId": "m1", "labelIds": ["UNREAD", "inbox"]}),
+        ("update_message_labels", {"messageId": "m1", "removeLabelIds": ["INBOX"]}),
+        ("update_message_labels", {"messageId": "m1", "addLabelIds": ["TRASH"]}),
+        ("label_thread", {"threadId": "t1", "labelIds": ["SPAM"]}),
+        ("label_message", {"messageId": "m1", "labelIds": ["Label_4", "TRASH"]}),
+        ("modify_thread", {"id": "t1", "removeLabelIds": ["INBOX"]}),          # no "label" in the name at all
+        ("batch_modify_messages", {"ids": ["a"], "request": {"addLabelIds": ["TRASH"]}}),
+    ]
+    ORDINARY = [
+        ("label_thread", {"threadId": "t1", "labelIds": ["Label_12"]}),         # a label of the owner's
+        ("label_message", {"messageId": "m1", "labelIds": ["STARRED"]}),
+        ("label_thread", {"threadId": "t1", "labelIds": ["INBOX"]}),            # back into the inbox
+        ("unlabel_thread", {"threadId": "t1", "labelIds": ["UNREAD"]}),         # mark as read
+        ("unlabel_thread", {"threadId": "t1", "labelIds": ["Label_7"]}),
+        ("unlabel_thread", {"threadId": "t1", "labelIds": ["TRASH"]}),          # out of Trash again
+        ("update_message_labels", {"messageId": "m1", "addLabelIds": ["Label_3", "INBOX"], "removeLabelIds": ["UNREAD"]}),
+        ("label_thread", None), ("unlabel_thread", {}),
+        ("list_labels", {}), ("create_label", {"name": "Team/Needs you"}),
+        ("search_threads", {"query": "label:inbox in:trash"}),                   # a search that mentions them
+        ("create_draft", {"body": "Move it to trash", "subject": "spam"}),
+    ]
+
+    def test_trash_spam_and_archive_by_label_are_refused(self):
+        for tool, call in self.REFUSED:
+            self.assertIsNotNone(send_lock.decide(self.G + tool, call), (tool, call))
+
+    def test_ordinary_labels_pass(self):
+        for tool, call in self.ORDINARY:
+            self.assertIsNone(send_lock.decide(self.G + tool, call), (tool, call))
+
+    def test_the_reason_says_what_would_happen(self):
+        self.assertIn("Trash", send_lock.decide(self.G + "update_message_labels", {"messageId": "m", "addLabelIds": ["TRASH"]}))
+        self.assertIn("Spam", send_lock.decide(self.G + "label_thread", {"threadId": "t", "labelIds": ["SPAM"]}))
+        self.assertIn("archive", send_lock.decide(self.G + "unlabel_thread", {"threadId": "t", "labelIds": ["INBOX"]}))
+
+    def test_whatever_the_connection_is_called(self):
+        for server in ["mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__", "mcp__plugin_owner-apps_Gmail__", "mcp__google_workspace__"]:
+            self.assertIsNotNone(send_lock.decide(server + "unlabel_thread", {"threadId": "t", "labelIds": ["INBOX"]}), server)
+            self.assertIsNone(send_lock.decide(server + "label_thread", {"threadId": "t", "labelIds": ["Label_1"]}), server)
+
+    def test_what_an_email_says_never_decides(self):
+        """Only values under a labels field count: a subject or body that says "trash" is not a label."""
+        self.assertIsNone(send_lock.decide(self.G + "label_thread", {"threadId": "TRASH", "labelIds": ["Label_1"], "note": "spam"}))
+
+
 class ScheduledTasks(unittest.TestCase):
     """A run never changes a recurring task (older tasks' stored text still asks runs to update
     their own instructions). The lock refuses the tools that would."""
@@ -289,6 +348,42 @@ class Hook(unittest.TestCase):
         t = self.transcript("check my scheduled tasks")       # the helper adds a tool result containing the tag
         self.assertEqual(self.pre("mcp__Gmail__send_message", transcript_path=t)[0], 0)
 
+    def loaded_skill(self, owner_says, body, name="k.jsonl"):
+        """A transcript as Claude records it when a skill is opened: what the owner typed, then the skill's whole
+        text as a user-side message of its own (copied from the eval traces of 1.1.0)."""
+        p = self.dir / name
+        lines = [json.dumps({"type": "queue-operation"}),
+                 json.dumps({"type": "user", "isSidechain": False, "message": {"role": "user", "content": owner_says}}),
+                 json.dumps({"type": "user", "isSidechain": False, "isMeta": True, "sourceToolUseID": "toolu_x",
+                             "message": {"role": "user", "content": [
+                                 {"type": "text", "text": "Base directory for this skill: /x\n\n" + body}]}})]
+        p.write_text("\n".join(lines) + "\n")
+        return str(p)
+
+    def test_opening_a_skill_or_command_never_makes_the_owners_chat_look_unattended(self):
+        """Found by the first eval run with stand-ins (1.1.0): the desk's and the scheduling skill's own text quoted
+        the task tag, Claude records an opened skill as a user-side message, and the lock then took the owner's chat
+        for a recurring task's run. No reply could go on a yes, no routine mail could be archived, and no recurring
+        task could be created. The lock is unchanged: no skill or command may contain the tag."""
+        plugin = HOOKS.parent
+        files = sorted(plugin.glob("skills/*/SKILL.md")) + sorted(plugin.glob("commands/*.md"))
+        self.assertGreaterEqual(len(files), 16)
+        for i, f in enumerate(files):
+            body = f.read_text(encoding="utf-8").split("---", 2)[2]
+            self.assertNotIn("[AI Workforce task:", body, f)
+            t = self.loaded_skill("clear my desk", body, name="k%d.jsonl" % i)
+            for tool, tool_input in [("mcp__Gmail__reply", {}), ("mcp__scheduled-tasks__create_scheduled_task", {}),
+                                     ("mcp__Gmail__unlabel_thread", {"threadId": "t1", "labelIds": ["INBOX"]})]:
+                code, err, _ = self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=tool_input,
+                                             session_id="k%d" % i, transcript_path=t)
+                self.assertEqual(code, 0, "%s after opening %s: %s" % (tool, f.parent.name + "/" + f.name, err))
+
+    def test_the_lock_does_not_tell_skill_text_from_a_typed_prompt(self):
+        """Why the rule above is needed: a user-side message carrying the tag locks the conversation whoever put it
+        there. That errs on the safe side, and it stays that way."""
+        t = self.loaded_skill("clear my desk", "Stored instructions begin with\n" + TAG_PROMPT)
+        self.assertEqual(self.pre("mcp__Gmail__reply", session="k-tag", transcript_path=t)[0], 2)
+
     def test_prompt_submit_marks_the_session_and_prints_nothing(self):
         code, err, out = self.run_hook(hook_event_name="UserPromptSubmit", session_id="s9", prompt=TAG_PROMPT)
         self.assertEqual((code, out), (0, ""))
@@ -339,6 +434,50 @@ class Hook(unittest.TestCase):
                                        session_id="s2", transcript_path=owner_chat)[0], 0)
         self.assertEqual(self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=send, session_id="s2",
                                        transcript_path=owner_chat, agent_type="ai-workforce:client-success-manager")[0], 2)
+
+    def test_highlevel_tags_and_stages_change_only_where_the_owner_is(self):
+        """1.1.0: the desk may change a contact's tags or an opportunity's stage on the owner's yes. The lock is as
+        it was: in a run nobody is watching, and for a team member, every HighLevel write is still refused."""
+        tool = "mcp__HighLevel__execute_operation"
+        changes = [{"operationId": "add-tags", "params": {"contactId": "c1", "tags": ["vip"]}},
+                   {"operationId": "remove-tags", "params": {"contactId": "c1", "tags": ["lead"]}},
+                   {"operationId": "update-contact", "params": {"contactId": "c1", "tags": ["vip"]}},
+                   {"operationId": "update-opportunity", "params": {"id": "o1", "pipelineStageId": "s2"}},
+                   {"operationId": "update-opportunity-status", "params": {"id": "o1", "status": "won"}},
+                   {"operationId": "delete-contact", "params": {"contactId": "c1"}}]
+        unattended = self.transcript(TAG_PROMPT)
+        owner_chat = self.transcript("Tag Dana as VIP and move her deal to Proposal sent", name="o2.jsonl")
+        for asked in changes:
+            name = asked["operationId"]
+            run = self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=asked, session_id="s1", transcript_path=unattended)
+            self.assertEqual(run[0], 2, name)                                              # unattended: refused
+            member = self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=asked, session_id="s3",
+                                   transcript_path=owner_chat, agent_type="ai-workforce:sales-manager")
+            self.assertEqual(member[0], 2, name)                                           # a team member: refused, owner present or not
+            chief = self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=asked, session_id="s3", transcript_path=owner_chat)
+            self.assertEqual(chief[0], 0, name)                # the owner's own chat is never locked; there, the written rules decide
+
+    def test_an_unattended_run_cannot_trash_spam_or_archive_through_labels(self):
+        t = self.transcript(TAG_PROMPT)
+        def call(tool, tool_input, **extra):
+            extra.setdefault("transcript_path", t)
+            return self.run_hook(hook_event_name="PreToolUse", tool_name="mcp__Gmail__" + tool, tool_input=tool_input,
+                                 session_id=extra.pop("session", "s1"), **extra)
+        for tool, tool_input, word in [("apply_sensitive_thread_label", {"threadId": "t1", "labelOption": "TRASH"}, "Trash"),
+                                       ("apply_sensitive_message_label", {"messageId": "m1", "labelOption": "SPAM"}, "Spam"),
+                                       ("unlabel_thread", {"threadId": "t1", "labelIds": ["INBOX"]}, "archive")]:
+            code, err, _ = call(tool, tool_input)
+            self.assertEqual(code, 2, tool)
+            self.assertIn(word, err)
+        for tool, tool_input in [("label_thread", {"threadId": "t1", "labelIds": ["Label_12"]}),
+                                 ("unlabel_thread", {"threadId": "t1", "labelIds": ["UNREAD"]})]:
+            self.assertEqual(call(tool, tool_input)[0], 0, tool)                 # ordinary labels still pass
+        # with the owner present the Chief of Staff isn't locked; a team member still is
+        owner_chat = self.transcript("Archive yesterday's newsletters", name="o.jsonl")
+        archive = {"threadId": "t1", "labelIds": ["INBOX"]}
+        self.assertEqual(call("unlabel_thread", archive, session="s2", transcript_path=owner_chat)[0], 0)
+        self.assertEqual(call("unlabel_thread", archive, session="s2", transcript_path=owner_chat,
+                              agent_type="ai-workforce:operations-manager")[0], 2)
 
     def test_broken_input_lets_the_call_through(self):
         for raw in ["", "not json", "[]", '{"hook_event_name": "PreToolUse"}', '{"hook_event_name": "Stop"}']:
