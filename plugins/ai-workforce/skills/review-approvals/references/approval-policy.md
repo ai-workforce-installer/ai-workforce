@@ -13,6 +13,7 @@ The owner does these personally. The team prepares them as an approval item with
 5. **Send an external message** - email, DM, SMS, comment, reply. The team writes drafts (Gmail drafts, or "Replies ready to copy", per `references/connections.md`), and a draft never needs an Approvals row of its own: the owner pressing Send is the approval. Where the owner chose "Send the ones I approve" (Sending, in Workforce Settings), the Chief of Staff sends a reply on the owner's yes to it, on the desk (`review-approvals`). Never in a run nobody is watching, never by a member working as its own agent, never on anything but that yes.
 6. **Create or change calendar events involving other people.**
 7. **Quote a price, discount or term that is not in the Business Brain** (Pricing & Offers, Policies).
+8. **Change a HighLevel contact's tags or an opportunity's pipeline stage** - on the desk only, one yes per item. Nothing else is ever changed in HighLevel.
 
 ## Allowed without approval
 - Reading and searching connected apps.

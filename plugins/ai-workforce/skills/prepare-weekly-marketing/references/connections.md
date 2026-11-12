@@ -50,4 +50,4 @@ Google Drive: search and read Drive. OneDrive: Microsoft 365 search (`sharepoint
 
 ## Customer messages in HighLevel (optional)
 
-Some owners talk to customers through HighLevel. If the Customer messages line is plain `HighLevel`, or HighLevel tools are connected and working while that line is still not set, follow `references/if-highlevel.md`. In short: runs only read HighLevel (the one thing ever sent there is a reply the owner said yes to on the desk), its replies go under Replies ready to copy, and a HighLevel that was connected but can't be reached is reported as "HighLevel unavailable" with the Result Partial.
+Some owners talk to customers through HighLevel. If the Customer messages line is plain `HighLevel`, or HighLevel tools are connected and working while that line is still not set, follow `references/if-highlevel.md`. In short: runs only read HighLevel (anything sent or changed there happens on the desk, on the owner's yes), its replies go under Replies ready to copy, and a HighLevel that was connected but can't be reached is reported as "HighLevel unavailable" with the Result Partial.

@@ -399,6 +399,28 @@ class Hook(unittest.TestCase):
         self.assertEqual(self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=send, session_id="s2",
                                        transcript_path=owner_chat, agent_type="ai-workforce:client-success-manager")[0], 2)
 
+    def test_highlevel_tags_and_stages_change_only_where_the_owner_is(self):
+        """1.1.0: the desk may change a contact's tags or an opportunity's stage on the owner's yes. The lock is as
+        it was: in a run nobody is watching, and for a team member, every HighLevel write is still refused."""
+        tool = "mcp__HighLevel__execute_operation"
+        changes = [{"operationId": "add-tags", "params": {"contactId": "c1", "tags": ["vip"]}},
+                   {"operationId": "remove-tags", "params": {"contactId": "c1", "tags": ["lead"]}},
+                   {"operationId": "update-contact", "params": {"contactId": "c1", "tags": ["vip"]}},
+                   {"operationId": "update-opportunity", "params": {"id": "o1", "pipelineStageId": "s2"}},
+                   {"operationId": "update-opportunity-status", "params": {"id": "o1", "status": "won"}},
+                   {"operationId": "delete-contact", "params": {"contactId": "c1"}}]
+        unattended = self.transcript(TAG_PROMPT)
+        owner_chat = self.transcript("Tag Dana as VIP and move her deal to Proposal sent", name="o2.jsonl")
+        for asked in changes:
+            name = asked["operationId"]
+            run = self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=asked, session_id="s1", transcript_path=unattended)
+            self.assertEqual(run[0], 2, name)                                              # unattended: refused
+            member = self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=asked, session_id="s3",
+                                   transcript_path=owner_chat, agent_type="ai-workforce:sales-manager")
+            self.assertEqual(member[0], 2, name)                                           # a team member: refused, owner present or not
+            chief = self.run_hook(hook_event_name="PreToolUse", tool_name=tool, tool_input=asked, session_id="s3", transcript_path=owner_chat)
+            self.assertEqual(chief[0], 0, name)                # the owner's own chat is never locked; there, the written rules decide
+
     def test_an_unattended_run_cannot_trash_spam_or_archive_through_labels(self):
         t = self.transcript(TAG_PROMPT)
         def call(tool, tool_input, **extra):

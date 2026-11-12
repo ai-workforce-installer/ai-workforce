@@ -821,3 +821,22 @@ def save_work_product(area, queue, row, text, who="Chief of Staff", page_id=None
     area.pages[page_id]["team"] = text               # only the team's own part is replaced
     row.evidence = page_id
     return "page:" + page_id
+
+
+# ---- 1.1.0 step 11: HighLevel beyond reading, attended only (skills/review-approvals/SKILL.md) ----
+
+HIGHLEVEL_ON_A_YES = ("send reply", "add tag", "remove tag", "move stage")
+HIGHLEVEL_NEVER = ("delete contact", "delete opportunity", "delete pipeline", "broadcast", "campaign", "workflow", "booking", "payment")
+
+
+def highlevel_change(kind, answer, owner_present=True, who="Chief of Staff", connection_allows=True, said_before=False):
+    """What happens to one HighLevel change on the desk. Returns (done, what the owner is told)."""
+    if kind in HIGHLEVEL_NEVER or kind not in HIGHLEVEL_ON_A_YES:
+        return False, "never: the owner does that in HighLevel themselves"
+    if not owner_present or who != "Chief of Staff":
+        return False, "read only here: it waits for the owner at the desk"
+    if not is_a_yes(answer):
+        return False, "nothing changed: that wasn't a yes to this item"
+    if not connection_allows:
+        return False, "" if said_before else "To let me do that, reconnect HighLevel and allow editing contacts and opportunities."
+    return True, "done"

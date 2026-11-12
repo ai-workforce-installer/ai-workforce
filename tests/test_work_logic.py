@@ -661,6 +661,29 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
         self.assertTrue(w.first_success({"kind": "job", "saved_and_fetched_back": True, "items": 2}))
 
 
+class HighLevelBeyondReading(unittest.TestCase):
+    """1.1.0 step 11."""
+    def test_a_tag_or_stage_change_happens_only_on_a_yes(self):
+        self.assertEqual(w.highlevel_change("add tag", "yes"), (True, "done"))
+        self.assertEqual(w.highlevel_change("move stage", "send it")[0], True)
+        for not_a_yes in ["looks good", "ok", "thanks"]:
+            self.assertFalse(w.highlevel_change("add tag", not_a_yes)[0], not_a_yes)
+
+    def test_never_unattended_and_never_by_a_member(self):
+        self.assertFalse(w.highlevel_change("add tag", "yes", owner_present=False)[0])
+        self.assertFalse(w.highlevel_change("move stage", "yes", who="Sales")[0])
+
+    def test_some_things_are_never_done_whatever_the_answer(self):
+        for kind in w.HIGHLEVEL_NEVER + ("rename pipeline",):
+            self.assertFalse(w.highlevel_change(kind, "yes")[0], kind)
+
+    def test_a_refused_write_is_explained_once(self):
+        done, said = w.highlevel_change("add tag", "yes", connection_allows=False)
+        self.assertFalse(done)
+        self.assertIn("reconnect HighLevel and allow editing contacts and opportunities", said)
+        self.assertEqual(w.highlevel_change("add tag", "yes", connection_allows=False, said_before=True), (False, ""))
+
+
 class WhereTheTeamSavesItsOwnWork(unittest.TestCase):
     """1.1.0 step 7."""
     def setUp(self):

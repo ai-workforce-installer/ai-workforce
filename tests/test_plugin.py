@@ -770,6 +770,34 @@ class SetupStartsFromTheHandOff(unittest.TestCase):
             self.assertIn(must, resuming)
 
 
+class HighLevelBeyondReadingAttendedOnly(unittest.TestCase):
+    """1.1.0 step 11: with the owner present and a yes per item, the Chief of Staff may change a contact's tags
+    or move an opportunity's stage. Nothing else, never in a run nobody is watching, and the lock is unchanged."""
+    def test_the_desk_rule(self):
+        desk = read(SKILLS / "review-approvals" / "SKILL.md")
+        for must in ["**HighLevel changes, on a yes.**", "With the owner present, a card and a yes per item",
+                     "adding or removing a contact's tags and moving an opportunity to another pipeline stage",
+                     "The card shows the contact and the change", "reconnect HighLevel and allow editing contacts and opportunities",
+                     "Never, on any yes: deleting a contact, opportunity or pipeline, broadcasts, campaigns, workflows, bookings or payments"]:
+            self.assertIn(must, desk)
+        ap = read(REFS / "approval-policy.md")
+        self.assertIn("8. **Change a HighLevel contact's tags or an opportunity's pipeline stage** - on the desk only, one yes per item.", ap)
+        self.assertIn("Nothing else is ever changed in HighLevel", ap)
+
+    def test_runs_and_members_still_only_read(self):
+        hl = read(REFS / "if-highlevel.md")
+        self.assertIn("adds or removes tags, moves an opportunity", hl.split("The exceptions")[0])       # still on the never list for runs
+        self.assertIn("runs only read HighLevel (anything sent or changed there happens on the desk, on the owner's yes)", read(REFS / "connections.md"))
+        self.assertIn("never send, tag, book or change anything there", read(PLUGIN / "agents" / "client-success-manager.md"))
+        for sk in ["daily-executive-briefing", "inbox-triage", "process-customer-inquiries", "assign-work"]:
+            self.assertNotIn("HighLevel changes, on a yes", read(SKILLS / sk / "SKILL.md"), sk)             # the desk rule stays on the desk
+
+    def test_setup_says_what_the_permission_is_for(self):
+        s = read(SKILLS / "setup-workforce" / "SKILL.md")
+        self.assertIn("allow sending messages, or editing contacts and opportunities, only if you want your team to do those on your yes", s)
+        self.assertIn("Your team uses it only on your yes, at your desk: sending a reply, changing a contact's tags, or moving an opportunity's stage.", s)
+
+
 class WhereTheTeamSavesItsOwnWork(unittest.TestCase):
     """1.1.0 step 7: one private page the owner designated holds what the team makes. Only the orchestrator
     writes there, to pages it knows by ID, checked after saving, with the owner's edits kept."""
@@ -1242,9 +1270,11 @@ class HighLevelIsReadOnly(unittest.TestCase):
                      "follow `references/if-highlevel.md`"]:
             self.assertIn(must, c)
         hl = read(REFS / "if-highlevel.md")
-        for must in ["**Read only, with one exception.**", "Never run an operation that sends", "Replies ready to copy", "HighLevel unavailable",
+        for must in ["**Read only, except on the desk.**", "Never run an operation that sends", "Replies ready to copy", "HighLevel unavailable",
                      "ask only for reads", "begins with a reading word",
-                     "on the desk, with the owner present and their yes to that one reply"]:       # 1.0.0: the one exception
+                     # 1.0.0: a reply on the owner's yes. 1.1.0: tags and pipeline stage, the same way.
+                     "on the desk only, with the owner present and their yes to that one item",
+                     "add or remove a contact's tags, and move an opportunity's pipeline stage", "Nothing else is ever changed there"]:
             self.assertIn(must, hl)
         self.assertIn("Customer messages: _not set_", read(SKILLS / "setup-workforce" / "references" / "page-templates.md"))
         self.assertIn("HighLevel", read(SKILLS / "setup-workforce" / "SKILL.md"))
