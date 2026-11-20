@@ -2,7 +2,7 @@
 name: schedule-workforce
 description: This skill should be used when the owner asks "can someone handle this every Friday?", "do this every morning", "make it a recurring responsibility", "keep track of what I promised", "how much usage would that take?", "schedule the team", "make the team run automatically", "schedule my briefing", "change the team's schedule", "pause the team", "check my scheduled tasks", "update my recurring tasks", or wants team members to handle work on their own at set times.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Schedule the Workforce
