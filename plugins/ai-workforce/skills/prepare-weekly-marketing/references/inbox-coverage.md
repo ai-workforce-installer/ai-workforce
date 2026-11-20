@@ -28,11 +28,11 @@ Gmail's Inbox view is not the whole mailbox: filters archive or label mail, and 
 
 | Path | Search |
 |---|---|
-| Gmail | One search over **All Mail**: `after:<start> before:<end> -in:sent -in:drafts -in:spam -in:trash` with `<start>`/`<end>` as Unix seconds (Gmail accepts them), or dates one day either side and then keep only messages whose date falls in the window. Never add `in:inbox`, a category, `is:important`, `is:unread` or keyword filters to this search: they hide mail. |
+| Gmail | One search over **All Mail**: `after:<start> before:<end> -in:sent -in:drafts -in:spam -in:trash` with dates one day either side, then keep only messages whose date falls in the window. Never add `in:inbox`, a category, `is:important`, `is:unread` or keyword filters to this search: they hide mail. |
 | Outlook | Microsoft 365 email search with the date range and every folder (Inbox, Archive, Other/Focused, custom folders); exclude Sent, Drafts, Junk, Deleted. |
 | Paste mode | Everything under "Emails to handle" on the Paste Box. |
 
-- **Fetch every page.** Keep requesting with the next-page token until there is none. Never stop at the first page, and never trust a result-count estimate (it can be far off).
+- **Fetch every page.** Keep requesting with the next-page token until there is none. Never stop at the first page, and never trust a result-count estimate (it can be far off). A full page with no next-page token: follow `references/if-search-stops.md`.
 - **Threads:** a search preview may not show every message in a thread. Judge a thread by its newest message in the window; for threads with more than one message that make the shortlist, open the thread to see the latest messages and whether the owner already replied.
 - **Record the exact searches** (query text, pages fetched, threads returned) for the Coverage section.
 - **Not reachable:** read "Where things live" in Workforce Settings. Any mailbox listed there that the team can't open (a CRM inbox, a second address) is listed under **Not checked** in every report.

@@ -121,6 +121,19 @@ class RunTrackingRules(unittest.TestCase):
                      "Never add `in:inbox`", "Fetch every page", "comprehensive"]:
             self.assertIn(must, t)
 
+    def test_a_search_without_a_next_page_is_sliced(self):
+        """1.1.1: Gmail's search_threads can return a full page with no next-page token (seen on a live
+        mailbox: 824 matches, never a token). The window is then searched in hour bands, and a full band
+        is split, so the check can still be complete instead of stopping at page one."""
+        ic = read(SKILLS / "inbox-triage" / "references" / "inbox-coverage.md")
+        self.assertIn("A full page with no next-page token: follow `references/if-search-stops.md`.", ic)
+        self.assertNotIn("Unix seconds (Gmail accepts them)", ic)       # it answered those with nothing
+        s = read(SKILLS / "inbox-triage" / "references" / "if-search-stops.md")
+        for must in ["Read this only when", "newer_than:<n+w>h older_than:<n>h", "newest first", "drop repeated thread IDs",
+                     "`category:promotions`", "`-category:promotions`", "under Not checked", "never \"no mail\"",
+                     "every slice came back below a full page", "comprehensive (<n> slices)"]:
+            self.assertIn(must, s)
+
     def test_customer_skill_cannot_stand_in_for_inbox_triage(self):
         t = read(SKILLS / "process-customer-inquiries" / "SKILL.md")
         self.assertIn("0. **Check this is the right job.**", t)
@@ -431,7 +444,10 @@ class SizeBudget(unittest.TestCase):
     CEILINGS = {   # job: (skills, always read, with every read-when-needed file reachable from them)
         # 1.1.0 lowered every ceiling again (1.0.0: 113,900/145,600, 53,900/77,900, 58,900/86,100, 73,000/100,200;
         # 0.9.0: 114,000/146,000, 54,500/79,000, 59,500/87,000, 73,500/101,000). 0.8.1 read 137,371, 68,573, 75,797, 96,056.
-        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 113_700, 141_900),
+        # 1.1.1 raised the morning run's worst case by 1,600 (141,900 to 143,500) for if-search-stops.md: read only
+        # when the mail search returns a full page with no next-page token, which made every morning Partial on a busy
+        # Gmail inbox. Its normal-run size did not grow (the wrong Unix-seconds advice it replaces was cut).
+        "the morning run (daily briefing + inbox check)": (["daily-executive-briefing", "inbox-triage"], 113_700, 143_500),
         "weekly marketing plan": (["prepare-weekly-marketing"], 52_600, 70_000),
         "invoice review": (["review-overdue-invoices"], 57_600, 78_300),
         "any other recurring responsibility": (["assign-work"], 71_300, 91_800),
@@ -443,7 +459,7 @@ class SizeBudget(unittest.TestCase):
     # the owner's yes and the live proof, paid for with cuts, and lowered this from 330,000. 1.1.0 added
     # commitments, cases, the Team work area, labels, the archive card and the urgent-only check under the
     # same ceiling (329,890 against 1.0.0's 329,858), and now counts the three command files as well.
-    ALL_INSTRUCTIONS = 329_900
+    ALL_INSTRUCTIONS = 331_500   # 1.1.1: +1,600 for if-search-stops.md (see the morning run above)
     STORED_PROMPT = 3_100           # what each recurring task stores
     MORNING_WITH_COMMITMENTS_ON = 115_700   # 1.1.0, new: a morning run for an owner who turned the commitments review on
     REF = re.compile(r"references/([a-z0-9-]+\.md)")
@@ -521,6 +537,7 @@ class ReadWhenNeeded(unittest.TestCase):
         "if-urgent-only.md": (None, None),              # 1.1.0: named by the inbox skill, for the optional afternoon check
         "if-case.md": (None, None),                     # 1.1.0: named by the skills that meet a case or a deliverable
         "if-commitments.md": (None, None),              # 1.1.0: named by the briefing, read only when the review is on
+        "if-search-stops.md": ("inbox-coverage.md", "follow `references/if-search-stops.md`"),   # 1.1.1
     }
 
     def test_every_file_says_when_to_read_it_and_something_sends_runs_there(self):
